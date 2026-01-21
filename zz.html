@@ -1,0 +1,997 @@
+
+// Force NO decimals everywhere
+add_filter( 'woocommerce_price_num_decimals', function () {
+    return 0;
+}, 9999 );
+
+add_filter( 'woocommerce_price_trim_zeros', '__return_true' );
+
+
+// Add category to empty heading in Elementor
+add_filter('elementor/widget/render_content', 'add_category_to_empty_heading', 10, 2);
+function add_category_to_empty_heading($content, $widget) {
+    
+    if (!is_product()) {
+        return $content;
+    }
+    
+    if ($widget->get_name() !== 'heading') {
+        return $content;
+    }
+    
+    $settings = $widget->get_settings();
+    $classes = isset($settings['_css_classes']) ? $settings['_css_classes'] : '';
+    
+    if (strpos($classes, 'product-category') === false) {
+        return $content;
+    }
+    
+    global $product;
+    if (!$product) {
+        return $content;
+    }
+    
+    $categories = get_the_terms($product->get_id(), 'product_cat');
+    if (!$categories || is_wp_error($categories)) {
+        return $content;
+    }
+    
+    $category_name = $categories[0]->name;
+    
+    $new_content = preg_replace(
+        '/<span class="elementor-heading-title[^"]*">[^<]*<\/span>/',
+        '<span class="elementor-heading-title elementor-size-default">' . esc_html($category_name) . '</span>',
+        $content
+    );
+    
+    return $new_content;
+}
+
+
+// ============================================
+// ARABIC TRANSLATIONS
+// ============================================
+
+// add_filter('gettext', 'complete_arabic_translations', 999, 3);
+// add_filter('gettext_with_context', 'complete_arabic_translations', 999, 3);
+// add_filter('ngettext', 'complete_arabic_translations', 999, 3);
+
+// function complete_arabic_translations($translated, $text, $domain) {
+    
+//     if (get_locale() != 'ar') {
+//         return $translated;
+//     }
+    
+//     $translations = array(
+//         // Product page
+//         'People watching this product now!' => 'يشاهد الناس هذا المنتج الآن!',
+        
+//         // Filter widgets
+//         'Filter By Price' => 'التصفية حسب السعر',
+//         'Filter by Price' => 'التصفية حسب السعر',
+//         'Filter by price' => 'التصفية حسب السعر',
+//         'Stock Status' => 'حالة المخزون',
+//         'Stock status' => 'حالة المخزون',
+//         'By Weight' => 'حسب الوزن',
+        
+//         // Checkout headings
+//         'Your Order' => 'طلبك',
+//         'Your order' => 'طلبك',
+//         'Payment Information' => 'معلومات الدفع',
+//         'Payment information' => 'معلومات الدفع',
+//         'Billing Details' => 'تفاصيل الفاتورة',
+//         'Billing details' => 'تفاصيل الفاتورة',
+//         'Billing & Shipping' => 'الفواتير والشحن',
+//     );
+    
+//     // Force specific strings to stay in English (don't translate them)
+//     $keep_english = array(
+//         'Cash on delivery',
+//         'Pay with cash upon delivery',
+//         'Pay with cash upon delivery.',
+//         'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our',
+//     );
+    
+//     $text_trimmed = trim($text);
+    
+//     // If this text should stay in English, return original
+//     if (in_array($text_trimmed, $keep_english)) {
+//         return $text;
+//     }
+    
+//     // Otherwise translate to Arabic
+//     if (isset($translations[$text_trimmed])) {
+//         return $translations[$text_trimmed];
+//     }
+    
+//     return $translated;
+// }
+
+// // Widget titles
+// add_filter('widget_title', 'translate_widget_titles_arabic', 10, 3);
+// function translate_widget_titles_arabic($title, $instance = array(), $id_base = '') {
+    
+//     if (get_locale() != 'ar') {
+//         return $title;
+//     }
+    
+//     $translations = array(
+//         'Filter by price' => 'التصفية حسب السعر',
+//         'Filter by Price' => 'التصفية حسب السعر',
+//         'Filter By Price' => 'التصفية حسب السعر',
+//         'Stock status' => 'حالة المخزون',
+//         'Stock Status' => 'حالة المخزون',
+//         'By Weight' => 'حسب الوزن',
+//     );
+    
+//     if (isset($translations[trim($title)])) {
+//         return $translations[trim($title)];
+//     }
+    
+//     return $title;
+// }
+
+// // Output buffer for checkout - Arabic site
+// add_action('template_redirect', 'translate_hardcoded_checkout_strings');
+// function translate_hardcoded_checkout_strings() {
+    
+//     if (!is_checkout()) {
+//         return;
+//     }
+    
+//     ob_start(function($buffer) {
+        
+//         // On Arabic site
+//         if (get_locale() == 'ar') {
+//             $replacements = array(
+//                 '>Your Order<' => '>طلبك<',
+//                 '>Payment Information<' => '>معلومات الدفع<',
+//                 '>Billing Details<' => '>تفاصيل الفاتورة<',
+//                 '>Billing details<' => '>تفاصيل الفاتورة<',
+//             );
+//         } else {
+//             // On English site - force Arabic back to English
+//             $replacements = array(
+//                 'الدفع عند الاستلام' => 'Cash on delivery',
+//                 '>الدفع عند الاستلام<' => '>Cash on delivery<',
+//                 'ادفع نقداً عند الاستلام.' => 'Pay with cash upon delivery.',
+//                 'سيتم استخدام بياناتك الشخصية لمعالجة طلبك، ودعم تجربتك على هذا الموقع الإلكتروني، ولأغراض أخرى موضحة في سياسة الخصوصية الخاصة بنا' => 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our privacy policy',
+//             );
+//         }
+        
+//         return str_replace(array_keys($replacements), array_values($replacements), $buffer);
+//     });
+// }
+
+// Handle AJAX updates
+// add_filter('woocommerce_update_order_review_fragments', 'handle_ajax_fragments', 9999);
+// function handle_ajax_fragments($fragments) {
+    
+//     foreach ($fragments as $key => $html) {
+        
+//         // On Arabic site
+//         if (get_locale() == 'ar') {
+//             $replacements = array(
+//                 '>Your Order<' => '>طلبك<',
+//                 '>Payment Information<' => '>معلومات الدفع<',
+//                 '>Billing Details<' => '>تفاصيل الفاتورة<',
+//                 '>Billing details<' => '>تفاصيل الفاتورة<',
+//             );
+//         } else {
+//             // On English site - force Arabic back to English
+//             $replacements = array(
+// 				'طلبك مؤهل للشحن المجاني!' => 'Your order qualifies for free shipping!',
+//                 'الدفع عند الاستلام' => 'Cash on delivery',
+//                 '>الدفع عند الاستلام<' => '>Cash on delivery<',
+//                 'ادفع نقداً عند الاستلام.' => 'Pay with cash upon delivery.',
+//                 'سيتم استخدام بياناتك الشخصية لمعالجة طلبك، ودعم تجربتك على هذا الموقع الإلكتروني، ولأغراض أخرى موضحة في سياسة الخصوصية الخاصة بنا' => 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our privacy policy',
+				
+//             );
+//         }
+        
+//         $fragments[$key] = str_replace(array_keys($replacements), array_values($replacements), $html);
+//     }
+    
+//     return $fragments;
+// }
+
+// // JavaScript fallback for English site (removes Arabic text if it appears)
+// add_action('wp_footer', 'force_english_on_english_checkout', 9999);
+// function force_english_on_english_checkout() {
+    
+//     // Only on English checkout
+//     if (get_locale() == 'ar' || !is_checkout()) {
+//         return;
+//     }
+//     ?>
+//     <script>
+//     (function($) {
+//         function forceEnglish() {
+//             $('.woocommerce-checkout-payment, .woocommerce-privacy-policy-text').find('*').contents().each(function() {
+//                 if (this.nodeType === 3) {
+//                     this.textContent = this.textContent
+//                         .replace(/الدفع عند الاستلام/g, 'Cash on delivery')
+//                         .replace(/ادفع نقداً عند الاستلام\./g, 'Pay with cash upon delivery.')
+//                         .replace(/سيتم استخدام بياناتك الشخصية لمعالجة طلبك، ودعم تجربتك على هذا الموقع الإلكتروني، ولأغراض أخرى موضحة في سياسة الخصوصية الخاصة بنا/g, 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our privacy policy');
+//                 }
+//             });
+//         }
+        
+//         $(document).ready(forceEnglish);
+//         $(document.body).on('updated_checkout payment_method_selected', forceEnglish);
+        
+//         const observer = new MutationObserver(forceEnglish);
+//         const target = document.querySelector('.woocommerce-checkout');
+//         if (target) {
+//             observer.observe(target, { childList: true, subtree: true });
+//         }
+//     })(jQuery);
+//     </script>
+//     <?php
+// }
+
+
+
+
+
+// 1. Enqueue Custom CSS for Language Switcher
+function kreaz_language_switcher_styles() {
+    ?>
+    <style>
+        /* ============================================
+           KREAZ Language Switcher - Custom Styles
+           ============================================ */
+        
+        /* Main Language Switcher Container */
+        .kreaz-language-switcher {
+            font-family: inherit;
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Current Language Wrapper */
+        .kreaz-lang-current {
+            position: relative;
+            cursor: pointer;
+            background: #ffffff;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 8px 16px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 140px;
+        }
+
+        .kreaz-lang-current:hover {
+            border-color: #E85D9A;
+            box-shadow: 0 2px 8px rgba(232, 93, 154, 0.15);
+        }
+
+        /* Flag Image */
+        .kreaz-lang-flag {
+            width: 24px;
+            height: 18px;
+            object-fit: cover;
+            border-radius: 3px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Language Name */
+        .kreaz-lang-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333333;
+            white-space: nowrap;
+            flex: 1;
+        }
+
+        /* Dropdown Arrow */
+        .kreaz-lang-arrow {
+            width: 16px;
+            height: 16px;
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .kreaz-lang-arrow path {
+            stroke: #666666;
+        }
+
+        .kreaz-language-switcher:hover .kreaz-lang-arrow {
+            transform: rotate(180deg);
+        }
+
+        .kreaz-lang-current:hover .kreaz-lang-arrow path {
+            stroke: #E85D9A;
+        }
+
+        /* Dropdown List */
+        .kreaz-lang-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .kreaz-language-switcher:hover .kreaz-lang-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        /* Dropdown Items */
+        .kreaz-lang-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: #333333;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .kreaz-lang-item:last-child {
+            border-bottom: none;
+        }
+
+        .kreaz-lang-item:hover {
+            background: linear-gradient(135deg, #E85D9A 0%, #D44A87 100%);
+            color: #ffffff;
+        }
+
+        .kreaz-lang-item:hover .kreaz-lang-name {
+            color: #ffffff;
+        }
+
+        .kreaz-lang-item:active {
+            transform: scale(0.98);
+        }
+
+        /* Hover effect for flags */
+        .kreaz-lang-item:hover .kreaz-lang-flag {
+            transform: scale(1.05);
+        }
+
+        /* Pulse animation */
+        @keyframes kreaz-pulse {
+            0%, 100% {
+                box-shadow: 0 2px 8px rgba(232, 93, 154, 0.15);
+            }
+            50% {
+                box-shadow: 0 2px 12px rgba(232, 93, 154, 0.25);
+            }
+        }
+
+        .kreaz-lang-current:hover {
+            animation: kreaz-pulse 2s infinite;
+        }
+
+        /* Fade in animation */
+        @keyframes kreaz-fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .kreaz-language-switcher:hover .kreaz-lang-dropdown .kreaz-lang-item {
+            animation: kreaz-fadeInUp 0.3s ease forwards;
+        }
+
+        /* ============================================
+           RESPONSIVE DESIGN
+           ============================================ */
+        
+        @media screen and (max-width: 768px) {
+            .kreaz-lang-current {
+                min-width: 120px;
+                padding: 6px 12px;
+            }
+            
+            .kreaz-lang-flag {
+                width: 20px;
+                height: 15px;
+            }
+            
+            .kreaz-lang-name {
+                font-size: 13px;
+            }
+            
+            .kreaz-lang-arrow {
+                width: 14px;
+                height: 14px;
+            }
+            
+            .kreaz-lang-item {
+                padding: 10px 12px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .kreaz-lang-current {
+                min-width: 100px;
+                padding: 5px 10px;
+            }
+            
+            .kreaz-lang-flag {
+                width: 18px;
+                height: 14px;
+            }
+            
+            .kreaz-lang-name {
+                font-size: 12px;
+            }
+        }
+
+        /* ============================================
+           RTL SUPPORT FOR ARABIC
+           ============================================ */
+        
+        [dir="rtl"] .kreaz-lang-current,
+        [dir="rtl"] .kreaz-lang-item {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .kreaz-lang-dropdown {
+            left: auto;
+            right: 0;
+        }
+    </style>
+    <?php
+}
+add_action('wp_head', 'kreaz_language_switcher_styles');
+
+
+// 2. Custom Language Switcher Function with TranslatePress Integration
+function kreaz_get_language_switcher() {
+    // Check if TranslatePress is active
+    if (function_exists('trp_get_languages')) {
+        return kreaz_translatepress_switcher();
+    }
+    
+    // Fallback to manual switcher
+    return kreaz_manual_switcher();
+}
+
+
+// 3. TranslatePress Integration
+function kreaz_translatepress_switcher() {
+    global $TRP_LANGUAGE;
+    
+    // Get TRP Languages
+    $trp = TRP_Translate_Press::get_trp_instance();
+    $trp_settings = $trp->get_component('settings');
+    $settings = $trp_settings->get_settings();
+    
+    $published_languages = $settings['publish-languages'];
+    $default_language = $settings['default-language'];
+    
+    // Get current language
+    $current_language = $TRP_LANGUAGE;
+    
+    // Get language names
+    $trp_languages = $trp->get_component('languages');
+    $language_names = $trp_languages->get_language_names($published_languages);
+    
+    // Get URLs
+    $url_converter = $trp->get_component('url_converter');
+    
+    // Flag URLs (using actual image paths)
+    $flags = array(
+        'en_US' => plugins_url('translatepress-multilingual/assets/images/flags/en_US.png'),
+        'ar' => plugins_url('translatepress-multilingual/assets/images/flags/ar.png')
+    );
+    
+    ob_start();
+    ?>
+    
+    <div class="kreaz-language-switcher" role="navigation" aria-label="Language selector">
+        <div class="kreaz-lang-current" role="button" tabindex="0" aria-label="Change language">
+            <img src="<?php echo esc_url($flags[$current_language]); ?>" 
+                 class="kreaz-lang-flag" 
+                 alt="<?php echo esc_attr($language_names[$current_language]); ?>" 
+                 onerror="this.style.display='none'">
+            <span class="kreaz-lang-name"><?php echo esc_html($language_names[$current_language]); ?></span>
+            <svg class="kreaz-lang-arrow" width="20" height="20" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 8L10 13L15 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+        </div>
+        
+        <div class="kreaz-lang-dropdown" role="group" aria-label="Available languages">
+            <?php foreach ($published_languages as $lang_code) : ?>
+                <?php if ($lang_code !== $current_language) : ?>
+                    <?php $lang_url = $url_converter->get_url_for_language($lang_code); ?>
+                    <a href="<?php echo esc_url($lang_url); ?>" 
+                       class="kreaz-lang-item"
+                       hreflang="<?php echo esc_attr($lang_code); ?>">
+                        <img src="<?php echo esc_url($flags[$lang_code]); ?>" 
+                             class="kreaz-lang-flag" 
+                             alt="<?php echo esc_attr($language_names[$lang_code]); ?>"
+                             onerror="this.style.display='none'">
+                        <span class="kreaz-lang-name"><?php echo esc_html($language_names[$lang_code]); ?></span>
+                    </a>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    
+    <?php
+    return ob_get_clean();
+}
+
+
+// 4. Manual Switcher (Fallback if TranslatePress is not active)
+function kreaz_manual_switcher() {
+    // Detect current language from URL
+    $current_url = $_SERVER['REQUEST_URI'];
+    $is_arabic = (strpos($current_url, '/ar/') !== false || strpos($current_url, '/ar') !== false);
+    
+    // Get home URL
+    $home_url = home_url('/');
+    
+    // Define languages with REAL flag images
+    $languages = array(
+        'en_US' => array(
+            'name' => 'English',
+            'native' => 'English',
+            'flag' => 'https://flagcdn.com/w40/us.png', // Using external flag service
+            'url' => $home_url,
+            'active' => !$is_arabic
+        ),
+        'ar' => array(
+            'name' => 'Arabic', 
+            'native' => 'العربية',
+            'flag' => 'https://flagcdn.com/w40/sa.png', // Saudi Arabia flag for Arabic
+            'url' => $home_url . 'ar/',
+            'active' => $is_arabic
+        )
+    );
+    
+    // Get current language
+    $current = $is_arabic ? 'ar' : 'en_US';
+    $current_language = $languages[$current];
+    
+    ob_start();
+    ?>
+    
+    <div class="kreaz-language-switcher" role="navigation" aria-label="Language selector">
+        <div class="kreaz-lang-current" role="button" tabindex="0" aria-label="Change language">
+            <img src="<?php echo esc_url($current_language['flag']); ?>" 
+                 class="kreaz-lang-flag" 
+                 alt="<?php echo esc_attr($current_language['name']); ?> flag" 
+                 loading="lazy">
+            <span class="kreaz-lang-name"><?php echo esc_html($current_language['native']); ?></span>
+            <svg class="kreaz-lang-arrow" width="20" height="20" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 8L10 13L15 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+        </div>
+        
+        <div class="kreaz-lang-dropdown" role="group" aria-label="Available languages">
+            <?php foreach ($languages as $lang_code => $language) : ?>
+                <?php if (!$language['active']) : ?>
+                    <a href="<?php echo esc_url($language['url']); ?>" 
+                       class="kreaz-lang-item"
+                       hreflang="<?php echo esc_attr($lang_code); ?>">
+                        <img src="<?php echo esc_url($language['flag']); ?>" 
+                             class="kreaz-lang-flag" 
+                             alt="<?php echo esc_attr($language['name']); ?> flag" 
+                             loading="lazy">
+                        <span class="kreaz-lang-name"><?php echo esc_html($language['native']); ?></span>
+                    </a>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    
+    <?php
+    return ob_get_clean();
+}
+
+
+// 5. Create Shortcode
+function kreaz_language_switcher_shortcode($atts) {
+    return kreaz_get_language_switcher();
+}
+add_shortcode('kreaz_lang_switcher', 'kreaz_language_switcher_shortcode');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * ============================================
+ * KREAZ SEO Meta Tags
+ * Dynamic Description & Keywords for All Pages
+ * Arabic/English Support
+ * ============================================
+ * Add this to your functions.php
+ */
+
+// 1. Main SEO Meta Tags Function
+function kreaz_seo_meta_tags() {
+    // Don't add if Yoast or RankMath is active
+    if (defined('WPSEO_VERSION') || class_exists('RankMath')) {
+        return;
+    }
+    
+    // Get current language
+    $current_lang = get_locale();
+    $is_arabic = (strpos($current_lang, 'ar') !== false);
+    
+    // Initialize variables
+    $meta_title = '';
+    $meta_description = '';
+    $meta_keywords = '';
+    $og_image = '';
+    
+    // Get site info
+    $site_name = get_bloginfo('name');
+    $site_url = home_url('/');
+    
+    // Default fallback image
+    $og_image = get_template_directory_uri() . '/assets/images/kreaz-og-image.jpg';
+    // Or use site logo
+    if (has_custom_logo()) {
+        $custom_logo_id = get_theme_mod('custom_logo');
+        $logo = wp_get_attachment_image_src($custom_logo_id, 'full');
+        if ($logo) {
+            $og_image = $logo[0];
+        }
+    }
+    
+    // ============================================
+    // HOMEPAGE
+    // ============================================
+    if (is_front_page() || is_home()) {
+        if ($is_arabic) {
+            $meta_title = 'كريز ديزرت | قطايف فاخرة محشوة بحشوات لذيذة - توصيل لجميع أنحاء مصر';
+            $meta_description = 'اكتشف قطايف كريز المصنوعة يدوياً مع حشوات فاخرة من الشوكولاتة، النوتيلا، الكريمة والمكسرات. طعم لا يُقاوم في كل قضمة. اطلب الآن مع التوصيل السريع لجميع المحافظات.';
+            $meta_keywords = 'قطايف, قطايف فاخرة, حلويات شرقية, كريز ديزرت, قطايف محشية, توصيل حلويات, حلويات مصرية, نوتيلا, شوكولاتة, مكسرات, كريمة, حلويات رمضان';
+        } else {
+            $meta_title = 'KREAZ Dessert | Handmade Qatayef with Luxurious Fillings - Nationwide Delivery';
+            $meta_description = 'Discover KREAZ handmade qatayef with premium fillings of chocolate, Nutella, cream, and nuts. Delight in every bite. Order now with fast delivery across Egypt.';
+            $meta_keywords = 'qatayef, premium qatayef, middle eastern desserts, kreaz dessert, stuffed qatayef, dessert delivery, egyptian sweets, nutella, chocolate, nuts, cream, ramadan sweets';
+        }
+    }
+    
+    // ============================================
+    // SHOP / ARCHIVE PAGES
+    // ============================================
+    elseif (is_shop() || is_product_category() || is_product_tag()) {
+        if (is_product_category()) {
+            $category = get_queried_object();
+            $category_name = $category->name;
+            
+            if ($is_arabic) {
+                $meta_title = $category_name . ' | متجر كريز للحلويات الفاخرة';
+                $meta_description = 'تصفح مجموعة ' . $category_name . ' من كريز ديزرت. قطايف فاخرة محشوة بأجود الحشوات. اطلب الآن مع توصيل سريع.';
+                $meta_keywords = $category_name . ', قطايف, حلويات فاخرة, كريز ديزرت, توصيل حلويات';
+            } else {
+                $meta_title = $category_name . ' | KREAZ Premium Desserts Shop';
+                $meta_description = 'Browse our ' . $category_name . ' collection from KREAZ Dessert. Premium qatayef with finest fillings. Order now with fast delivery.';
+                $meta_keywords = $category_name . ', qatayef, premium desserts, kreaz dessert, dessert delivery';
+            }
+        } else {
+            if ($is_arabic) {
+                $meta_title = 'متجر كريز | تسوق قطايف فاخرة بحشوات متنوعة';
+                $meta_description = 'تسوق من متجر كريز للحلويات الفاخرة. قطايف محشوة بالشوكولاتة، النوتيلا، الكريمة والمكسرات. أسعار مميزة وتوصيل سريع لجميع المحافظات.';
+                $meta_keywords = 'متجر حلويات, قطايف للبيع, شراء قطايف, حلويات اون لاين, توصيل حلويات, كريز ديزرت';
+            } else {
+                $meta_title = 'KREAZ Shop | Buy Premium Qatayef with Variety of Fillings';
+                $meta_description = 'Shop from KREAZ premium desserts store. Qatayef filled with chocolate, Nutella, cream and nuts. Great prices and fast delivery nationwide.';
+                $meta_keywords = 'dessert shop, buy qatayef, order qatayef, sweets online, dessert delivery, kreaz dessert';
+            }
+        }
+    }
+    
+    // ============================================
+    // SINGLE PRODUCT
+    // ============================================
+    elseif (is_product()) {
+        global $product;
+        $product_name = get_the_title();
+        $product_description = $product->get_short_description();
+        if (empty($product_description)) {
+            $product_description = wp_trim_words($product->get_description(), 30);
+        }
+        $product_price = $product->get_price();
+        
+        // Get product image
+        if (has_post_thumbnail()) {
+            $og_image = get_the_post_thumbnail_url(get_the_ID(), 'full');
+        }
+        
+        if ($is_arabic) {
+            $meta_title = $product_name . ' | اطلب الآن من كريز ديزرت';
+            $meta_description = $product_description ? $product_description : 'اطلب ' . $product_name . ' من كريز ديزرت. قطايف فاخرة محشوة بأجود المكونات. توصيل سريع لجميع المحافظات.';
+            $meta_keywords = $product_name . ', قطايف, حلويات فاخرة, كريز, توصيل حلويات, شراء حلويات اون لاين';
+        } else {
+            $meta_title = $product_name . ' | Order Now from KREAZ Dessert';
+            $meta_description = $product_description ? $product_description : 'Order ' . $product_name . ' from KREAZ Dessert. Premium qatayef with finest ingredients. Fast delivery nationwide.';
+            $meta_keywords = $product_name . ', qatayef, premium desserts, kreaz, dessert delivery, buy sweets online';
+        }
+    }
+    
+    // ============================================
+    // CART PAGE
+    // ============================================
+    elseif (is_cart()) {
+        if ($is_arabic) {
+            $meta_title = 'عربة التسوق | كريز ديزرت';
+            $meta_description = 'راجع طلبك من كريز ديزرت. أكمل الطلب الآن واستمتع بقطايف فاخرة مع توصيل سريع لباب منزلك.';
+            $meta_keywords = 'عربة التسوق, إتمام الطلب, شراء حلويات, كريز ديزرت';
+        } else {
+            $meta_title = 'Shopping Cart | KREAZ Dessert';
+            $meta_description = 'Review your order from KREAZ Dessert. Complete your order now and enjoy premium qatayef with fast delivery to your door.';
+            $meta_keywords = 'shopping cart, checkout, buy desserts, kreaz dessert';
+        }
+    }
+    
+    // ============================================
+    // CHECKOUT PAGE
+    // ============================================
+    elseif (is_checkout()) {
+        if ($is_arabic) {
+            $meta_title = 'إتمام الطلب | كريز ديزرت';
+            $meta_description = 'أكمل طلبك من كريز ديزرت بسهولة وأمان. توصيل سريع لجميع المحافظات.';
+            $meta_keywords = 'إتمام الطلب, الدفع, شراء حلويات, كريز';
+        } else {
+            $meta_title = 'Checkout | KREAZ Dessert';
+            $meta_description = 'Complete your order from KREAZ Dessert easily and securely. Fast delivery nationwide.';
+            $meta_keywords = 'checkout, payment, buy desserts, kreaz';
+        }
+    }
+    
+    // ============================================
+    // ABOUT US PAGE
+    // ============================================
+    elseif (is_page('about') || is_page('about-us') || is_page('من-نحن')) {
+        if ($is_arabic) {
+            $meta_title = 'من نحن | قصة كريز ديزرت';
+            $meta_description = 'تعرف على قصة كريز ديزرت ورحلتنا في صناعة أفضل قطايف فاخرة بحشوات مميزة. جودة عالية وطعم لا يُنسى.';
+            $meta_keywords = 'من نحن, كريز ديزرت, قصتنا, حلويات فاخرة, قطايف';
+        } else {
+            $meta_title = 'About Us | KREAZ Dessert Story';
+            $meta_description = 'Learn about KREAZ Dessert story and our journey in making the finest premium qatayef with distinctive fillings. High quality and unforgettable taste.';
+            $meta_keywords = 'about us, kreaz dessert, our story, premium sweets, qatayef';
+        }
+    }
+    
+    // ============================================
+    // CONTACT PAGE
+    // ============================================
+    elseif (is_page('contact') || is_page('contact-us') || is_page('اتصل-بنا')) {
+        if ($is_arabic) {
+            $meta_title = 'اتصل بنا | كريز ديزرت';
+            $meta_description = 'تواصل معنا في كريز ديزرت. نحن هنا للإجابة على استفساراتك وخدمتك. خدمة عملاء متميزة متاحة دائماً.';
+            $meta_keywords = 'اتصل بنا, خدمة العملاء, كريز ديزرت, رقم التواصل, واتساب';
+        } else {
+            $meta_title = 'Contact Us | KREAZ Dessert';
+            $meta_description = 'Contact KREAZ Dessert. We are here to answer your questions and serve you. Excellent customer service always available.';
+            $meta_keywords = 'contact us, customer service, kreaz dessert, phone number, whatsapp';
+        }
+    }
+    
+    // ============================================
+    // BLOG / POSTS
+    // ============================================
+    elseif (is_single() && !is_product()) {
+        $post_title = get_the_title();
+        $post_excerpt = get_the_excerpt();
+        
+        if (has_post_thumbnail()) {
+            $og_image = get_the_post_thumbnail_url(get_the_ID(), 'full');
+        }
+        
+        if ($is_arabic) {
+            $meta_title = $post_title . ' | مدونة كريز ديزرت';
+            $meta_description = $post_excerpt ? $post_excerpt : wp_trim_words(get_the_content(), 30);
+            $meta_keywords = 'كريز, حلويات, قطايف, مدونة, وصفات';
+        } else {
+            $meta_title = $post_title . ' | KREAZ Dessert Blog';
+            $meta_description = $post_excerpt ? $post_excerpt : wp_trim_words(get_the_content(), 30);
+            $meta_keywords = 'kreaz, desserts, qatayef, blog, recipes';
+        }
+    }
+    
+    // ============================================
+    // DEFAULT FALLBACK
+    // ============================================
+    else {
+        $page_title = get_the_title();
+        if ($is_arabic) {
+            $meta_title = $page_title . ' | كريز ديزرت';
+            $meta_description = 'كريز ديزرت - قطايف فاخرة محشوة بحشوات لذيذة. طعم لا يُقاوم في كل قضمة. توصيل لجميع أنحاء مصر.';
+            $meta_keywords = 'كريز, قطايف, حلويات, حلويات فاخرة';
+        } else {
+            $meta_title = $page_title . ' | KREAZ Dessert';
+            $meta_description = 'KREAZ Dessert - Premium qatayef with delicious fillings. Delight in every bite. Delivery across Egypt.';
+            $meta_keywords = 'kreaz, qatayef, desserts, premium sweets';
+        }
+    }
+    
+    // ============================================
+    // OUTPUT META TAGS
+    // ============================================
+    ?>
+    <!-- KREAZ SEO Meta Tags -->
+    <meta name="description" content="<?php echo esc_attr($meta_description); ?>">
+    <meta name="keywords" content="<?php echo esc_attr($meta_keywords); ?>">
+    <meta name="author" content="<?php echo esc_attr($site_name); ?>">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="<?php echo is_product() ? 'product' : 'website'; ?>">
+    <meta property="og:url" content="<?php echo esc_url(get_permalink()); ?>">
+    <meta property="og:title" content="<?php echo esc_attr($meta_title); ?>">
+    <meta property="og:description" content="<?php echo esc_attr($meta_description); ?>">
+    <meta property="og:image" content="<?php echo esc_url($og_image); ?>">
+    <meta property="og:site_name" content="<?php echo esc_attr($site_name); ?>">
+    <meta property="og:locale" content="<?php echo $is_arabic ? 'ar_EG' : 'en_US'; ?>">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="<?php echo esc_url(get_permalink()); ?>">
+    <meta name="twitter:title" content="<?php echo esc_attr($meta_title); ?>">
+    <meta name="twitter:description" content="<?php echo esc_attr($meta_description); ?>">
+    <meta name="twitter:image" content="<?php echo esc_url($og_image); ?>">
+    
+    <!-- Additional SEO Tags -->
+    <meta name="language" content="<?php echo $is_arabic ? 'Arabic' : 'English'; ?>">
+    <meta name="revisit-after" content="7 days">
+    <meta name="distribution" content="global">
+    <link rel="canonical" href="<?php echo esc_url(get_permalink()); ?>">
+    
+    <?php if (is_product()) : global $product; ?>
+    <!-- Product Specific Meta -->
+    <meta property="product:price:amount" content="<?php echo esc_attr($product->get_price()); ?>">
+    <meta property="product:price:currency" content="EGP">
+    <meta property="product:availability" content="<?php echo $product->is_in_stock() ? 'in stock' : 'out of stock'; ?>">
+    <?php endif; ?>
+    
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "<?php echo esc_js($site_name); ?>",
+        "url": "<?php echo esc_url($site_url); ?>",
+        "logo": "<?php echo esc_url($og_image); ?>",
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+20-956-238-7908",
+            "contactType": "Customer Service",
+            "areaServed": "EG",
+            "availableLanguage": ["Arabic", "English"]
+        },
+        "sameAs": [
+            "https://www.facebook.com/kreaz",
+            "https://www.instagram.com/kreaz",
+            "https://wa.me/201234567890"
+        ]
+    }
+    </script>
+    
+    <?php if (is_product()) : global $product; ?>
+    <!-- Product Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "<?php echo esc_js(get_the_title()); ?>",
+        "image": "<?php echo esc_url($og_image); ?>",
+        "description": "<?php echo esc_js($meta_description); ?>",
+        "sku": "<?php echo esc_js($product->get_sku()); ?>",
+        "offers": {
+            "@type": "Offer",
+            "url": "<?php echo esc_url(get_permalink()); ?>",
+            "priceCurrency": "EGP",
+            "price": "<?php echo esc_js($product->get_price()); ?>",
+            "availability": "<?php echo $product->is_in_stock() ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'; ?>",
+            "priceValidUntil": "<?php echo date('Y-12-31'); ?>"
+        }
+    }
+    </script>
+    <?php endif; ?>
+    
+    <?php
+}
+add_action('wp_head', 'kreaz_seo_meta_tags', 1);
+
+
+// 2. Remove default WordPress meta tags that might conflict
+remove_action('wp_head', 'wp_generator');
+remove_action('wp_head', 'wlwmanifest_link');
+remove_action('wp_head', 'rsd_link');
+remove_action('wp_head', 'wp_shortlink_wp_head');
+
+
+// 3. Custom Title Tag (if theme doesn't support title-tag)
+function kreaz_custom_title($title) {
+    if (is_feed()) {
+        return $title;
+    }
+    
+    $current_lang = get_locale();
+    $is_arabic = (strpos($current_lang, 'ar') !== false);
+    $site_name = get_bloginfo('name');
+    
+    if (is_front_page()) {
+        if ($is_arabic) {
+            return 'كريز ديزرت | قطايف فاخرة محشوة بحشوات لذيذة - توصيل لجميع أنحاء مصر';
+        } else {
+            return 'KREAZ Dessert | Premium Qatayef with Luxurious Fillings - Nationwide Delivery';
+        }
+    }
+    
+    return $title . ' | ' . $site_name;
+}
+add_filter('pre_get_document_title', 'kreaz_custom_title');
+
+
+// 4. Add theme support for title tag
+add_theme_support('title-tag');
+
+
+
+
+
+add_action( 'woocommerce_thankyou', 'redirect_to_custom_thank_you', 5 );
+function redirect_to_custom_thank_you( $order_id ) {
+    if ( ! $order_id ) return;
+
+    // Prevent redirect loop
+    if ( is_page( 'thank-you' ) ) return;
+
+    wp_safe_redirect( home_url( '/thank-you/?order_id=' . $order_id ) );
+    exit;
+}
+
+
+
+
+add_action('init', function() {
+    if ( function_exists('is_woocommerce') && (is_checkout() || (defined('DOING_AJAX') && DOING_AJAX)) ) {
+        if ( WC()->session && !WC()->session->has_session() ) {
+            WC()->session->set_customer_session_cookie(true);
+        }
+    }
+});
+
+

@@ -1,0 +1,3555 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ramadan Collection - Kreaz Dessert</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background-color: #f8f8f8;
+      }
+
+      /* Header Styles */
+      .top-header {
+        background-color: #f5f5f5;
+        padding: 10px 0;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .top-header-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 14px;
+        color: #666;
+      }
+
+      .top-header-left {
+        display: flex;
+        gap: 30px;
+      }
+
+      .top-header-right {
+        display: flex;
+        gap: 25px;
+        align-items: center;
+      }
+
+      .top-header a {
+        color: #666;
+        text-decoration: none;
+        transition: color 0.3s;
+      }
+
+      .top-header a:hover {
+        color: #d4537c;
+      }
+
+      /* Main Header */
+      .main-header {
+        background-color: white;
+        padding: 20px 0;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .main-header-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 30px;
+      }
+
+      .logo-menu {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .logo {
+        width: 180px;
+      }
+
+      .menu-btn {
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        color: white;
+        border: none;
+        padding: 10px 25px;
+        border-radius: 25px;
+        font-size: 15px;
+        cursor: pointer;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .search-bar {
+        flex: 1;
+        max-width: 500px;
+        position: relative;
+      }
+
+      .search-bar input {
+        width: 100%;
+        padding: 12px 45px 12px 20px;
+        border: 1px solid #e0e0e0;
+        border-radius: 25px;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.3s;
+      }
+
+      .search-bar input:focus {
+        border-color: #d4537c;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 25px;
+        align-items: center;
+      }
+
+      .header-action {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #333;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .cart-btn {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        padding: 10px 20px;
+        border-radius: 25px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        position: relative;
+      }
+
+      .cart-count {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: #d4537c;
+        color: white;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 150px;
+        width: 70px;
+        background-color: white;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+        z-index: 90;
+        border-radius: 0 15px 15px 0;
+      }
+
+      .sidebar-item {
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .sidebar-item:hover {
+        background-color: #fff5f8;
+      }
+
+      .sidebar-item img {
+        width: 35px;
+        height: 35px;
+        object-fit: contain;
+      }
+
+      .sidebar-item.discount {
+        background: linear-gradient(135deg, #ff6b9d, #d4537c);
+        color: white;
+        font-weight: bold;
+        font-size: 20px;
+        border-radius: 0 15px 15px 0;
+      }
+
+      /* Main Content */
+      .main-content {
+        margin-left: 70px;
+        padding: 40px 20px;
+      }
+
+      /* Ramadan Hero Section */
+      .ramadan-hero {
+        max-width: 1400px;
+        margin: 0 auto 60px;
+        background: linear-gradient(135deg, #1a1a2e 0%, #2d3561 100%);
+        border-radius: 30px;
+        padding: 60px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(212, 83, 124, 0.2);
+      }
+
+      .ramadan-hero::before {
+        content: "☪";
+        position: absolute;
+        top: -50px;
+        right: 50px;
+        font-size: 200px;
+        opacity: 0.1;
+        color: #f4d03f;
+      }
+
+      .ramadan-hero::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #f4d03f, #d4537c, #f4d03f);
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 600px;
+      }
+
+      .hero-content h1 {
+        color: #f4d03f;
+        font-size: 48px;
+        margin-bottom: 15px;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .hero-content .subtitle {
+        color: #e8e8e8;
+        font-size: 20px;
+        margin-bottom: 10px;
+        font-style: italic;
+      }
+
+      .hero-content p {
+        color: #d0d0d0;
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 25px;
+      }
+
+      .hero-btn {
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        border-radius: 30px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 5px 20px rgba(212, 83, 124, 0.3);
+      }
+
+      .hero-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(212, 83, 124, 0.4);
+      }
+
+      .decorative-line {
+        width: 150px;
+        height: 3px;
+        background: linear-gradient(90deg, #f4d03f, transparent);
+        margin: 20px 0;
+      }
+
+      /* Products Section */
+      .products-section {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: linear-gradient(
+          135deg,
+          #2d3561 0%,
+          #1f2847 50%,
+          #2d3561 100%
+        );
+        padding: 60px 40px;
+        border-radius: 30px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Ramadan Background Decorations */
+      .products-section::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: radial-gradient(
+            circle at 10% 20%,
+            rgba(244, 208, 63, 0.12) 0%,
+            transparent 30%
+          ),
+          radial-gradient(
+            circle at 90% 80%,
+            rgba(244, 208, 63, 0.12) 0%,
+            transparent 30%
+          ),
+          radial-gradient(
+            circle at 50% 50%,
+            rgba(244, 208, 63, 0.08) 0%,
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 30% 70%,
+            rgba(212, 83, 124, 0.08) 0%,
+            transparent 35%
+          ),
+          radial-gradient(
+            circle at 70% 30%,
+            rgba(212, 83, 124, 0.08) 0%,
+            transparent 35%
+          );
+        pointer-events: none;
+      }
+
+      .products-section::after {
+        content: "🌙";
+        position: absolute;
+        top: 30px;
+        right: 50px;
+        font-size: 100px;
+        opacity: 0.2;
+        animation: float 6s ease-in-out infinite;
+      }
+
+      /* Floating Lanterns */
+      .lantern-decoration {
+        position: absolute;
+        font-size: 50px;
+        opacity: 0.25;
+        filter: drop-shadow(0 0 10px rgba(244, 208, 63, 0.3));
+        animation: swing 4s ease-in-out infinite;
+      }
+
+      .lantern-top-left {
+        top: 40px;
+        left: 30px;
+        animation-delay: 0s;
+      }
+
+      .lantern-top-right {
+        top: 80px;
+        right: 120px;
+        animation-delay: 1s;
+      }
+
+      .lantern-mid-left {
+        top: 50%;
+        left: 50px;
+        animation-delay: 2s;
+        font-size: 45px;
+      }
+
+      .lantern-mid-right {
+        top: 45%;
+        right: 60px;
+        animation-delay: 0.5s;
+        font-size: 45px;
+      }
+
+      .lantern-bottom-left {
+        bottom: 100px;
+        left: 80px;
+        animation-delay: 1.5s;
+        font-size: 40px;
+      }
+
+      .lantern-bottom-right {
+        bottom: 120px;
+        right: 100px;
+        animation-delay: 2.5s;
+        font-size: 40px;
+      }
+
+      /* Islamic Pattern Overlay */
+      .islamic-pattern-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 400px;
+        color: rgba(244, 208, 63, 0.04);
+        pointer-events: none;
+      }
+
+      /* Stars in Section Background */
+      .section-stars {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+      }
+
+      .section-star {
+        position: absolute;
+        width: 3px;
+        height: 3px;
+        background: #f4d03f;
+        border-radius: 50%;
+        box-shadow: 0 0 4px #f4d03f;
+        animation: twinkle 3s infinite;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-20px) rotate(5deg);
+        }
+      }
+
+      @keyframes swing {
+        0%,
+        100% {
+          transform: rotate(-8deg);
+        }
+        50% {
+          transform: rotate(8deg);
+        }
+      }
+
+      /* Additional Ramadan Elements */
+      .ramadan-element {
+        position: absolute;
+        pointer-events: none;
+        filter: drop-shadow(0 0 8px rgba(244, 208, 63, 0.3));
+      }
+
+      /* Custom Order Section */
+      .custom-order-section {
+        max-width: 1400px;
+        margin: 60px auto;
+        background: linear-gradient(135deg, #ffffff 0%, #fef5f9 100%);
+        border-radius: 30px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        position: relative;
+      }
+
+      .custom-order-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+        gap: 60px;
+        padding: 80px 60px;
+      }
+
+      .custom-order-text {
+        padding-right: 20px;
+      }
+
+      .custom-order-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+      }
+
+      .custom-order-text h2 {
+        color: #333;
+        font-size: 42px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        line-height: 1.2;
+      }
+
+      .custom-order-text h2 span {
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .custom-order-text p {
+        color: #666;
+        font-size: 17px;
+        line-height: 1.8;
+        margin-bottom: 30px;
+      }
+
+      .custom-features {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-bottom: 35px;
+      }
+
+      .custom-feature {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #555;
+        font-size: 15px;
+        font-weight: 500;
+      }
+
+      .custom-feature-icon {
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        color: white;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+
+      .custom-order-buttons {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+
+      .custom-order-btn {
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        color: white;
+        border: none;
+        padding: 16px 40px;
+        border-radius: 30px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 5px 20px rgba(212, 83, 124, 0.3);
+      }
+
+      .custom-order-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(212, 83, 124, 0.4);
+      }
+
+      .custom-order-btn-secondary {
+        background: white;
+        color: #d4537c;
+        border: 2px solid #d4537c;
+        box-shadow: none;
+      }
+
+      .custom-order-btn-secondary:hover {
+        background: #fef5f9;
+      }
+
+      .custom-order-image {
+        position: relative;
+        height: 500px;
+        border-radius: 20px;
+        overflow: visible;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .custom-order-image-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #fef5f9 0%, #f8f8f8 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 150px;
+        position: relative;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(212, 83, 124, 0.15);
+        overflow: hidden;
+      }
+
+      /* Enhanced background effects */
+      .custom-order-image-placeholder::before {
+        content: "";
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(
+          circle,
+          rgba(212, 83, 124, 0.15) 0%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation: pulse-glow 3s ease-in-out infinite;
+      }
+
+      .custom-order-image-placeholder::after {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+            circle at 20% 30%,
+            rgba(244, 208, 63, 0.08) 0%,
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 80% 70%,
+            rgba(212, 83, 124, 0.08) 0%,
+            transparent 40%
+          );
+      }
+
+      /* Animated image */
+      .animate-up-down {
+        animation: up-down 3s ease-in-out infinite;
+        position: relative;
+        z-index: 2;
+        filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.15));
+      }
+
+      @keyframes up-down {
+        0% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-20px);
+        }
+        100% {
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes pulse-glow {
+        0%,
+        100% {
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 0.5;
+        }
+        50% {
+          transform: translate(-50%, -50%) scale(1.1);
+          opacity: 0.8;
+        }
+      }
+
+      .image-decoration {
+        position: absolute;
+        font-size: 50px;
+        opacity: 0.25;
+        z-index: 1;
+        animation: float-decoration 4s ease-in-out infinite;
+      }
+
+      @keyframes float-decoration {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-10px) rotate(5deg);
+        }
+      }
+
+      .decoration-1 {
+        top: 20px;
+        left: 20px;
+        animation-delay: 0s;
+      }
+      .decoration-2 {
+        top: 20px;
+        right: 20px;
+        animation-delay: 1s;
+      }
+      .decoration-3 {
+        bottom: 20px;
+        left: 20px;
+        animation-delay: 2s;
+      }
+      .decoration-4 {
+        bottom: 20px;
+        right: 20px;
+        animation-delay: 1.5s;
+      }
+
+      .floating-element {
+        position: absolute;
+        opacity: 0.08;
+        animation: float-smooth 8s ease-in-out infinite;
+      }
+
+      .floating-element-1 {
+        top: 10%;
+        right: 5%;
+        font-size: 80px;
+        animation-delay: 0s;
+      }
+
+      .floating-element-2 {
+        bottom: 15%;
+        left: 5%;
+        font-size: 60px;
+        animation-delay: 2s;
+      }
+
+      @keyframes float-smooth {
+        0%,
+        100% {
+          transform: translateY(0px) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-15px) rotate(3deg);
+        }
+      }
+
+      /* Tabs Section */
+      .tabs-section {
+        max-width: 1400px;
+        margin: 60px auto;
+        padding: 0 20px;
+      }
+
+      .tabs-header {
+        text-align: center;
+        margin-bottom: 50px;
+      }
+
+      .tabs-header h2 {
+        color: #333;
+        font-size: 38px;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+
+      .tabs-header p {
+        color: #666;
+        font-size: 16px;
+      }
+
+      /* Tabs Navigation */
+      .tabs-nav {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 50px;
+        flex-wrap: wrap;
+      }
+
+      .tab-btn {
+        background: white;
+        color: #666;
+        border: 2px solid #e0e0e0;
+        padding: 14px 35px;
+        border-radius: 30px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .tab-btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        transition: left 0.3s;
+        z-index: -1;
+      }
+
+      .tab-btn:hover {
+        color: white;
+        border-color: #d4537c;
+      }
+
+      .tab-btn:hover::before {
+        left: 0;
+      }
+
+      .tab-btn.active {
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        color: white;
+        border-color: #d4537c;
+        box-shadow: 0 5px 20px rgba(212, 83, 124, 0.3);
+      }
+
+      .tab-btn .tab-icon {
+        margin-right: 8px;
+      }
+
+      /* Tab Content */
+      .tab-content {
+        display: none;
+        animation: fadeIn 0.5s ease-in-out;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Products Grid in Tabs */
+      .tab-products-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 30px;
+      }
+
+      /* Product Card for Tabs */
+      .tab-product-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.4s ease;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        position: relative;
+      }
+
+      .tab-product-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(212, 83, 124, 0.2);
+      }
+
+      .tab-product-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        z-index: 3;
+        text-transform: uppercase;
+      }
+
+      .badge-bestseller {
+        background: linear-gradient(135deg, #ff9800, #f57c00);
+        color: white;
+      }
+
+      .badge-new {
+        background: linear-gradient(135deg, #4caf50, #388e3c);
+        color: white;
+      }
+
+      .badge-sale {
+        background: linear-gradient(135deg, #f44336, #d32f2f);
+        color: white;
+      }
+
+      .tab-product-image {
+        position: relative;
+        height: 250px;
+        background: linear-gradient(135deg, #fff5f8 0%, #f8f8f8 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .tab-product-emoji {
+        font-size: 90px;
+        position: relative;
+        z-index: 2;
+        transition: transform 0.3s;
+      }
+
+      .tab-product-card:hover .tab-product-emoji {
+        transform: scale(1.1);
+      }
+
+      .tab-product-content {
+        padding: 20px;
+      }
+
+      .tab-product-title {
+        color: #333;
+        font-size: 18px;
+        margin-bottom: 8px;
+        font-weight: 600;
+      }
+
+      .tab-product-description {
+        color: #666;
+        font-size: 13px;
+        line-height: 1.5;
+        margin-bottom: 15px;
+      }
+
+      .tab-product-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+      }
+
+      .tab-product-price {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .price-current {
+        color: #d4537c;
+        font-size: 22px;
+        font-weight: 700;
+      }
+
+      .price-old {
+        color: #999;
+        font-size: 16px;
+        text-decoration: line-through;
+      }
+
+      .tab-product-rating {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #f4d03f;
+        font-size: 14px;
+      }
+
+      .tab-add-to-cart {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .tab-add-to-cart:hover {
+        transform: scale(1.02);
+        box-shadow: 0 5px 20px rgba(212, 83, 124, 0.3);
+      }
+
+      @media (max-width: 1200px) {
+        .tab-products-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      @media (max-width: 900px) {
+        .tab-products-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 20px;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .tab-products-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .tabs-nav {
+          flex-direction: column;
+        }
+
+        .tab-btn {
+          width: 100%;
+        }
+      }
+
+      /* Why Choose Kreaz Section */
+      .why-choose-section {
+        max-width: 1600px;
+        margin: 120px auto;
+        padding: 0 40px;
+      }
+
+      .why-choose-header {
+        text-align: center;
+        margin-bottom: 70px;
+        position: relative;
+      }
+
+      .why-choose-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        color: white;
+        padding: 12px 35px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 25px;
+        box-shadow: 0 8px 25px rgba(212, 83, 124, 0.3);
+      }
+
+      .why-choose-header h2 {
+        font-size: 56px;
+        font-weight: 700;
+        color: #2d2d2d;
+        margin-bottom: 20px;
+        line-height: 1.2;
+      }
+
+      .why-choose-header h2 span {
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .why-choose-header p {
+        font-size: 18px;
+        color: #666;
+        max-width: 700px;
+        margin: 0 auto;
+        line-height: 1.8;
+      }
+
+      .why-choose-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 35px;
+      }
+
+      .why-choose-card {
+        background: white;
+        border-radius: 20px;
+        padding: 45px 35px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+      }
+
+      .why-choose-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #d4537c, #e8719d, #f4d03f);
+        transform: scaleX(0);
+        transition: transform 0.5s;
+      }
+
+      .why-choose-card:hover::before {
+        transform: scaleX(1);
+      }
+
+      .why-choose-card:hover {
+        transform: translateY(-15px);
+        box-shadow: 0 25px 60px rgba(212, 83, 124, 0.2);
+      }
+
+      .why-choose-icon {
+        width: 90px;
+        height: 90px;
+        margin: 0 auto 25px;
+        background: linear-gradient(135deg, #fef5f9 0%, #fff5f0 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 45px;
+        position: relative;
+        transition: all 0.5s;
+      }
+
+      .why-choose-icon::before {
+        content: "";
+        position: absolute;
+        inset: -5px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        opacity: 0;
+        transition: opacity 0.5s;
+        z-index: -1;
+      }
+
+      .why-choose-card:hover .why-choose-icon {
+        transform: scale(1.1) rotate(5deg);
+      }
+
+      .why-choose-card:hover .why-choose-icon::before {
+        opacity: 0.15;
+      }
+
+      .why-choose-card h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #2d2d2d;
+        margin-bottom: 12px;
+      }
+
+      .why-choose-card p {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.7;
+        margin: 0;
+      }
+
+      /* Instagram Gallery Section - Luxury Version */
+      .instagram-section {
+        background: #ffffff;
+        padding: 120px 40px;
+        margin-top: 120px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .instagram-section::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(212, 83, 124, 0.3),
+          rgba(244, 208, 63, 0.3),
+          rgba(212, 83, 124, 0.3),
+          transparent
+        );
+      }
+
+      .instagram-container {
+        max-width: 1600px;
+        margin: 0 auto;
+      }
+
+      .instagram-header {
+        text-align: center;
+        margin-bottom: 80px;
+        position: relative;
+      }
+
+      .instagram-title-decoration {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .instagram-line {
+        width: 80px;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(212, 83, 124, 0.5)
+        );
+      }
+
+      .instagram-line.right {
+        background: linear-gradient(
+          90deg,
+          rgba(212, 83, 124, 0.5),
+          transparent
+        );
+      }
+
+      .instagram-icon-luxury {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: white;
+        box-shadow: 0 10px 30px rgba(212, 83, 124, 0.3);
+      }
+
+      .instagram-header h3 {
+        font-size: 14px;
+        color: #d4537c;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        margin-bottom: 20px;
+        font-weight: 700;
+      }
+
+      .instagram-header h2 {
+        font-size: 56px;
+        font-weight: 300;
+        color: #2d2d2d;
+        margin-bottom: 25px;
+        line-height: 1.2;
+        font-family: "Georgia", serif;
+        letter-spacing: -1px;
+      }
+
+      .instagram-header h2 .highlight {
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 400;
+      }
+
+      .instagram-subtitle {
+        font-size: 18px;
+        color: #666;
+        max-width: 600px;
+        margin: 0 auto 30px;
+        line-height: 1.8;
+        font-weight: 300;
+      }
+
+      .instagram-handle-luxury {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 30px;
+        border: 2px solid rgba(212, 83, 124, 0.2);
+        border-radius: 50px;
+        font-size: 17px;
+        font-weight: 600;
+        color: #d4537c;
+        text-decoration: none;
+        transition: all 0.4s;
+        background: linear-gradient(135deg, #fef5f9 0%, transparent 100%);
+      }
+
+      .instagram-handle-luxury:hover {
+        border-color: #d4537c;
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(212, 83, 124, 0.3);
+      }
+
+      /* Luxury Masonry Grid */
+      .instagram-gallery {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        grid-auto-rows: 120px;
+        gap: 15px;
+        margin-bottom: 70px;
+      }
+
+      /* Premium Layout Pattern */
+      .instagram-item:nth-child(1) {
+        grid-column: span 4;
+        grid-row: span 3;
+      }
+
+      .instagram-item:nth-child(2) {
+        grid-column: span 4;
+        grid-row: span 2;
+      }
+
+      .instagram-item:nth-child(3) {
+        grid-column: span 4;
+        grid-row: span 2;
+      }
+
+      .instagram-item:nth-child(4) {
+        grid-column: span 3;
+        grid-row: span 2;
+      }
+
+      .instagram-item:nth-child(5) {
+        grid-column: span 5;
+        grid-row: span 3;
+      }
+
+      .instagram-item:nth-child(6) {
+        grid-column: span 4;
+        grid-row: span 3;
+      }
+
+      .instagram-item:nth-child(7) {
+        grid-column: span 4;
+        grid-row: span 2;
+      }
+
+      .instagram-item:nth-child(8) {
+        grid-column: span 5;
+        grid-row: span 2;
+      }
+
+      .instagram-item {
+        position: relative;
+        border-radius: 0;
+        overflow: hidden;
+        cursor: pointer;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+        transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        background: #f5f5f5;
+      }
+
+      .instagram-item::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border: 4px solid transparent;
+        transition: border-color 0.6s;
+        pointer-events: none;
+        z-index: 4;
+      }
+
+      .instagram-item:hover::after {
+        border-color: rgba(244, 208, 63, 0.6);
+      }
+
+      .instagram-item::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(212, 83, 124, 0.92),
+          rgba(232, 113, 157, 0.92),
+          rgba(244, 208, 63, 0.88)
+        );
+        opacity: 0;
+        transition: opacity 0.6s;
+        z-index: 2;
+      }
+
+      .instagram-item:hover::before {
+        opacity: 1;
+      }
+
+      .instagram-item:hover {
+        transform: scale(1.02);
+        box-shadow:
+          0 20px 60px rgba(212, 83, 124, 0.25),
+          0 0 0 1px rgba(244, 208, 63, 0.3);
+        z-index: 10;
+      }
+
+      .instagram-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 80px;
+        position: relative;
+      }
+
+      /* Real image placeholder note */
+      /* Replace with: background-image: url('path/to/instagram-photo.jpg'); */
+      /* background-size: cover; background-position: center; */
+
+      .instagram-placeholder::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+            ellipse at 30% 30%,
+            rgba(212, 83, 124, 0.05) 0%,
+            transparent 70%
+          ),
+          radial-gradient(
+            ellipse at 70% 70%,
+            rgba(244, 208, 63, 0.05) 0%,
+            transparent 70%
+          );
+      }
+
+      .instagram-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 25px;
+        opacity: 0;
+        transition: opacity 0.6s;
+        z-index: 3;
+        color: white;
+      }
+
+      .instagram-item:hover .instagram-overlay {
+        opacity: 1;
+      }
+
+      .instagram-overlay-icon {
+        font-size: 50px;
+        margin-bottom: 10px;
+        opacity: 0.9;
+      }
+
+      .instagram-stats {
+        display: flex;
+        gap: 35px;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .instagram-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .instagram-stat-icon {
+        font-size: 30px;
+      }
+
+      .instagram-stat-number {
+        font-size: 22px;
+        font-weight: 700;
+      }
+
+      .instagram-stat-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        opacity: 0.9;
+      }
+
+      /* Premium CTA Section */
+      .instagram-cta-wrapper {
+        text-align: center;
+        position: relative;
+        padding: 70px 60px;
+        background: linear-gradient(135deg, #fef5f9 0%, #fff5f0 100%);
+        border-radius: 0;
+        box-shadow:
+          0 20px 60px rgba(0, 0, 0, 0.08),
+          inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      }
+
+      .instagram-cta-wrapper::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        height: 4px;
+        background: linear-gradient(90deg, #d4537c, #f4d03f, #d4537c);
+      }
+
+      .instagram-cta-text {
+        font-size: 16px;
+        color: #666;
+        margin-bottom: 30px;
+        font-weight: 300;
+      }
+
+      .instagram-cta-luxury {
+        display: inline-flex;
+        align-items: center;
+        gap: 15px;
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        color: white;
+        padding: 20px 60px;
+        border-radius: 0;
+        font-size: 15px;
+        font-weight: 700;
+        text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        box-shadow: 0 15px 40px rgba(212, 83, 124, 0.35);
+        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        border: none;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .instagram-cta-luxury::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+        transform: translateX(-100%);
+        transition: transform 0.5s;
+      }
+
+      .instagram-cta-luxury:hover::before {
+        transform: translateX(0);
+      }
+
+      .instagram-cta-luxury span {
+        position: relative;
+        z-index: 1;
+      }
+
+      .instagram-cta-luxury:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 60px rgba(212, 83, 124, 0.45);
+      }
+
+      .instagram-cta-icon-lux {
+        font-size: 24px;
+        position: relative;
+        z-index: 1;
+      }
+
+      @media (max-width: 1400px) {
+        .instagram-gallery {
+          grid-template-columns: repeat(8, 1fr);
+          grid-auto-rows: 110px;
+        }
+
+        .instagram-item:nth-child(1) {
+          grid-column: span 3;
+          grid-row: span 3;
+        }
+        .instagram-item:nth-child(2) {
+          grid-column: span 3;
+          grid-row: span 2;
+        }
+        .instagram-item:nth-child(3) {
+          grid-column: span 2;
+          grid-row: span 2;
+        }
+        .instagram-item:nth-child(4) {
+          grid-column: span 2;
+          grid-row: span 2;
+        }
+        .instagram-item:nth-child(5) {
+          grid-column: span 3;
+          grid-row: span 3;
+        }
+        .instagram-item:nth-child(6) {
+          grid-column: span 3;
+          grid-row: span 3;
+        }
+        .instagram-item:nth-child(7) {
+          grid-column: span 4;
+          grid-row: span 2;
+        }
+        .instagram-item:nth-child(8) {
+          grid-column: span 4;
+          grid-row: span 2;
+        }
+      }
+
+      @media (max-width: 1024px) {
+        .instagram-gallery {
+          grid-template-columns: repeat(6, 1fr);
+          grid-auto-rows: 100px;
+          gap: 12px;
+        }
+
+        .instagram-item:nth-child(1) {
+          grid-column: span 3;
+          grid-row: span 2;
+        }
+        .instagram-item:nth-child(2) {
+          grid-column: span 3;
+          grid-row: span 2;
+        }
+        .instagram-item:nth-child(3) {
+          grid-column: span 2;
+          grid-row: span 2;
+        }
+        .instagram-item:nth-child(4) {
+          grid-column: span 2;
+          grid-row: span 2;
+        }
+        .instagram-item:nth-child(5) {
+          grid-column: span 2;
+          grid-row: span 2;
+        }
+        .instagram-item:nth-child(6) {
+          grid-column: span 3;
+          grid-row: span 3;
+        }
+        .instagram-item:nth-child(7) {
+          grid-column: span 3;
+          grid-row: span 2;
+        }
+        .instagram-item:nth-child(8) {
+          grid-column: span 6;
+          grid-row: span 2;
+        }
+
+        .instagram-placeholder {
+          font-size: 60px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .instagram-section {
+          padding: 80px 20px;
+          margin-top: 80px;
+        }
+
+        .instagram-header h2 {
+          font-size: 38px;
+        }
+
+        .instagram-gallery {
+          grid-template-columns: repeat(4, 1fr);
+          grid-auto-rows: 90px;
+          gap: 10px;
+        }
+
+        .instagram-item:nth-child(1) {
+          grid-column: span 2;
+          grid-row: span 2;
+        }
+        .instagram-item:nth-child(2) {
+          grid-column: span 2;
+          grid-row: span 2;
+        }
+        .instagram-item:nth-child(3) {
+          grid-column: span 2;
+          grid-row: span 2;
+        }
+        .instagram-item:nth-child(4) {
+          grid-column: span 2;
+          grid-row: span 2;
+        }
+        .instagram-item:nth-child(5) {
+          grid-column: span 4;
+          grid-row: span 2;
+        }
+        .instagram-item:nth-child(6) {
+          grid-column: span 2;
+          grid-row: span 2;
+        }
+        .instagram-item:nth-child(7) {
+          grid-column: span 2;
+          grid-row: span 2;
+        }
+        .instagram-item:nth-child(8) {
+          grid-column: span 4;
+          grid-row: span 2;
+        }
+
+        .instagram-placeholder {
+          font-size: 50px;
+        }
+
+        .instagram-cta-wrapper {
+          padding: 50px 30px;
+        }
+
+        .instagram-cta-luxury {
+          padding: 18px 40px;
+          font-size: 13px;
+        }
+
+        .instagram-overlay-icon {
+          font-size: 35px;
+        }
+
+        .instagram-stats {
+          gap: 25px;
+        }
+
+        .instagram-stat-number {
+          font-size: 18px;
+        }
+      }
+
+      @media (max-width: 1200px) {
+        .why-choose-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 30px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .why-choose-section {
+          margin: 80px auto;
+          padding: 0 20px;
+        }
+
+        .why-choose-header h2 {
+          font-size: 38px;
+        }
+
+        .why-choose-grid {
+          grid-template-columns: 1fr;
+          gap: 25px;
+        }
+
+        .why-choose-card {
+          padding: 40px 30px;
+        }
+      }
+
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 50px;
+        position: relative;
+        z-index: 2;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      .section-header-content {
+        flex: 1;
+      }
+
+      .section-header h2 {
+        color: #f4d03f;
+        font-size: 36px;
+        margin-bottom: 10px;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .section-header p {
+        color: #e8e8e8;
+        font-size: 16px;
+      }
+
+      .see-more-link {
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        color: white;
+        text-decoration: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-size: 15px;
+        font-weight: 600;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(212, 83, 124, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+      }
+
+      .see-more-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(212, 83, 124, 0.4);
+      }
+
+      .products-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 30px;
+        position: relative;
+        z-index: 2;
+      }
+
+      @media (max-width: 1200px) {
+        .products-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .product-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.4s ease;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        position: relative;
+      }
+
+      .product-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #f4d03f, #d4537c);
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .product-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(212, 83, 124, 0.2);
+      }
+
+      .product-card:hover::before {
+        opacity: 1;
+      }
+
+      .product-image-wrapper {
+        position: relative;
+        height: 280px;
+        background: linear-gradient(135deg, #fff5f8 0%, #f8f8f8 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .product-image-wrapper::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+            circle at 20% 50%,
+            rgba(212, 83, 124, 0.08) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 50%,
+            rgba(212, 83, 124, 0.08) 0%,
+            transparent 50%
+          );
+      }
+
+      .product-emoji {
+        font-size: 100px;
+        position: relative;
+        z-index: 2;
+      }
+
+      .product-content {
+        padding: 25px;
+      }
+
+      .product-title {
+        color: #333;
+        font-size: 20px;
+        margin-bottom: 10px;
+        font-weight: 600;
+      }
+
+      .product-description {
+        color: #666;
+        font-size: 14px;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+
+      .product-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+      }
+
+      .product-price {
+        color: #d4537c;
+        font-size: 26px;
+        font-weight: 700;
+      }
+
+      .product-rating {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #f4d03f;
+        font-size: 14px;
+      }
+
+      .add-to-cart-btn {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .add-to-cart-btn:hover {
+        transform: scale(1.02);
+        box-shadow: 0 5px 20px rgba(212, 83, 124, 0.3);
+      }
+
+      .add-to-cart-btn:active {
+        transform: scale(0.98);
+      }
+
+      /* Floating Stars */
+      .stars-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+      }
+
+      .star {
+        position: absolute;
+        width: 3px;
+        height: 3px;
+        background: #f4d03f;
+        border-radius: 50%;
+        animation: twinkle 3s infinite;
+      }
+
+      @keyframes twinkle {
+        0%,
+        100% {
+          opacity: 0.3;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.5);
+        }
+      }
+
+      /* Responsive */
+      @media (max-width: 1200px) {
+        .products-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 1024px) {
+        .sidebar {
+          display: none;
+        }
+
+        .main-content {
+          margin-left: 0;
+        }
+
+        .products-grid {
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+          gap: 20px;
+        }
+
+        .section-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .see-more-link {
+          align-self: flex-end;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .top-header {
+          display: none;
+        }
+
+        .main-header-content {
+          flex-wrap: wrap;
+        }
+
+        .search-bar {
+          order: 3;
+          max-width: 100%;
+          width: 100%;
+        }
+
+        .ramadan-hero {
+          padding: 40px 30px;
+        }
+
+        .hero-content h1 {
+          font-size: 32px;
+        }
+
+        .products-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .section-header h2 {
+          font-size: 28px;
+        }
+
+        .custom-order-content {
+          grid-template-columns: 1fr;
+          padding: 60px 40px;
+          gap: 40px;
+        }
+
+        .custom-order-text {
+          padding-right: 0;
+        }
+
+        .custom-order-text h2 {
+          font-size: 36px;
+        }
+
+        .custom-order-image {
+          height: 400px;
+        }
+
+        .custom-features {
+          grid-template-columns: 1fr;
+        }
+
+        .custom-order-buttons {
+          flex-direction: column;
+        }
+
+        .custom-order-btn {
+          width: 100%;
+        }
+      }
+
+      /* Footer Section */
+      .footer {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: white;
+        margin-top: 80px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .footer::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #d4537c, #f4d03f, #d4537c);
+      }
+
+      .footer-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 60px 20px 30px;
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 50px;
+      }
+
+      .footer-column h3 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 25px;
+        color: #f4d03f;
+      }
+
+      .footer-about {
+        padding-right: 30px;
+      }
+
+      .footer-logo {
+        margin-bottom: 20px;
+      }
+
+      .footer-logo svg {
+        width: 180px;
+        height: auto;
+      }
+
+      .footer-about p {
+        color: #d0d0d0;
+        line-height: 1.8;
+        margin-bottom: 25px;
+        font-size: 15px;
+      }
+
+      .footer-social {
+        display: flex;
+        gap: 15px;
+      }
+
+      .social-link {
+        width: 45px;
+        height: 45px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        transition: all 0.3s;
+        border: 1px solid rgba(244, 208, 63, 0.2);
+        text-decoration: none;
+      }
+
+      .social-link:hover {
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        border-color: #d4537c;
+        transform: translateY(-3px);
+      }
+
+      .footer-links {
+        list-style: none;
+      }
+
+      .footer-links li {
+        margin-bottom: 15px;
+      }
+
+      .footer-links a {
+        color: #d0d0d0;
+        text-decoration: none;
+        font-size: 15px;
+        transition: all 0.3s;
+        display: inline-block;
+      }
+
+      .footer-links a:hover {
+        color: #f4d03f;
+        padding-left: 10px;
+      }
+
+      .footer-contact {
+        list-style: none;
+      }
+
+      .footer-contact li {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        color: #d0d0d0;
+        font-size: 15px;
+        line-height: 1.6;
+      }
+
+      .contact-icon {
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 16px;
+      }
+
+      .footer-newsletter p {
+        color: #d0d0d0;
+        font-size: 14px;
+        margin-bottom: 20px;
+        line-height: 1.6;
+      }
+
+      .newsletter-form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .newsletter-input {
+        padding: 14px 18px;
+        border: 1px solid rgba(244, 208, 63, 0.3);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        font-size: 14px;
+        outline: none;
+        transition: all 0.3s;
+      }
+
+      .newsletter-input::placeholder {
+        color: #999;
+      }
+
+      .newsletter-input:focus {
+        border-color: #f4d03f;
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .newsletter-btn {
+        padding: 14px;
+        background: linear-gradient(135deg, #d4537c, #e8719d);
+        border: none;
+        border-radius: 10px;
+        color: white;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .newsletter-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(212, 83, 124, 0.4);
+      }
+
+      .footer-bottom {
+        border-top: 1px solid rgba(244, 208, 63, 0.2);
+        padding: 25px 0;
+        margin-top: 30px;
+      }
+
+      .footer-bottom-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      .copyright {
+        color: #d0d0d0;
+        font-size: 14px;
+      }
+
+      .copyright span {
+        color: #f4d03f;
+        font-weight: 600;
+      }
+
+      .payment-methods {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+
+      .payment-methods span {
+        color: #d0d0d0;
+        font-size: 14px;
+        margin-right: 10px;
+      }
+
+      .payment-icon {
+        width: 45px;
+        height: 30px;
+        background: white;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+      }
+
+      .footer-stars {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .footer-star {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: #f4d03f;
+        border-radius: 50%;
+        animation: twinkle 3s infinite;
+      }
+
+      @media (max-width: 1024px) {
+        .footer-content {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 40px;
+        }
+
+        .footer-about {
+          grid-column: span 2;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .footer-content {
+          grid-template-columns: 1fr;
+          padding: 40px 20px 20px;
+        }
+
+        .footer-about {
+          grid-column: span 1;
+          padding-right: 0;
+        }
+
+        .footer-bottom-content {
+          flex-direction: column;
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Stars Background -->
+    <div class="stars-container" id="starsContainer"></div>
+
+    <!-- Top Header -->
+    <div class="top-header">
+      <div class="top-header-content">
+        <div class="top-header-left">
+          <a href="#">About Us</a>
+          <a href="#">Contact Us</a>
+          <a href="#">Delivery</a>
+        </div>
+        <div class="top-header-right">
+          <a href="#">📍 Store Locations</a>
+          <a href="#">📞 (956) 238-7908</a>
+          <a href="#">❤️ Wishlist</a>
+          <a href="#">👤 Hello, Kreaz</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Header -->
+    <div class="main-header">
+      <div class="main-header-content">
+        <div class="logo-menu">
+          <button class="menu-btn">☰ Menu</button>
+          <svg
+            class="logo"
+            viewBox="0 0 200 80"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <linearGradient
+                id="pinkGradient"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
+                <stop
+                  offset="0%"
+                  style="stop-color: #d4537c; stop-opacity: 1"
+                />
+                <stop
+                  offset="100%"
+                  style="stop-color: #e8719d; stop-opacity: 1"
+                />
+              </linearGradient>
+            </defs>
+            <rect width="200" height="80" fill="url(#pinkGradient)" rx="10" />
+            <circle cx="40" cy="35" r="15" fill="white" />
+            <ellipse cx="40" cy="50" rx="8" ry="4" fill="white" />
+            <text
+              x="70"
+              y="45"
+              font-family="Arial, sans-serif"
+              font-size="28"
+              font-weight="bold"
+              fill="white"
+            >
+              KREAZ
+            </text>
+            <text
+              x="70"
+              y="65"
+              font-family="Arial, sans-serif"
+              font-size="12"
+              fill="white"
+              opacity="0.9"
+            >
+              DESSERT
+            </text>
+            <rect x="70" y="50" width="60" height="2" fill="#90EE90" />
+          </svg>
+        </div>
+        <div class="search-bar">
+          <input type="text" placeholder="Search for products" />
+        </div>
+        <div class="header-actions">
+          <a href="#" class="header-action">🏷️ Promotions</a>
+          <a href="#" class="header-action">💰 Weekly Discounts</a>
+          <div class="cart-btn">
+            🛒 EGP1,000.00
+            <span class="cart-count">2</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-item">🍰</div>
+      <div class="sidebar-item">🧀</div>
+      <div class="sidebar-item">🍤</div>
+      <div class="sidebar-item">🥤</div>
+      <div class="sidebar-item">☕</div>
+      <div class="sidebar-item discount">%</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Ramadan Hero Section -->
+      <div class="ramadan-hero">
+        <div class="hero-content">
+          <h1>Ramadan Kareem 🌙</h1>
+          <div class="decorative-line"></div>
+          <p class="subtitle">Taste the Sweetness of the Holy Month</p>
+          <p>
+            Celebrate this blessed month with our exclusive collection of
+            handcrafted oriental sweets. From traditional qatayef to premium
+            kunafa, every bite brings the authentic taste of Ramadan to your
+            iftar table.
+          </p>
+          <button class="hero-btn">Shop Sweets Collection</button>
+        </div>
+      </div>
+
+      <!-- Products Section -->
+      <div class="products-section">
+        <!-- Ramadan Background Decorations -->
+        <!-- Islamic Patterns -->
+        <div class="islamic-pattern-overlay">☪</div>
+        <div
+          class="islamic-pattern-overlay"
+          style="top: 20%; left: 15%; font-size: 150px; opacity: 0.03"
+        >
+          ☪
+        </div>
+        <div
+          class="islamic-pattern-overlay"
+          style="
+            top: 70%;
+            right: 20%;
+            left: auto;
+            font-size: 180px;
+            opacity: 0.03;
+          "
+        >
+          ☪
+        </div>
+
+        <!-- Multiple Lanterns -->
+        <div class="lantern-decoration lantern-top-left">🏮</div>
+        <div class="lantern-decoration lantern-top-right">🏮</div>
+        <div class="lantern-decoration lantern-mid-left">🏮</div>
+        <div class="lantern-decoration lantern-mid-right">🏮</div>
+        <div class="lantern-decoration lantern-bottom-left">🏮</div>
+        <div class="lantern-decoration lantern-bottom-right">🏮</div>
+
+        <!-- Extra Lanterns for more Ramadan vibes -->
+        <div
+          class="lantern-decoration"
+          style="
+            top: 25%;
+            left: 15%;
+            animation-delay: 3s;
+            font-size: 35px;
+            opacity: 0.2;
+          "
+        >
+          🏮
+        </div>
+        <div
+          class="lantern-decoration"
+          style="
+            top: 60%;
+            right: 25%;
+            animation-delay: 1.8s;
+            font-size: 38px;
+            opacity: 0.22;
+          "
+        >
+          🏮
+        </div>
+        <div
+          class="lantern-decoration"
+          style="
+            top: 15%;
+            left: 50%;
+            animation-delay: 2.3s;
+            font-size: 42px;
+            opacity: 0.18;
+          "
+        >
+          🏮
+        </div>
+
+        <!-- Additional Ramadan Elements -->
+        <div
+          class="ramadan-element"
+          style="
+            top: 10%;
+            right: 15%;
+            font-size: 35px;
+            opacity: 0.15;
+            animation: float 7s ease-in-out infinite;
+          "
+        >
+          🕌
+        </div>
+        <div
+          class="ramadan-element"
+          style="
+            bottom: 15%;
+            left: 20%;
+            font-size: 30px;
+            opacity: 0.15;
+            animation: float 8s ease-in-out infinite;
+            animation-delay: 1s;
+          "
+        >
+          🕌
+        </div>
+        <div
+          class="ramadan-element"
+          style="
+            top: 35%;
+            left: 8%;
+            font-size: 28px;
+            opacity: 0.12;
+            animation: twinkle 4s infinite;
+          "
+        >
+          ✨
+        </div>
+        <div
+          class="ramadan-element"
+          style="
+            top: 50%;
+            right: 10%;
+            font-size: 28px;
+            opacity: 0.12;
+            animation: twinkle 4s infinite;
+            animation-delay: 2s;
+          "
+        >
+          ✨
+        </div>
+        <div
+          class="ramadan-element"
+          style="
+            bottom: 25%;
+            right: 15%;
+            font-size: 25px;
+            opacity: 0.12;
+            animation: twinkle 5s infinite;
+            animation-delay: 1s;
+          "
+        >
+          ✨
+        </div>
+
+        <div class="section-stars" id="sectionStars"></div>
+
+        <div class="section-header">
+          <div class="section-header-content">
+            <h2>Ramadan Sweets Collection</h2>
+            <p>Authentic oriental desserts for your blessed iftar table</p>
+          </div>
+          <a href="#" class="see-more-link">See More →</a>
+        </div>
+
+        <div class="products-grid">
+          <!-- Product Card 1 - Qatayef -->
+          <div class="product-card">
+            <div class="product-image-wrapper">
+              <span class="product-emoji">🥟</span>
+            </div>
+            <div class="product-content">
+              <h3 class="product-title">Qatayef Premium</h3>
+              <p class="product-description">
+                Handcrafted qatayef filled with cream, nuts, or cheese. The
+                perfect traditional dessert for iftar celebrations.
+              </p>
+              <div class="product-footer">
+                <span class="product-price">EGP 120</span>
+                <div class="product-rating">
+                  ⭐⭐⭐⭐⭐ <span style="color: #666">(342)</span>
+                </div>
+              </div>
+              <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
+          </div>
+
+          <!-- Product Card 2 - Kunafa -->
+          <div class="product-card">
+            <div class="product-image-wrapper">
+              <span class="product-emoji">🧀</span>
+            </div>
+            <div class="product-content">
+              <h3 class="product-title">Kunafa Nabulsi</h3>
+              <p class="product-description">
+                Crispy golden kunafa layers with sweet cheese filling and sugar
+                syrup. A Ramadan favorite dessert.
+              </p>
+              <div class="product-footer">
+                <span class="product-price">EGP 150</span>
+                <div class="product-rating">
+                  ⭐⭐⭐⭐⭐ <span style="color: #666">(528)</span>
+                </div>
+              </div>
+              <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
+          </div>
+
+          <!-- Product Card 3 - Basbousa -->
+          <div class="product-card">
+            <div class="product-image-wrapper">
+              <span class="product-emoji">🍰</span>
+            </div>
+            <div class="product-content">
+              <h3 class="product-title">Basbousa with Cream</h3>
+              <p class="product-description">
+                Soft semolina cake soaked in syrup, topped with fresh cream and
+                almonds. Traditional oriental delight.
+              </p>
+              <div class="product-footer">
+                <span class="product-price">EGP 95</span>
+                <div class="product-rating">
+                  ⭐⭐⭐⭐⭐ <span style="color: #666">(298)</span>
+                </div>
+              </div>
+              <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
+          </div>
+
+          <!-- Product Card 4 - Baklava -->
+          <div class="product-card">
+            <div class="product-image-wrapper">
+              <span class="product-emoji">🥐</span>
+            </div>
+            <div class="product-content">
+              <h3 class="product-title">Baklava Assorted Box</h3>
+              <p class="product-description">
+                Delicate phyllo pastry layers filled with pistachios, walnuts,
+                and cashews. Perfect gift box for Ramadan.
+              </p>
+              <div class="product-footer">
+                <span class="product-price">EGP 280</span>
+                <div class="product-rating">
+                  ⭐⭐⭐⭐⭐ <span style="color: #666">(456)</span>
+                </div>
+              </div>
+              <button class="add-to-cart-btn">Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Order Section -->
+      <div class="custom-order-section">
+        <div class="floating-element floating-element-1">🎂</div>
+        <div class="floating-element floating-element-2">🍰</div>
+
+        <div class="custom-order-content">
+          <div class="custom-order-text">
+            <span class="custom-order-badge">Bespoke Creations</span>
+            <h2>Create Your <span>Dream Cake</span></h2>
+            <p>
+              Elevate your celebrations with our premium custom cake service.
+              From elegant wedding cakes to whimsical birthday designs, our
+              master pastry chefs bring your vision to life with exquisite
+              craftsmanship and unparalleled attention to detail.
+            </p>
+
+            <div class="custom-features">
+              <div class="custom-feature">
+                <div class="custom-feature-icon">✓</div>
+                <span>Premium Ingredients</span>
+              </div>
+              <div class="custom-feature">
+                <div class="custom-feature-icon">✓</div>
+                <span>Personalized Design</span>
+              </div>
+              <div class="custom-feature">
+                <div class="custom-feature-icon">✓</div>
+                <span>Expert Pastry Chefs</span>
+              </div>
+              <div class="custom-feature">
+                <div class="custom-feature-icon">✓</div>
+                <span>Free Consultation</span>
+              </div>
+            </div>
+
+            <div class="custom-order-buttons">
+              <button class="custom-order-btn">Start Your Order</button>
+              <button class="custom-order-btn custom-order-btn-secondary">
+                View Gallery
+              </button>
+            </div>
+          </div>
+
+          <div class="custom-order-image">
+            <div class="custom-order-image-placeholder">
+              <span class="animate-up-down">🎂</span>
+              <div class="image-decoration decoration-1">🌸</div>
+              <div class="image-decoration decoration-2">✨</div>
+              <div class="image-decoration decoration-3">🍓</div>
+              <div class="image-decoration decoration-4">🌸</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs Section -->
+      <div class="tabs-section">
+        <div class="tabs-header">
+          <h2>Explore Our Collection</h2>
+          <p>Discover our finest sweets across different categories</p>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tabs-nav">
+          <button class="tab-btn active" data-tab="bestseller">
+            <span class="tab-icon">🏆</span>
+            Best Seller
+          </button>
+          <button class="tab-btn" data-tab="newarrival">
+            <span class="tab-icon">✨</span>
+            New Arrival
+          </button>
+          <button class="tab-btn" data-tab="sale">
+            <span class="tab-icon">🔥</span>
+            Sale
+          </button>
+        </div>
+
+        <!-- Best Seller Tab Content -->
+        <div class="tab-content active" id="bestseller">
+          <div class="tab-products-grid">
+            <!-- Product 1 -->
+            <div class="tab-product-card">
+              <span class="tab-product-badge badge-bestseller"
+                >Best Seller</span
+              >
+              <div class="tab-product-image">
+                <span class="tab-product-emoji">🧀</span>
+              </div>
+              <div class="tab-product-content">
+                <h3 class="tab-product-title">Kunafa Nabulsi</h3>
+                <p class="tab-product-description">
+                  Crispy golden layers with sweet cheese filling and syrup.
+                </p>
+                <div class="tab-product-footer">
+                  <div class="tab-product-price">
+                    <span class="price-current">EGP 150</span>
+                  </div>
+                  <div class="tab-product-rating">
+                    ⭐⭐⭐⭐⭐ <span style="color: #666">(528)</span>
+                  </div>
+                </div>
+                <button class="tab-add-to-cart">Add to Cart</button>
+              </div>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="tab-product-card">
+              <span class="tab-product-badge badge-bestseller"
+                >Best Seller</span
+              >
+              <div class="tab-product-image">
+                <span class="tab-product-emoji">🥐</span>
+              </div>
+              <div class="tab-product-content">
+                <h3 class="tab-product-title">Baklava Assorted</h3>
+                <p class="tab-product-description">
+                  Delicate phyllo pastry filled with nuts and honey.
+                </p>
+                <div class="tab-product-footer">
+                  <div class="tab-product-price">
+                    <span class="price-current">EGP 280</span>
+                  </div>
+                  <div class="tab-product-rating">
+                    ⭐⭐⭐⭐⭐ <span style="color: #666">(456)</span>
+                  </div>
+                </div>
+                <button class="tab-add-to-cart">Add to Cart</button>
+              </div>
+            </div>
+
+            <!-- Product 3 -->
+            <div class="tab-product-card">
+              <span class="tab-product-badge badge-bestseller"
+                >Best Seller</span
+              >
+              <div class="tab-product-image">
+                <span class="tab-product-emoji">🥟</span>
+              </div>
+              <div class="tab-product-content">
+                <h3 class="tab-product-title">Qatayef Premium</h3>
+                <p class="tab-product-description">
+                  Handcrafted qatayef filled with cream and nuts.
+                </p>
+                <div class="tab-product-footer">
+                  <div class="tab-product-price">
+                    <span class="price-current">EGP 120</span>
+                  </div>
+                  <div class="tab-product-rating">
+                    ⭐⭐⭐⭐⭐ <span style="color: #666">(342)</span>
+                  </div>
+                </div>
+                <button class="tab-add-to-cart">Add to Cart</button>
+              </div>
+            </div>
+
+            <!-- Product 4 -->
+            <div class="tab-product-card">
+              <span class="tab-product-badge badge-bestseller"
+                >Best Seller</span
+              >
+              <div class="tab-product-image">
+                <span class="tab-product-emoji">🍩</span>
+              </div>
+              <div class="tab-product-content">
+                <h3 class="tab-product-title">Luqmat Al Qadi</h3>
+                <p class="tab-product-description">
+                  Golden fried dough balls with date syrup.
+                </p>
+                <div class="tab-product-footer">
+                  <div class="tab-product-price">
+                    <span class="price-current">EGP 85</span>
+                  </div>
+                  <div class="tab-product-rating">
+                    ⭐⭐⭐⭐⭐ <span style="color: #666">(412)</span>
+                  </div>
+                </div>
+                <button class="tab-add-to-cart">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- New Arrival Tab Content -->
+        <div class="tab-content" id="newarrival">
+          <div class="tab-products-grid">
+            <!-- Product 1 -->
+            <div class="tab-product-card">
+              <span class="tab-product-badge badge-new">New</span>
+              <div class="tab-product-image">
+                <span class="tab-product-emoji">🍮</span>
+              </div>
+              <div class="tab-product-content">
+                <h3 class="tab-product-title">Mahalabia Pistachio</h3>
+                <p class="tab-product-description">
+                  Silky milk pudding with rose water and pistachios.
+                </p>
+                <div class="tab-product-footer">
+                  <div class="tab-product-price">
+                    <span class="price-current">EGP 65</span>
+                  </div>
+                  <div class="tab-product-rating">
+                    ⭐⭐⭐⭐⭐ <span style="color: #666">(89)</span>
+                  </div>
+                </div>
+                <button class="tab-add-to-cart">Add to Cart</button>
+              </div>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="tab-product-card">
+              <span class="tab-product-badge badge-new">New</span>
+              <div class="tab-product-image">
+                <span class="tab-product-emoji">🌀</span>
+              </div>
+              <div class="tab-product-content">
+                <h3 class="tab-product-title">Zalabya Special</h3>
+                <p class="tab-product-description">
+                  Crispy spiral-shaped dough soaked in syrup.
+                </p>
+                <div class="tab-product-footer">
+                  <div class="tab-product-price">
+                    <span class="price-current">EGP 75</span>
+                  </div>
+                  <div class="tab-product-rating">
+                    ⭐⭐⭐⭐⭐ <span style="color: #666">(67)</span>
+                  </div>
+                </div>
+                <button class="tab-add-to-cart">Add to Cart</button>
+              </div>
+            </div>
+
+            <!-- Product 3 -->
+            <div class="tab-product-card">
+              <span class="tab-product-badge badge-new">New</span>
+              <div class="tab-product-image">
+                <span class="tab-product-emoji">🥧</span>
+              </div>
+              <div class="tab-product-content">
+                <h3 class="tab-product-title">Um Ali Deluxe</h3>
+                <p class="tab-product-description">
+                  Warm bread pudding with nuts and cream.
+                </p>
+                <div class="tab-product-footer">
+                  <div class="tab-product-price">
+                    <span class="price-current">EGP 110</span>
+                  </div>
+                  <div class="tab-product-rating">
+                    ⭐⭐⭐⭐⭐ <span style="color: #666">(134)</span>
+                  </div>
+                </div>
+                <button class="tab-add-to-cart">Add to Cart</button>
+              </div>
+            </div>
+
+            <!-- Product 4 -->
+            <div class="tab-product-card">
+              <span class="tab-product-badge badge-new">New</span>
+              <div class="tab-product-image">
+                <span class="tab-product-emoji">🍰</span>
+              </div>
+              <div class="tab-product-content">
+                <h3 class="tab-product-title">Basbousa Cream</h3>
+                <p class="tab-product-description">
+                  Semolina cake with cream and almonds.
+                </p>
+                <div class="tab-product-footer">
+                  <div class="tab-product-price">
+                    <span class="price-current">EGP 95</span>
+                  </div>
+                  <div class="tab-product-rating">
+                    ⭐⭐⭐⭐⭐ <span style="color: #666">(156)</span>
+                  </div>
+                </div>
+                <button class="tab-add-to-cart">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sale Tab Content -->
+        <div class="tab-content" id="sale">
+          <div class="tab-products-grid">
+            <!-- Product 1 -->
+            <div class="tab-product-card">
+              <span class="tab-product-badge badge-sale">-25% OFF</span>
+              <div class="tab-product-image">
+                <span class="tab-product-emoji">🎁</span>
+              </div>
+              <div class="tab-product-content">
+                <h3 class="tab-product-title">Oriental Sweets Box</h3>
+                <p class="tab-product-description">
+                  Assorted box with kunafa, baklava, and more.
+                </p>
+                <div class="tab-product-footer">
+                  <div class="tab-product-price">
+                    <span class="price-current">EGP 262</span>
+                    <span class="price-old">EGP 350</span>
+                  </div>
+                  <div class="tab-product-rating">
+                    ⭐⭐⭐⭐⭐ <span style="color: #666">(612)</span>
+                  </div>
+                </div>
+                <button class="tab-add-to-cart">Add to Cart</button>
+              </div>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="tab-product-card">
+              <span class="tab-product-badge badge-sale">-20% OFF</span>
+              <div class="tab-product-image">
+                <span class="tab-product-emoji">🥐</span>
+              </div>
+              <div class="tab-product-content">
+                <h3 class="tab-product-title">Baklava Mix 1kg</h3>
+                <p class="tab-product-description">
+                  Premium baklava variety pack for sharing.
+                </p>
+                <div class="tab-product-footer">
+                  <div class="tab-product-price">
+                    <span class="price-current">EGP 224</span>
+                    <span class="price-old">EGP 280</span>
+                  </div>
+                  <div class="tab-product-rating">
+                    ⭐⭐⭐⭐⭐ <span style="color: #666">(345)</span>
+                  </div>
+                </div>
+                <button class="tab-add-to-cart">Add to Cart</button>
+              </div>
+            </div>
+
+            <!-- Product 3 -->
+            <div class="tab-product-card">
+              <span class="tab-product-badge badge-sale">-30% OFF</span>
+              <div class="tab-product-image">
+                <span class="tab-product-emoji">🧀</span>
+              </div>
+              <div class="tab-product-content">
+                <h3 class="tab-product-title">Kunafa Family Size</h3>
+                <p class="tab-product-description">
+                  Large kunafa tray perfect for gatherings.
+                </p>
+                <div class="tab-product-footer">
+                  <div class="tab-product-price">
+                    <span class="price-current">EGP 105</span>
+                    <span class="price-old">EGP 150</span>
+                  </div>
+                  <div class="tab-product-rating">
+                    ⭐⭐⭐⭐⭐ <span style="color: #666">(423)</span>
+                  </div>
+                </div>
+                <button class="tab-add-to-cart">Add to Cart</button>
+              </div>
+            </div>
+
+            <!-- Product 4 -->
+            <div class="tab-product-card">
+              <span class="tab-product-badge badge-sale">-15% OFF</span>
+              <div class="tab-product-image">
+                <span class="tab-product-emoji">🥟</span>
+              </div>
+              <div class="tab-product-content">
+                <h3 class="tab-product-title">Qatayef Box (12pc)</h3>
+                <p class="tab-product-description">
+                  Dozen qatayef with mixed fillings.
+                </p>
+                <div class="tab-product-footer">
+                  <div class="tab-product-price">
+                    <span class="price-current">EGP 102</span>
+                    <span class="price-old">EGP 120</span>
+                  </div>
+                  <div class="tab-product-rating">
+                    ⭐⭐⭐⭐⭐ <span style="color: #666">(267)</span>
+                  </div>
+                </div>
+                <button class="tab-add-to-cart">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Why Choose Kreaz Section -->
+      <div class="why-choose-section">
+        <!-- Header -->
+        <div class="why-choose-header">
+          <span class="why-choose-badge">Why Choose Us</span>
+          <h2>Why <span>Kreaz Dessert</span>?</h2>
+          <p>
+            Four pillars of excellence that make us your premier choice for
+            oriental sweets
+          </p>
+        </div>
+
+        <!-- Reasons Grid - 4 Key Reasons -->
+        <div class="why-choose-grid">
+          <!-- Reason 1 -->
+          <div class="why-choose-card">
+            <div class="why-choose-icon">🌅</div>
+            <h3>Fresh Daily</h3>
+            <p>
+              Made fresh every morning with the finest ingredients for ultimate
+              taste and quality
+            </p>
+          </div>
+
+          <!-- Reason 2 -->
+          <div class="why-choose-card">
+            <div class="why-choose-icon">🌟</div>
+            <h3>Premium Ingredients</h3>
+            <p>
+              Only the highest quality ingredients sourced from trusted
+              suppliers worldwide
+            </p>
+          </div>
+
+          <!-- Reason 3 -->
+          <div class="why-choose-card">
+            <div class="why-choose-icon">🎨</div>
+            <h3>Custom Designs</h3>
+            <p>
+              Personalized cakes and sweets tailored perfectly to your special
+              occasions
+            </p>
+          </div>
+
+          <!-- Reason 4 -->
+          <div class="why-choose-card">
+            <div class="why-choose-icon">🚀</div>
+            <h3>Fast Delivery</h3>
+            <p>
+              Quick and reliable delivery service ensuring your sweets arrive
+              fresh and on time
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Create floating stars in section background - more stars!
+      const sectionStars = document.getElementById("sectionStars");
+      if (sectionStars) {
+        for (let i = 0; i < 60; i++) {
+          const star = document.createElement("div");
+          star.className = "section-star";
+          star.style.top = Math.random() * 100 + "%";
+          star.style.left = Math.random() * 100 + "%";
+          star.style.animationDelay = Math.random() * 3 + "s";
+          // Vary star sizes
+          const size =
+            Math.random() < 0.3 ? "4px" : Math.random() < 0.6 ? "3px" : "2px";
+          star.style.width = size;
+          star.style.height = size;
+          sectionStars.appendChild(star);
+        }
+      }
+
+      // Create floating stars in general background
+      const starsContainer = document.getElementById("starsContainer");
+      for (let i = 0; i < 30; i++) {
+        const star = document.createElement("div");
+        star.className = "star";
+        star.style.top = Math.random() * 100 + "%";
+        star.style.left = Math.random() * 100 + "%";
+        star.style.animationDelay = Math.random() * 3 + "s";
+        starsContainer.appendChild(star);
+      }
+
+      // Tabs functionality
+      const tabButtons = document.querySelectorAll(".tab-btn");
+      const tabContents = document.querySelectorAll(".tab-content");
+
+      tabButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          // Remove active class from all buttons and contents
+          tabButtons.forEach((btn) => btn.classList.remove("active"));
+          tabContents.forEach((content) => content.classList.remove("active"));
+
+          // Add active class to clicked button
+          button.classList.add("active");
+
+          // Show corresponding tab content
+          const tabId = button.getAttribute("data-tab");
+          document.getElementById(tabId).classList.add("active");
+        });
+      });
+
+      // Add to cart functionality for all buttons
+      document
+        .querySelectorAll(".add-to-cart-btn, .tab-add-to-cart")
+        .forEach((button) => {
+          button.addEventListener("click", function () {
+            const originalText = this.textContent;
+            this.textContent = "✓ Added to Cart!";
+            this.style.background = "linear-gradient(135deg, #4ecca3, #3fb89d)";
+
+            setTimeout(() => {
+              this.textContent = originalText;
+              this.style.background =
+                "linear-gradient(135deg, #d4537c, #e8719d)";
+            }, 2000);
+          });
+        });
+
+      // Smooth scroll for hero button
+      document
+        .querySelector(".hero-btn")
+        .addEventListener("click", function () {
+          document.querySelector(".products-section").scrollIntoView({
+            behavior: "smooth",
+          });
+        });
+
+      // Create footer stars
+      const footerStars = document.getElementById("footerStars");
+      if (footerStars) {
+        for (let i = 0; i < 25; i++) {
+          const star = document.createElement("div");
+          star.className = "footer-star";
+          star.style.top = Math.random() * 100 + "%";
+          star.style.left = Math.random() * 100 + "%";
+          star.style.animationDelay = Math.random() * 3 + "s";
+          footerStars.appendChild(star);
+        }
+      }
+    </script>
+
+    <!-- Instagram Gallery Section -->
+    <div class="instagram-section">
+      <div class="instagram-container">
+        <!-- Luxury Header -->
+        <div class="instagram-header">
+          <div class="instagram-title-decoration">
+            <div class="instagram-line"></div>
+            <div class="instagram-icon-luxury">📷</div>
+            <div class="instagram-line right"></div>
+          </div>
+          <h3>Follow Our Journey</h3>
+          <h2>Sweetness on <span class="highlight">Instagram</span></h2>
+          <p class="instagram-subtitle">
+            Explore our latest creations, behind-the-scenes moments, and daily
+            inspiration from our kitchen
+          </p>
+          <a
+            href="https://instagram.com/kreazdessert"
+            class="instagram-handle-luxury"
+            target="_blank"
+          >
+            📷 @kreazdessert
+          </a>
+        </div>
+
+        <!-- Luxury Masonry Gallery -->
+        <div class="instagram-gallery">
+          <!-- Photo 1 -->
+          <div class="instagram-item">
+            <div class="instagram-placeholder">🍰</div>
+            <div class="instagram-overlay">
+              <span class="instagram-overlay-icon">📷</span>
+              <div class="instagram-stats">
+                <div class="instagram-stat">
+                  <span class="instagram-stat-icon">❤️</span>
+                  <span class="instagram-stat-number">2.4K</span>
+                  <span class="instagram-stat-label">Likes</span>
+                </div>
+                <div class="instagram-stat">
+                  <span class="instagram-stat-icon">💬</span>
+                  <span class="instagram-stat-number">132</span>
+                  <span class="instagram-stat-label">Comments</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo 2 -->
+          <div class="instagram-item">
+            <div class="instagram-placeholder">🎂</div>
+            <div class="instagram-overlay">
+              <span class="instagram-overlay-icon">📷</span>
+              <div class="instagram-stats">
+                <div class="instagram-stat">
+                  <span class="instagram-stat-icon">❤️</span>
+                  <span class="instagram-stat-number">3.8K</span>
+                  <span class="instagram-stat-label">Likes</span>
+                </div>
+                <div class="instagram-stat">
+                  <span class="instagram-stat-icon">💬</span>
+                  <span class="instagram-stat-number">245</span>
+                  <span class="instagram-stat-label">Comments</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo 3 -->
+          <div class="instagram-item">
+            <div class="instagram-placeholder">🧁</div>
+            <div class="instagram-overlay">
+              <span class="instagram-overlay-icon">📷</span>
+              <div class="instagram-stats">
+                <div class="instagram-stat">
+                  <span class="instagram-stat-icon">❤️</span>
+                  <span class="instagram-stat-number">1.9K</span>
+                  <span class="instagram-stat-label">Likes</span>
+                </div>
+                <div class="instagram-stat">
+                  <span class="instagram-stat-icon">💬</span>
+                  <span class="instagram-stat-number">87</span>
+                  <span class="instagram-stat-label">Comments</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo 4 -->
+          <div class="instagram-item">
+            <div class="instagram-placeholder">🍩</div>
+            <div class="instagram-overlay">
+              <span class="instagram-overlay-icon">📷</span>
+              <div class="instagram-stats">
+                <div class="instagram-stat">
+                  <span class="instagram-stat-icon">❤️</span>
+                  <span class="instagram-stat-number">4.2K</span>
+                  <span class="instagram-stat-label">Likes</span>
+                </div>
+                <div class="instagram-stat">
+                  <span class="instagram-stat-icon">💬</span>
+                  <span class="instagram-stat-number">298</span>
+                  <span class="instagram-stat-label">Comments</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo 5 -->
+          <div class="instagram-item">
+            <div class="instagram-placeholder">🥐</div>
+            <div class="instagram-overlay">
+              <span class="instagram-overlay-icon">📷</span>
+              <div class="instagram-stats">
+                <div class="instagram-stat">
+                  <span class="instagram-stat-icon">❤️</span>
+                  <span class="instagram-stat-number">2.7K</span>
+                  <span class="instagram-stat-label">Likes</span>
+                </div>
+                <div class="instagram-stat">
+                  <span class="instagram-stat-icon">💬</span>
+                  <span class="instagram-stat-number">156</span>
+                  <span class="instagram-stat-label">Comments</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo 6 -->
+          <div class="instagram-item">
+            <div class="instagram-placeholder">🧀</div>
+            <div class="instagram-overlay">
+              <span class="instagram-overlay-icon">📷</span>
+              <div class="instagram-stats">
+                <div class="instagram-stat">
+                  <span class="instagram-stat-icon">❤️</span>
+                  <span class="instagram-stat-number">5.1K</span>
+                  <span class="instagram-stat-label">Likes</span>
+                </div>
+                <div class="instagram-stat">
+                  <span class="instagram-stat-icon">💬</span>
+                  <span class="instagram-stat-number">312</span>
+                  <span class="instagram-stat-label">Comments</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo 7 -->
+          <div class="instagram-item">
+            <div class="instagram-placeholder">🥟</div>
+            <div class="instagram-overlay">
+              <span class="instagram-overlay-icon">📷</span>
+              <div class="instagram-stats">
+                <div class="instagram-stat">
+                  <span class="instagram-stat-icon">❤️</span>
+                  <span class="instagram-stat-number">3.3K</span>
+                  <span class="instagram-stat-label">Likes</span>
+                </div>
+                <div class="instagram-stat">
+                  <span class="instagram-stat-icon">💬</span>
+                  <span class="instagram-stat-label">Comments</span>
+                  <span class="instagram-stat-number">198</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo 8 -->
+          <div class="instagram-item">
+            <div class="instagram-placeholder">🍮</div>
+            <div class="instagram-overlay">
+              <span class="instagram-overlay-icon">📷</span>
+              <div class="instagram-stats">
+                <div class="instagram-stat">
+                  <span class="instagram-stat-icon">❤️</span>
+                  <span class="instagram-stat-number">2.1K</span>
+                  <span class="instagram-stat-label">Likes</span>
+                </div>
+                <div class="instagram-stat">
+                  <span class="instagram-stat-icon">💬</span>
+                  <span class="instagram-stat-number">124</span>
+                  <span class="instagram-stat-label">Comments</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Luxury CTA -->
+        <div class="instagram-cta-wrapper">
+          <p class="instagram-cta-text">
+            Join our community and be part of the sweetest moments
+          </p>
+          <a
+            href="https://instagram.com/kreazdessert"
+            class="instagram-cta-luxury"
+            target="_blank"
+          >
+            <span class="instagram-cta-icon-lux">📷</span>
+            <span>Follow @kreazdessert</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-stars" id="footerStars"></div>
+
+      <div class="footer-content">
+        <!-- About Column -->
+        <div class="footer-column footer-about">
+          <div class="footer-logo">
+            <svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient
+                  id="pinkGradientFooter"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="100%"
+                >
+                  <stop
+                    offset="0%"
+                    style="stop-color: #d4537c; stop-opacity: 1"
+                  />
+                  <stop
+                    offset="100%"
+                    style="stop-color: #e8719d; stop-opacity: 1"
+                  />
+                </linearGradient>
+              </defs>
+              <rect
+                width="200"
+                height="80"
+                fill="url(#pinkGradientFooter)"
+                rx="10"
+              />
+              <circle cx="40" cy="35" r="15" fill="white" />
+              <ellipse cx="40" cy="50" rx="8" ry="4" fill="white" />
+              <text
+                x="70"
+                y="45"
+                font-family="Arial, sans-serif"
+                font-size="28"
+                font-weight="bold"
+                fill="white"
+              >
+                KREAZ
+              </text>
+              <text
+                x="70"
+                y="65"
+                font-family="Arial, sans-serif"
+                font-size="12"
+                fill="white"
+                opacity="0.9"
+              >
+                DESSERT
+              </text>
+              <rect x="70" y="50" width="60" height="2" fill="#90EE90" />
+            </svg>
+          </div>
+          <p>
+            Crafting the finest oriental sweets since 2007. Kreaz Dessert brings
+            you authentic flavors, premium ingredients, and unforgettable taste
+            experiences across Egypt.
+          </p>
+
+          <div class="footer-social">
+            <a href="#" class="social-link">📘</a>
+            <a href="#" class="social-link">📷</a>
+            <a href="#" class="social-link">🐦</a>
+            <a href="#" class="social-link">📍</a>
+          </div>
+        </div>
+
+        <!-- Quick Links Column -->
+        <div class="footer-column">
+          <h3>Quick Links</h3>
+          <ul class="footer-links">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Products</a></li>
+            <li><a href="#">Branches</a></li>
+            <li><a href="#">Custom Orders</a></li>
+            <li><a href="#">Blog</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact Column -->
+        <div class="footer-column">
+          <h3>Contact Us</h3>
+          <ul class="footer-contact">
+            <li>
+              <span class="contact-icon">📞</span>
+              <span>(956) 238-7908</span>
+            </li>
+            <li>
+              <span class="contact-icon">✉️</span>
+              <span>info@kreaz.com</span>
+            </li>
+            <li>
+              <span class="contact-icon">📍</span>
+              <span>Main Branch, Downtown Cairo, Egypt</span>
+            </li>
+            <li>
+              <span class="contact-icon">🕐</span>
+              <span>9:00 AM - 11:00 PM</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Newsletter Column -->
+        <div class="footer-column footer-newsletter">
+          <h3>Newsletter</h3>
+          <p>Subscribe to get special offers, updates, and exclusive deals!</p>
+          <form class="newsletter-form">
+            <input
+              type="email"
+              class="newsletter-input"
+              placeholder="Your email address"
+              required
+            />
+            <button type="submit" class="newsletter-btn">Subscribe</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Footer Bottom -->
+      <div class="footer-bottom">
+        <div class="footer-bottom-content">
+          <div class="copyright">
+            © 2026 <span>Kreaz Dessert</span>. All rights reserved.
+          </div>
+          <div class="payment-methods">
+            <span>We Accept:</span>
+            <div class="payment-icon">💳</div>
+            <div class="payment-icon">💰</div>
+            <div class="payment-icon">📱</div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
