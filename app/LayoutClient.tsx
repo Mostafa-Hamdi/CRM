@@ -1,5 +1,5 @@
 "use client";
-import Layout from "./layout components/Layout";
+import Layout from "./layout-components/Layout";
 import { useSelector } from "react-redux";
 import Login from "./components/Login";
 import { PropsWithChildren } from "react";
