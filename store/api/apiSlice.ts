@@ -145,8 +145,19 @@ export const api = createApi({
     //   }),
     //   invalidatesTags: ["Subscriptions"],
     // }),
+    toggleUserStatus: builder.mutation<void, { id: number; body: boolean }>({
+      query: ({ id, body }) => ({
+        url: `/users/${id}/status`,
+        method: "PUT",
+        body: JSON.stringify(body), // send raw true/false
+        headers: {
+          "Content-Type": "application/json", // make sure backend interprets it as JSON
+        },
+      }),
+      invalidatesTags: ["Users"],
+    }),
 
-    getUsers: builder.query<void, void>({
+    getUsers: builder.query<any, any>({
       query: () => "/users",
       providesTags: ["Users"],
     }),
@@ -158,4 +169,5 @@ export const {
   useLogoutMutation,
   useGetCurrentUserQuery,
   useGetUsersQuery,
+  useToggleUserStatusMutation,
 } = api;
