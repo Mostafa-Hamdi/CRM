@@ -136,7 +136,10 @@ export const api = createApi({
       query: ({ id, status }) => ({
         url: `/users/${id}/status`,
         method: "PUT",
-        body: status, // ✅ raw true / false
+        body: JSON.stringify(status),
+        headers: {
+          "Content-Type": "application/json",
+        },
       }),
       invalidatesTags: ["Users"],
     }),
@@ -145,7 +148,10 @@ export const api = createApi({
       query: (body) => ({
         url: "/users",
         method: "POST",
-        body,
+        body: JSON.stringify(body),
+        headers: {
+          "Content-Type": "application/json",
+        },
       }),
       invalidatesTags: ["Users"],
     }),
