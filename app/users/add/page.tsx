@@ -17,6 +17,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useAddUserMutation, useGetRolesQuery } from "@/store/api/apiSlice";
+import Link from "next/link";
 
 // Validation Schema
 const schema = yup
@@ -99,13 +100,13 @@ const Page = () => {
       <div className="fixed bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-indigo-400/20 to-blue-400/20 rounded-full blur-3xl -z-10" />
 
       <div className="max-w-5xl mx-auto space-y-6">
-        <button
-          onClick={() => window.history.back()}
+        <Link
+          href={"/users"}
           className="group flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur-xl border border-white/80 rounded-2xl hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-blue-500/30"
         >
           <ArrowLeft className="w-5 h-5" />
           <span className="font-bold">Back to Users</span>
-        </button>
+        </Link>
 
         <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 sm:p-8 shadow-xl shadow-blue-500/10">
           <div className="flex items-start gap-4">
