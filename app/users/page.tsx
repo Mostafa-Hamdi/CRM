@@ -9,6 +9,7 @@ import {
   Users,
   Edit2,
   Sparkles,
+  Key,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -26,7 +27,7 @@ interface User {
 
 const Page = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const { data, isLoading } = useGetUsersQuery({});
+  const { data, isLoading } = useGetUsersQuery();
   const [toggleUserStatus] = useToggleUserStatusMutation();
   // Filter users based on search query
   const filteredUsers = useMemo(() => {
@@ -41,9 +42,9 @@ const Page = () => {
     );
   }, [data, searchQuery]);
 
-  const handleToggleStatus = async (id: number, body: boolean) => {
+  const handleToggleStatus = async (id: number, status: boolean) => {
     try {
-      await toggleUserStatus({ id, body }).unwrap();
+      await toggleUserStatus({ id, status }).unwrap();
     } catch (Err) {
       console.log(Err);
     }
@@ -297,11 +298,18 @@ const Page = () => {
                       <td className="px-6 py-5">
                         <div className="flex items-center justify-center gap-2">
                           <Link
-                            href={`/users/${user?.id}`}
+                            href={`/users/${user?.id}/reset-password`}
                             className="cursor-pointer p-2.5 text-blue-600 hover:text-white bg-blue-50 hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 group"
                             title="Edit user"
                           >
                             <Edit2 className="w-5 h-5" />
+                          </Link>
+                          <Link
+                            href={`/users/${user.id}/reset-password`}
+                            className="cursor-pointer p-2.5 text-blue-600 hover:text-white bg-blue-100 hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/50 group"
+                            title="Reset password"
+                          >
+                            <Key className="w-5 h-5" />
                           </Link>
                         </div>
                       </td>

@@ -1,6 +1,5 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { api } from "./api/apiSlice";
-import subscriptionReducer from "./slices/subscription";
 import authReducer from "./slices/auth";
 
 import {
@@ -17,7 +16,6 @@ import storage from "redux-persist/lib/storage";
 
 const rootReducer = combineReducers({
   auth: authReducer,
-  subscription: subscriptionReducer,
   [api.reducerPath]: api.reducer,
 });
 

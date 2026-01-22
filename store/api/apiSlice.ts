@@ -5,38 +5,48 @@ import {
   FetchArgs,
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
-import { setToken, logout, User } from "../slices/auth";
-import type { RootState } from "../store"; // Import your store type
+import { setAuth, setToken, logout } from "../slices/auth";
+import type { RootState } from "../store";
+
+/* ======================
+   Types
+====================== */
 
 interface LoginResponse {
-  user: User;
   token: string;
+  fullName: string;
+  email: string;
+  roles: string[];
+  permissions: string[];
 }
 
 interface RefreshResponse {
   accessToken: string;
 }
 
-// 1️⃣ Base fetch with headers
+/* ======================
+   Base Query
+====================== */
+
 const baseQuery = fetchBaseQuery({
   baseUrl: "https://jacelyn-undelineable-maynard.ngrok-free.dev/api",
   prepareHeaders: (headers, { getState }) => {
-    const state = getState() as RootState;
-    const token = state.auth.token;
+    const token = (getState() as RootState).auth.token;
 
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);
     }
 
-    // Required for ngrok to bypass browser warning
     headers.set("ngrok-skip-browser-warning", "true");
-
     return headers;
   },
-  credentials: "include", // send cookies (for refresh token)
+  credentials: "include",
 });
 
-// 2️⃣ Wrapper to handle 401 + refresh token
+/* ======================
+   Reauth Wrapper
+====================== */
+
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
@@ -44,38 +54,26 @@ const baseQueryWithReauth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
 
-  // Check if we got 401 and it's not the refresh endpoint itself
   const isRefreshEndpoint =
     (typeof args === "string" ? args : args.url) === "/auth/refresh";
 
-  if (result?.error && result.error.status === 401 && !isRefreshEndpoint) {
-    try {
-      // Attempt to refresh the access token
-      const refreshResult = await baseQuery(
-        { url: "/auth/refresh", method: "POST" },
-        api,
-        extraOptions,
-      );
+  if (result.error?.status === 401 && !isRefreshEndpoint) {
+    const refreshResult = await baseQuery(
+      { url: "/auth/refresh", method: "POST" },
+      api,
+      extraOptions,
+    );
 
-      if (refreshResult.data) {
-        const data = refreshResult.data as RefreshResponse;
+    if (refreshResult.data) {
+      const { accessToken } = refreshResult.data as RefreshResponse;
 
-        if (data?.accessToken) {
-          // Store new token
-          api.dispatch(setToken(data.accessToken));
-
-          // Retry the original request with new token
-          result = await baseQuery(args, api, extraOptions);
-        } else {
-          // No access token in response → logout
-          api.dispatch(logout());
-        }
+      if (accessToken) {
+        api.dispatch(setToken(accessToken));
+        result = await baseQuery(args, api, extraOptions);
       } else {
-        // Refresh failed → logout
         api.dispatch(logout());
       }
-    } catch (e) {
-      console.error("Refresh token request failed:", e);
+    } else {
       api.dispatch(logout());
     }
   }
@@ -83,12 +81,17 @@ const baseQueryWithReauth: BaseQueryFn<
   return result;
 };
 
-// 3️⃣ API definition
+/* ======================
+   API Slice
+====================== */
+
 export const api = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["Subscriptions", "Login", "Logout", "Users", "Roles"],
+  tagTypes: ["Users", "Roles"],
   endpoints: (builder) => ({
+    /* ---------- AUTH ---------- */
+
     login: builder.mutation<LoginResponse, { email: string; password: string }>(
       {
         query: (body) => ({
@@ -96,16 +99,14 @@ export const api = createApi({
           method: "POST",
           body,
         }),
-        async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        async onQueryStarted(_, { dispatch, queryFulfilled }) {
           try {
             const { data } = await queryFulfilled;
-            // Store token in Redux state
-            dispatch(setToken(data.token));
-          } catch (error) {
-            console.error("Login failed:", error);
+            dispatch(setAuth(data));
+          } catch {
+            // handled by UI
           }
         },
-        invalidatesTags: ["Login"],
       },
     ),
 
@@ -114,70 +115,61 @@ export const api = createApi({
         url: "/auth/logout",
         method: "POST",
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          await queryFulfilled;
-        } catch (error) {
-          console.error("Logout request failed:", error);
-        } finally {
-          // Always clear state, even if server request fails
-          dispatch(api.util.resetApiState());
-          dispatch(logout());
-        }
+      async onQueryStarted(_, { dispatch }) {
+        dispatch(api.util.resetApiState());
+        dispatch(logout());
       },
-      invalidatesTags: ["Logout"],
     }),
 
-    // Example: Protected endpoint
-    getCurrentUser: builder.query<User, void>({
+    getCurrentUser: builder.query<LoginResponse, void>({
       query: () => "/auth/me",
     }),
 
-    // Uncomment when ready
-    // createSubscription: builder.mutation<
-    //   any,
-    //   { planId: number; addons?: number[] }
-    // >({
-    //   query: (body) => ({
-    //     url: "/subscribe-test",
-    //     method: "POST",
-    //     body,
-    //   }),
-    //   invalidatesTags: ["Subscriptions"],
-    // }),
-    toggleUserStatus: builder.mutation<void, { id: number; body: boolean }>({
-      query: ({ id, body }) => ({
+    /* ---------- USERS ---------- */
+
+    getUsers: builder.query<any[], void>({
+      query: () => "/users",
+      providesTags: ["Users"],
+    }),
+
+    toggleUserStatus: builder.mutation<void, { id: number; status: boolean }>({
+      query: ({ id, status }) => ({
         url: `/users/${id}/status`,
         method: "PUT",
-        body: JSON.stringify(body), // send raw true/false
-        headers: {
-          "Content-Type": "application/json", // make sure backend interprets it as JSON
-        },
-      }),
-      invalidatesTags: ["Users"],
-    }),
-    addUser: builder.mutation<void, any>({
-      query: (body) => ({
-        url: `/users`,
-        method: "POST",
-        body: JSON.stringify(body),
-        headers: {
-          "Content-Type": "application/json", // make sure backend interprets it as JSON
-        },
+        body: status, // ✅ raw true / false
       }),
       invalidatesTags: ["Users"],
     }),
 
-    getUsers: builder.query<any, any>({
-      query: () => "/users",
-      providesTags: ["Users"],
+    addUser: builder.mutation<void, any>({
+      query: (body) => ({
+        url: "/users",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Users"],
     }),
-    getRoles: builder.query<any, void>({
+
+    resetPass: builder.mutation<void, { id: number; newPassword: string }>({
+      query: ({ id, newPassword }) => ({
+        url: `/users/${id}/reset-password`,
+        method: "PUT",
+        body: { newPassword }, // ✅ correct shape
+      }),
+    }),
+
+    /* ---------- ROLES ---------- */
+
+    getRoles: builder.query<any[], void>({
       query: () => "/roles",
       providesTags: ["Roles"],
     }),
   }),
 });
+
+/* ======================
+   Hooks
+====================== */
 
 export const {
   useLoginMutation,
@@ -187,4 +179,5 @@ export const {
   useToggleUserStatusMutation,
   useGetRolesQuery,
   useAddUserMutation,
+  useResetPassMutation,
 } = api;
