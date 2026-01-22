@@ -102,7 +102,7 @@ const Page = () => {
       <div className="max-w-5xl mx-auto space-y-6">
         <Link
           href={"/users"}
-          className="group flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur-xl border border-white/80 rounded-2xl hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-blue-500/30"
+          className="cursor-pointer group flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur-xl border border-white/80 rounded-2xl hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-blue-500/30"
         >
           <ArrowLeft className="w-5 h-5" />
           <span className="font-bold">Back to Users</span>
@@ -265,7 +265,7 @@ const Page = () => {
                               field.onChange(role.id);
                               setSelectedRole(role.id);
                             }}
-                            className={`relative p-4 rounded-xl border-2 transition-all duration-300 font-bold text-sm ${
+                            className={`cursor-pointer relative p-4 rounded-xl border-2 transition-all duration-300 font-bold text-sm ${
                               isSelected
                                 ? "bg-gradient-to-r from-blue-600 to-cyan-600 border-blue-600 text-white shadow-xl shadow-blue-500/40 scale-105"
                                 : "bg-white/80 border-gray-200 text-gray-700 hover:border-blue-400 hover:shadow-lg"
@@ -295,7 +295,7 @@ const Page = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="group relative cursor-pointer flex-1 flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 text-white font-semibold rounded-2xl hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 hover:scale-105 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                className="cursor-pointer group relative cursor-pointer flex-1 flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 text-white font-semibold rounded-2xl hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 hover:scale-105 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                 {isSubmitting ? (
@@ -317,7 +317,7 @@ const Page = () => {
                   reset();
                   setSelectedRole(undefined);
                 }}
-                className="flex-1 sm:flex-none px-8 py-4 bg-white/80 backdrop-blur-xl border-2 border-gray-200 text-gray-700 font-semibold rounded-2xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 hover:shadow-lg"
+                className="cursor-pointer flex-1 sm:flex-none px-8 py-4 bg-white/80 backdrop-blur-xl border-2 border-gray-200 text-gray-700 font-semibold rounded-2xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 hover:shadow-lg"
               >
                 Reset Form
               </button>
