@@ -102,7 +102,7 @@ const Page = () => {
       <div className="max-w-5xl mx-auto space-y-6">
         <Link
           href={"/users"}
-          className="cursor-pointer group flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur-xl border border-white/80 rounded-2xl hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-blue-500/30"
+          className="cursor-pointer group w-fit flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur-xl border border-white/80 rounded-2xl hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-blue-500/30"
         >
           <ArrowLeft className="w-5 h-5" />
           <span className="font-bold">Back to Users</span>
