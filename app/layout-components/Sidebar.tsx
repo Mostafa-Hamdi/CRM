@@ -72,7 +72,7 @@ const Sidebar = ({ sidebarOpen }: any) => {
     {
       title: "System",
       items: [
-        { icon: UserCircle, label: "Users", link: "/dashboard/users" },
+        { icon: UserCircle, label: "Users", link: "/users" },
         { icon: Shield, label: "Roles", link: "/dashboard/roles" },
         { icon: Settings, label: "Settings", link: "/dashboard/settings" },
         { icon: UserCircle2, label: "Profile", link: "/dashboard/profile" },

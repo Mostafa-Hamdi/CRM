@@ -87,7 +87,7 @@ const baseQueryWithReauth: BaseQueryFn<
 export const api = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["Subscriptions", "Login", "Logout", "Users"],
+  tagTypes: ["Subscriptions", "Login", "Logout", "Users", "Roles"],
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, { email: string; password: string }>(
       {
@@ -156,10 +156,25 @@ export const api = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
+    addUser: builder.mutation<void, any>({
+      query: (body) => ({
+        url: `/users`,
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: {
+          "Content-Type": "application/json", // make sure backend interprets it as JSON
+        },
+      }),
+      invalidatesTags: ["Users"],
+    }),
 
     getUsers: builder.query<any, any>({
       query: () => "/users",
       providesTags: ["Users"],
+    }),
+    getRoles: builder.query<any, void>({
+      query: () => "/roles",
+      providesTags: ["Roles"],
     }),
   }),
 });
@@ -170,4 +185,6 @@ export const {
   useGetCurrentUserQuery,
   useGetUsersQuery,
   useToggleUserStatusMutation,
+  useGetRolesQuery,
+  useAddUserMutation,
 } = api;
