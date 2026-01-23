@@ -1,6 +1,5 @@
 import {
   Home,
-  ShoppingCart,
   Package,
   TrendingUp,
   Archive,
@@ -16,6 +15,10 @@ import {
   Settings,
   UserCircle2,
   LogOut,
+  Grid,
+  Boxes,
+  BoxesIcon,
+  GraduationCap,
 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import Link from "next/link";
@@ -34,8 +37,8 @@ const Sidebar = ({ sidebarOpen }: any) => {
       title: "Main",
       items: [
         { icon: Home, label: "Dashboard", link: "/dashboard" },
-        { icon: ShoppingCart, label: "Orders", link: "/dashboard/orders" },
-        { icon: Package, label: "Products", link: "/dashboard/products" },
+        { icon: BoxesIcon, label: "Categories", link: "/categories" },
+        { icon: GraduationCap, label: "Courses", link: "/courses" },
         {
           icon: TrendingUp,
           label: "Stock Movement",

@@ -88,7 +88,7 @@ const baseQueryWithReauth: BaseQueryFn<
 export const api = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["Users", "Roles"],
+  tagTypes: ["Users", "Roles", "Categories", "Courses"],
   endpoints: (builder) => ({
     /* ---------- AUTH ---------- */
 
@@ -170,6 +170,30 @@ export const api = createApi({
       query: () => "/roles",
       providesTags: ["Roles"],
     }),
+    // Categories
+    getCategories: builder.query<any[], void>({
+      query: () => "/categories",
+      providesTags: ["Categories"],
+    }),
+    deleteCategory: builder.mutation<void, { id: number }>({
+      query: ({ id }) => ({
+        url: `/categories/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Categories"],
+    }),
+    // Courses
+    getCourses: builder.query<any[], void>({
+      query: () => "/courses",
+      providesTags: ["Courses"],
+    }),
+    deleteCourse: builder.mutation<void, { id: number }>({
+      query: ({ id }) => ({
+        url: `/courses/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Courses"],
+    }),
   }),
 });
 
@@ -186,4 +210,8 @@ export const {
   useGetRolesQuery,
   useAddUserMutation,
   useResetPassMutation,
+  useGetCategoriesQuery,
+  useDeleteCategoryMutation,
+  useGetCoursesQuery,
+  useDeleteCourseMutation,
 } = api;
