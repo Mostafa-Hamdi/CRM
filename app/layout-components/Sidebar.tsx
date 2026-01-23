@@ -20,6 +20,7 @@ import {
   BoxesIcon,
   GraduationCap,
   UserCheck,
+  UserPlus,
 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import Link from "next/link";
@@ -46,9 +47,9 @@ const Sidebar = ({ sidebarOpen }: any) => {
           link: "/enrollments",
         },
         {
-          icon: Archive,
-          label: "Reserved Quantity",
-          link: "/dashboard/reserved-quantity",
+          icon: UserPlus,
+          label: "Leads",
+          link: "/leads",
         },
         { icon: Activity, label: "Activities", link: "/dashboard/activities" },
       ],
