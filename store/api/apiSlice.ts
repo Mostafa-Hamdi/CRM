@@ -88,7 +88,7 @@ const baseQueryWithReauth: BaseQueryFn<
 export const api = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["Users", "Roles", "Categories", "Courses"],
+  tagTypes: ["Users", "Roles", "Categories", "Courses", "Enrollments"],
   endpoints: (builder) => ({
     /* ---------- AUTH ---------- */
 
@@ -194,6 +194,24 @@ export const api = createApi({
       }),
       invalidatesTags: ["Courses"],
     }),
+    // Enrollments
+    getEnrollments: builder.query<any[], void>({
+      query: () => "/enrollments",
+      providesTags: ["Enrollments"],
+    }),
+    getFilteredEnrollments: builder.mutation<any, { statusId: number }>({
+      query: ({ statusId }) => ({
+        url: `/enrollments?status=${statusId}`,
+        method: "GET",
+      }),
+    }),
+    deleteEnrollment: builder.mutation<void, { id: number }>({
+      query: ({ id }) => ({
+        url: `/enrollments/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Enrollments"],
+    }),
   }),
 });
 
@@ -214,4 +232,7 @@ export const {
   useDeleteCategoryMutation,
   useGetCoursesQuery,
   useDeleteCourseMutation,
+  useGetEnrollmentsQuery,
+  useGetFilteredEnrollmentsMutation,
+  useDeleteEnrollmentMutation,
 } = api;
