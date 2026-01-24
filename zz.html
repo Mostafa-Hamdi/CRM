@@ -48,189 +48,156 @@ function add_category_to_empty_heading($content, $widget) {
 }
 
 
-// ============================================
-// ARABIC TRANSLATIONS
-// ============================================
-
-// add_filter('gettext', 'complete_arabic_translations', 999, 3);
-// add_filter('gettext_with_context', 'complete_arabic_translations', 999, 3);
-// add_filter('ngettext', 'complete_arabic_translations', 999, 3);
-
-// function complete_arabic_translations($translated, $text, $domain) {
-    
-//     if (get_locale() != 'ar') {
-//         return $translated;
-//     }
-    
-//     $translations = array(
-//         // Product page
-//         'People watching this product now!' => 'يشاهد الناس هذا المنتج الآن!',
-        
-//         // Filter widgets
-//         'Filter By Price' => 'التصفية حسب السعر',
-//         'Filter by Price' => 'التصفية حسب السعر',
-//         'Filter by price' => 'التصفية حسب السعر',
-//         'Stock Status' => 'حالة المخزون',
-//         'Stock status' => 'حالة المخزون',
-//         'By Weight' => 'حسب الوزن',
-        
-//         // Checkout headings
-//         'Your Order' => 'طلبك',
-//         'Your order' => 'طلبك',
-//         'Payment Information' => 'معلومات الدفع',
-//         'Payment information' => 'معلومات الدفع',
-//         'Billing Details' => 'تفاصيل الفاتورة',
-//         'Billing details' => 'تفاصيل الفاتورة',
-//         'Billing & Shipping' => 'الفواتير والشحن',
-//     );
-    
-//     // Force specific strings to stay in English (don't translate them)
-//     $keep_english = array(
-//         'Cash on delivery',
-//         'Pay with cash upon delivery',
-//         'Pay with cash upon delivery.',
-//         'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our',
-//     );
-    
-//     $text_trimmed = trim($text);
-    
-//     // If this text should stay in English, return original
-//     if (in_array($text_trimmed, $keep_english)) {
-//         return $text;
-//     }
-    
-//     // Otherwise translate to Arabic
-//     if (isset($translations[$text_trimmed])) {
-//         return $translations[$text_trimmed];
-//     }
-    
-//     return $translated;
-// }
-
-// // Widget titles
-// add_filter('widget_title', 'translate_widget_titles_arabic', 10, 3);
-// function translate_widget_titles_arabic($title, $instance = array(), $id_base = '') {
-    
-//     if (get_locale() != 'ar') {
-//         return $title;
-//     }
-    
-//     $translations = array(
-//         'Filter by price' => 'التصفية حسب السعر',
-//         'Filter by Price' => 'التصفية حسب السعر',
-//         'Filter By Price' => 'التصفية حسب السعر',
-//         'Stock status' => 'حالة المخزون',
-//         'Stock Status' => 'حالة المخزون',
-//         'By Weight' => 'حسب الوزن',
-//     );
-    
-//     if (isset($translations[trim($title)])) {
-//         return $translations[trim($title)];
-//     }
-    
-//     return $title;
-// }
-
-// // Output buffer for checkout - Arabic site
-// add_action('template_redirect', 'translate_hardcoded_checkout_strings');
-// function translate_hardcoded_checkout_strings() {
-    
-//     if (!is_checkout()) {
-//         return;
-//     }
-    
-//     ob_start(function($buffer) {
-        
-//         // On Arabic site
-//         if (get_locale() == 'ar') {
-//             $replacements = array(
-//                 '>Your Order<' => '>طلبك<',
-//                 '>Payment Information<' => '>معلومات الدفع<',
-//                 '>Billing Details<' => '>تفاصيل الفاتورة<',
-//                 '>Billing details<' => '>تفاصيل الفاتورة<',
-//             );
-//         } else {
-//             // On English site - force Arabic back to English
-//             $replacements = array(
-//                 'الدفع عند الاستلام' => 'Cash on delivery',
-//                 '>الدفع عند الاستلام<' => '>Cash on delivery<',
-//                 'ادفع نقداً عند الاستلام.' => 'Pay with cash upon delivery.',
-//                 'سيتم استخدام بياناتك الشخصية لمعالجة طلبك، ودعم تجربتك على هذا الموقع الإلكتروني، ولأغراض أخرى موضحة في سياسة الخصوصية الخاصة بنا' => 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our privacy policy',
-//             );
-//         }
-        
-//         return str_replace(array_keys($replacements), array_values($replacements), $buffer);
-//     });
-// }
-
-// Handle AJAX updates
-// add_filter('woocommerce_update_order_review_fragments', 'handle_ajax_fragments', 9999);
-// function handle_ajax_fragments($fragments) {
-    
-//     foreach ($fragments as $key => $html) {
-        
-//         // On Arabic site
-//         if (get_locale() == 'ar') {
-//             $replacements = array(
-//                 '>Your Order<' => '>طلبك<',
-//                 '>Payment Information<' => '>معلومات الدفع<',
-//                 '>Billing Details<' => '>تفاصيل الفاتورة<',
-//                 '>Billing details<' => '>تفاصيل الفاتورة<',
-//             );
-//         } else {
-//             // On English site - force Arabic back to English
-//             $replacements = array(
-// 				'طلبك مؤهل للشحن المجاني!' => 'Your order qualifies for free shipping!',
-//                 'الدفع عند الاستلام' => 'Cash on delivery',
-//                 '>الدفع عند الاستلام<' => '>Cash on delivery<',
-//                 'ادفع نقداً عند الاستلام.' => 'Pay with cash upon delivery.',
-//                 'سيتم استخدام بياناتك الشخصية لمعالجة طلبك، ودعم تجربتك على هذا الموقع الإلكتروني، ولأغراض أخرى موضحة في سياسة الخصوصية الخاصة بنا' => 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our privacy policy',
-				
-//             );
-//         }
-        
-//         $fragments[$key] = str_replace(array_keys($replacements), array_values($replacements), $html);
-//     }
-    
-//     return $fragments;
-// }
-
-// // JavaScript fallback for English site (removes Arabic text if it appears)
-// add_action('wp_footer', 'force_english_on_english_checkout', 9999);
-// function force_english_on_english_checkout() {
-    
-//     // Only on English checkout
-//     if (get_locale() == 'ar' || !is_checkout()) {
-//         return;
-//     }
-//     ?>
-//     <script>
-//     (function($) {
-//         function forceEnglish() {
-//             $('.woocommerce-checkout-payment, .woocommerce-privacy-policy-text').find('*').contents().each(function() {
-//                 if (this.nodeType === 3) {
-//                     this.textContent = this.textContent
-//                         .replace(/الدفع عند الاستلام/g, 'Cash on delivery')
-//                         .replace(/ادفع نقداً عند الاستلام\./g, 'Pay with cash upon delivery.')
-//                         .replace(/سيتم استخدام بياناتك الشخصية لمعالجة طلبك، ودعم تجربتك على هذا الموقع الإلكتروني، ولأغراض أخرى موضحة في سياسة الخصوصية الخاصة بنا/g, 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our privacy policy');
-//                 }
-//             });
-//         }
-        
-//         $(document).ready(forceEnglish);
-//         $(document.body).on('updated_checkout payment_method_selected', forceEnglish);
-        
-//         const observer = new MutationObserver(forceEnglish);
-//         const target = document.querySelector('.woocommerce-checkout');
-//         if (target) {
-//             observer.observe(target, { childList: true, subtree: true });
-//         }
-//     })(jQuery);
-//     </script>
-//     <?php
-// }
-
-
+ ============================================
+ ARABIC TRANSLATIONS
+ ===========================================
+ add_filter('gettext', 'complete_arabic_translations', 999, 3);
+ add_filter('gettext_with_context', 'complete_arabic_translations', 999, 3);
+ add_filter('ngettext', 'complete_arabic_translations', 999, 3)
+ function complete_arabic_translations($translated, $text, $domain) {  
+     if (get_locale() != 'ar') {
+         return $translated;
+     }  
+     $translations = array(
+         // Product page
+         'People watching this product now!' => 'يشاهد الناس هذا المنتج الآن!',      
+         // Filter widgets
+         'Filter By Price' => 'التصفية حسب السعر',
+         'Filter by Price' => 'التصفية حسب السعر',
+         'Filter by price' => 'التصفية حسب السعر',
+         'Stock Status' => 'حالة المخزون',
+         'Stock status' => 'حالة المخزون',
+         'By Weight' => 'حسب الوزن',      
+         // Checkout headings
+         'Your Order' => 'طلبك',
+         'Your order' => 'طلبك',
+         'Payment Information' => 'معلومات الدفع',
+         'Payment information' => 'معلومات الدفع',
+         'Billing Details' => 'تفاصيل الفاتورة',
+         'Billing details' => 'تفاصيل الفاتورة',
+         'Billing & Shipping' => 'الفواتير والشحن',
+     );  
+     // Force specific strings to stay in English (don't translate them)
+     $keep_english = array(
+         'Cash on delivery',
+         'Pay with cash upon delivery',
+         'Pay with cash upon delivery.',
+         'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our',
+     );  
+     $text_trimmed = trim($text);  
+     // If this text should stay in English, return original
+     if (in_array($text_trimmed, $keep_english)) {
+         return $text;
+     }  
+     // Otherwise translate to Arabic
+     if (isset($translations[$text_trimmed])) {
+         return $translations[$text_trimmed];
+     }  
+     return $translated;
+ 
+ // Widget titles
+ add_filter('widget_title', 'translate_widget_titles_arabic', 10, 3);
+ function translate_widget_titles_arabic($title, $instance = array(), $id_base = '') {  
+     if (get_locale() != 'ar') {
+         return $title;
+     }  
+     $translations = array(
+         'Filter by price' => 'التصفية حسب السعر',
+         'Filter by Price' => 'التصفية حسب السعر',
+         'Filter By Price' => 'التصفية حسب السعر',
+         'Stock status' => 'حالة المخزون',
+         'Stock Status' => 'حالة المخزون',
+         'By Weight' => 'حسب الوزن',
+     );  
+     if (isset($translations[trim($title)])) {
+         return $translations[trim($title)];
+     }  
+     return $title;
+ 
+ // Output buffer for checkout - Arabic site
+ add_action('template_redirect', 'translate_hardcoded_checkout_strings');
+ function translate_hardcoded_checkout_strings() {  
+     if (!is_checkout()) {
+         return;
+     }  
+     ob_start(function($buffer) {      
+         // On Arabic site
+         if (get_locale() == 'ar') {
+             $replacements = array(
+                 '>Your Order<' => '>طلبك<',
+                 '>Payment Information<' => '>معلومات الدفع<',
+                 '>Billing Details<' => '>تفاصيل الفاتورة<',
+                 '>Billing details<' => '>تفاصيل الفاتورة<',
+             );
+         } else {
+             // On English site - force Arabic back to English
+             $replacements = array(
+                 'الدفع عند الاستلام' => 'Cash on delivery',
+                 '>الدفع عند الاستلام<' => '>Cash on delivery<',
+                 'ادفع نقداً عند الاستلام.' => 'Pay with cash upon delivery.',
+                 'سيتم استخدام بياناتك الشخصية لمعالجة طلبك، ودعم تجربتك على هذا الموقع الإلكتروني، ولأغراض أخرى موضحة في سياسة الخصوصية الخاصة بنا' => 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our privacy policy',
+             );
+         }      
+         return str_replace(array_keys($replacements), array_values($replacements), $buffer);
+     });
+ 
+ Handle AJAX updates
+ add_filter('woocommerce_update_order_review_fragments', 'handle_ajax_fragments', 9999);
+ function handle_ajax_fragments($fragments) {  
+     foreach ($fragments as $key => $html) {      
+         // On Arabic site
+         if (get_locale() == 'ar') {
+             $replacements = array(
+                 '>Your Order<' => '>طلبك<',
+                 '>Payment Information<' => '>معلومات الدفع<',
+                 '>Billing Details<' => '>تفاصيل الفاتورة<',
+                 '>Billing details<' => '>تفاصيل الفاتورة<',
+             );
+         } else {
+             // On English site - force Arabic back to English
+             $replacements = array(
+ 				'طلبك مؤهل للشحن المجاني!' => 'Your order qualifies for free shipping!',
+                 'الدفع عند الاستلام' => 'Cash on delivery',
+                 '>الدفع عند الاستلام<' => '>Cash on delivery<',
+                 'ادفع نقداً عند الاستلام.' => 'Pay with cash upon delivery.',
+                 'سيتم استخدام بياناتك الشخصية لمعالجة طلبك، ودعم تجربتك على هذا الموقع الإلكتروني، ولأغراض أخرى موضحة في سياسة الخصوصية الخاصة بنا' => 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our privacy policy'				
+             );
+         }      
+         $fragments[$key] = str_replace(array_keys($replacements), array_values($replacements), $html);
+     }  
+     return $fragments;
+ 
+ // JavaScript fallback for English site (removes Arabic text if it appears)
+ add_action('wp_footer', 'force_english_on_english_checkout', 9999);
+ function force_english_on_english_checkout() {  
+     // Only on English checkout
+     if (get_locale() == 'ar' || !is_checkout()) {
+         return;
+     }
+     ?>
+     <script>
+     (function($) {
+         function forceEnglish() {
+             $('.woocommerce-checkout-payment, .woocommerce-privacy-policy-text').find('*').contents().each(function() {
+                 if (this.nodeType === 3) {
+                     this.textContent = this.textContent
+                         .replace(/الدفع عند الاستلام/g, 'Cash on delivery')
+                         .replace(/ادفع نقداً عند الاستلام\./g, 'Pay with cash upon delivery.')
+                         .replace(/سيتم استخدام بياناتك الشخصية لمعالجة طلبك، ودعم تجربتك على هذا الموقع الإلكتروني، ولأغراض أخرى موضحة في سياسة الخصوصية الخاصة بنا/g, 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our privacy policy');
+                 }
+             });
+         }      
+         $(document).ready(forceEnglish);
+         $(document.body).on('updated_checkout payment_method_selected', forceEnglish);      
+         const observer = new MutationObserver(forceEnglish);
+         const target = document.querySelector('.woocommerce-checkout');
+         if (target) {
+             observer.observe(target, { childList: true, subtree: true });
+         }
+     })(jQuery);
+     </script>
+     <?php
+ 
 
 
 

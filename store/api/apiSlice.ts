@@ -230,6 +230,11 @@ export const api = createApi({
       }),
       invalidatesTags: ["Leads"],
     }),
+    getLeadNotes: builder.query<any, { id: number }>({
+      query: ({ id }) => ({
+        url: `/leads/${id}/notes`,
+      }),
+    }),
   }),
 });
 
@@ -256,4 +261,5 @@ export const {
   useGetLeadsQuery,
   useGetFilteredLeadsMutation,
   useDeleteLeadMutation,
+  useGetLeadNotesQuery,
 } = api;

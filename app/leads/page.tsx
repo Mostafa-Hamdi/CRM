@@ -24,6 +24,7 @@ import {
   CheckCircle,
   XCircle,
   Pause,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
@@ -438,6 +439,11 @@ const Page = () => {
                     </th>
                     <th className="px-6 py-5 text-center">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
+                        Notes
+                      </span>
+                    </th>
+                    <th className="px-6 py-5 text-center">
+                      <span className="text-xs font-bold text-white uppercase tracking-wider">
                         Operations
                       </span>
                     </th>
@@ -529,6 +535,19 @@ const Page = () => {
                           <span className="text-gray-700 text-sm font-medium">
                             {formatDate(lead.createdAt)}
                           </span>
+                        </div>
+                      </td>
+
+                      {/* Notes */}
+                      <td className="px-6 py-5">
+                        <div className="flex items-center justify-center">
+                          <Link
+                            href={`/leads/notes/${lead.id}`}
+                            className="cursor-pointer p-2.5 text-amber-600 hover:text-white bg-amber-50 hover:bg-gradient-to-r hover:from-amber-600 hover:to-orange-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/30 group"
+                            title="View notes"
+                          >
+                            <FileText className="w-5 h-5" />
+                          </Link>
                         </div>
                       </td>
 
