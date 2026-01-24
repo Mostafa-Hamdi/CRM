@@ -21,6 +21,7 @@ import {
   GraduationCap,
   UserCheck,
   UserPlus,
+  UserSquare,
 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import Link from "next/link";
@@ -51,7 +52,7 @@ const Sidebar = ({ sidebarOpen }: any) => {
           label: "Leads",
           link: "/leads",
         },
-        { icon: Activity, label: "Activities", link: "/dashboard/activities" },
+        { icon: UserSquare, label: "Students", link: "/students" },
       ],
     },
     {

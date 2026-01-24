@@ -88,7 +88,15 @@ const baseQueryWithReauth: BaseQueryFn<
 export const api = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["Users", "Roles", "Categories", "Courses", "Enrollments", "Leads"],
+  tagTypes: [
+    "Users",
+    "Roles",
+    "Categories",
+    "Courses",
+    "Enrollments",
+    "Leads",
+    "Students",
+  ],
   endpoints: (builder) => ({
     /* ---------- AUTH ---------- */
 
@@ -235,6 +243,25 @@ export const api = createApi({
         url: `/leads/${id}/notes`,
       }),
     }),
+
+    // students
+    getStudents: builder.query<any[], void>({
+      query: () => "/students",
+      providesTags: ["Students"],
+    }),
+    searchStudents: builder.mutation<any[], { name: string }>({
+      query: ({ name }) => ({
+        url: `/students?fullname=${name}`,
+        method: "GET",
+      }),
+    }),
+    deleteStudent: builder.mutation<void, { id: number }>({
+      query: ({ id }) => ({
+        url: `/students/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Students"],
+    }),
   }),
 });
 
@@ -262,4 +289,7 @@ export const {
   useGetFilteredLeadsMutation,
   useDeleteLeadMutation,
   useGetLeadNotesQuery,
+  useGetStudentsQuery,
+  useDeleteStudentMutation,
+  useSearchStudentsMutation,
 } = api;
