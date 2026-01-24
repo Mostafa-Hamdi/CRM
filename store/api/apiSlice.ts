@@ -251,7 +251,7 @@ export const api = createApi({
     }),
     searchStudents: builder.mutation<any[], { name: string }>({
       query: ({ name }) => ({
-        url: `/students?fullname=${name}`,
+        url: `/students/by-name?fullname=${name}`,
         method: "GET",
       }),
     }),
