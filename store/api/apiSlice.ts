@@ -227,6 +227,16 @@ export const api = createApi({
       query: () => "/leads",
       providesTags: ["Leads"],
     }),
+    addLead: builder.mutation<
+      void,
+      { fullName: string; email: string; phone: string; source: string }
+    >({
+      query: ({ fullName, email, phone, source }) => ({
+        url: `/leads`,
+        method: "POST",
+        body: { fullName, phone, email, source }, // ✅ correct shape
+      }),
+    }),
     getFilteredLeads: builder.mutation<any, { statusId: number }>({
       query: ({ statusId }) => ({
         url: `/leads?status=${statusId}`,
@@ -306,4 +316,5 @@ export const {
   useDeleteStudentMutation,
   useSearchStudentsMutation,
   useConvertStatusMutation,
+  useAddLeadMutation,
 } = api;
