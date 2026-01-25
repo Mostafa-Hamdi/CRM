@@ -5,7 +5,7 @@ import {
   useDeleteLeadMutation,
   useGetCoursesQuery,
   useGetFilteredLeadsMutation,
-  useGetLeadsQuery,
+  useGetSpecificLeadsMutation,
 } from "@/store/api/apiSlice";
 import { useState, useMemo, useEffect } from "react";
 import {
@@ -29,6 +29,8 @@ import {
   FileText,
   ArrowRight,
   X,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
@@ -57,15 +59,19 @@ const Page = () => {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [selectedCourseId, setSelectedCourseId] = useState<number>(0);
   const [paidAmount, setPaidAmount] = useState<string>("");
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [leadsResponse, setLeadsResponse] = useState<any>(null);
 
-  const { data: leadsResponse, isLoading } = useGetLeadsQuery();
-  const leads = leadsResponse?.data;
+  const [getSpecificLeads, { isLoading }] = useGetSpecificLeadsMutation();
   const { data: courses, isLoading: coursesIsLoading } = useGetCoursesQuery();
   const [deleteLead] = useDeleteLeadMutation();
   const [convertStatus, { isLoading: isConverting }] =
     useConvertStatusMutation();
   const [getFilteredLeads, { isLoading: isFilterLoading }] =
     useGetFilteredLeadsMutation();
+
+  const leads = leadsResponse?.data;
 
   // Status mapping
   const statusMap: { [key: number]: string } = {
@@ -78,19 +84,39 @@ const Page = () => {
     7: "Converted",
   };
 
-  // Initialize displayed leads
+  // Fetch leads on mount and when page/size changes
   useEffect(() => {
-    if (leads) {
-      setDisplayedLeads(leads);
-    }
-  }, [leads]);
+    const fetchLeads = async () => {
+      try {
+        const result = await getSpecificLeads({
+          pageNumber,
+          pageSize,
+        }).unwrap();
+        setLeadsResponse(result);
+        setDisplayedLeads(result.data);
+      } catch (err) {
+        console.error("Failed to fetch leads:", err);
+      }
+    };
+
+    fetchLeads();
+  }, [pageNumber, pageSize, getSpecificLeads]);
 
   // Filter by status
   const handleStatusFilter = async (statusId: number) => {
     setActiveFilter(statusId);
 
     if (statusId === 0) {
-      setDisplayedLeads(leads || []);
+      // Fetch all leads again
+      try {
+        const result = await getSpecificLeads({
+          pageNumber,
+          pageSize,
+        }).unwrap();
+        setDisplayedLeads(result.data);
+      } catch (err) {
+        console.error("Failed to fetch leads:", err);
+      }
     } else {
       try {
         const filtered = await getFilteredLeads({ statusId }).unwrap();
@@ -141,6 +167,11 @@ const Page = () => {
         text: "Lead has been deleted successfully.",
         timer: 2000,
       });
+
+      // Refresh the current page
+      const result = await getSpecificLeads({ pageNumber, pageSize }).unwrap();
+      setLeadsResponse(result);
+      setDisplayedLeads(result.data);
     } catch (err) {
       Swal.fire({
         icon: "error",
@@ -203,6 +234,11 @@ const Page = () => {
       });
 
       handleCloseModal();
+
+      // Refresh the current page
+      const result = await getSpecificLeads({ pageNumber, pageSize }).unwrap();
+      setLeadsResponse(result);
+      setDisplayedLeads(result.data);
     } catch (err) {
       let message = "Failed to convert lead.";
 
@@ -309,7 +345,7 @@ const Page = () => {
               <div>
                 <p className="text-gray-600 text-sm font-medium">Total Leads</p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mt-1">
-                  {leads?.length || 0}
+                  {leadsResponse?.totalCount || 0}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center">
@@ -691,6 +727,116 @@ const Page = () => {
             </div>
           )}
         </div>
+
+        {/* Pagination Controls */}
+        {leadsResponse && leadsResponse.totalPages > 1 && (
+          <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Page Info */}
+              <div className="text-sm text-gray-600">
+                Showing page{" "}
+                <span className="font-bold text-gray-900">{pageNumber}</span> of{" "}
+                <span className="font-bold text-gray-900">
+                  {leadsResponse.totalPages}
+                </span>{" "}
+                ({leadsResponse.totalCount} total leads)
+              </div>
+
+              {/* Pagination Buttons */}
+              <div className="flex items-center gap-2">
+                {/* Previous Button */}
+                <button
+                  onClick={() => setPageNumber(pageNumber - 1)}
+                  disabled={pageNumber === 1}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all ${
+                    pageNumber === 1
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-500 hover:text-blue-600 hover:shadow-md"
+                  }`}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  <span>Previous</span>
+                </button>
+
+                {/* Page Numbers */}
+                <div className="flex items-center gap-1">
+                  {Array.from(
+                    { length: leadsResponse.totalPages },
+                    (_, i) => i + 1,
+                  ).map((page) => {
+                    // Show first page, last page, current page, and pages around current
+                    if (
+                      page === 1 ||
+                      page === leadsResponse.totalPages ||
+                      (page >= pageNumber - 1 && page <= pageNumber + 1)
+                    ) {
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => setPageNumber(page)}
+                          className={`w-10 h-10 rounded-xl font-semibold transition-all ${
+                            page === pageNumber
+                              ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                              : "bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-500 hover:text-blue-600 hover:shadow-md"
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      );
+                    } else if (
+                      page === pageNumber - 2 ||
+                      page === pageNumber + 2
+                    ) {
+                      return (
+                        <span
+                          key={page}
+                          className="px-2 text-gray-400 font-semibold"
+                        >
+                          ...
+                        </span>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+
+                {/* Next Button */}
+                <button
+                  onClick={() => setPageNumber(pageNumber + 1)}
+                  disabled={pageNumber === leadsResponse.totalPages}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all ${
+                    pageNumber === leadsResponse.totalPages
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-500 hover:text-blue-600 hover:shadow-md"
+                  }`}
+                >
+                  <span>Next</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Page Size Selector */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600 font-medium">Show:</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(parseInt(e.target.value));
+                    setPageNumber(1); // Reset to first page when changing page size
+                  }}
+                  className="px-3 py-2 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all cursor-pointer hover:border-blue-400"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+                <span className="text-sm text-gray-600">per page</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Convert Modal */}
@@ -698,7 +844,7 @@ const Page = () => {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden">
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-cyan-600  p-6">
+            <div className="bg-gradient-to-r from-blue-600 to-cyan-600 p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
@@ -708,7 +854,7 @@ const Page = () => {
                     <h2 className="text-2xl font-bold text-white">
                       Convert Lead
                     </h2>
-                    <p className="text-emerald-100 text-sm mt-1">
+                    <p className="text-cyan-100 text-sm mt-1">
                       {selectedLead.fullName}
                     </p>
                   </div>
@@ -781,7 +927,7 @@ const Page = () => {
               <button
                 onClick={handleConvertSubmit}
                 disabled={isConverting}
-                className="flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600  text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-emerald-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isConverting ? (
                   <>
@@ -802,4 +948,5 @@ const Page = () => {
     </div>
   );
 };
+
 export default Page;

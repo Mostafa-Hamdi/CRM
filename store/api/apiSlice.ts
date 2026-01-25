@@ -227,12 +227,14 @@ export const api = createApi({
       query: () => "/leads",
       providesTags: ["Leads"],
     }),
-    getSpecificLeads: builder.query<
+    getSpecificLeads: builder.mutation<
       { data: any },
       { pageNumber: number; pageSize: number }
     >({
-      query: ({ pageNumber, pageSize }) =>
-        `/leads?PageNumber=${pageNumber}&PageSize=${pageSize}`,
+      query: ({ pageNumber, pageSize }) => ({
+        url: `/leads?PageNumber=${pageNumber}&PageSize=${pageSize}`,
+        method: "GET",
+      }),
     }),
     addLead: builder.mutation<
       void,
@@ -324,4 +326,5 @@ export const {
   useSearchStudentsMutation,
   useConvertStatusMutation,
   useAddLeadMutation,
+  useGetSpecificLeadsMutation,
 } = api;
