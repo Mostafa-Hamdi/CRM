@@ -223,7 +223,7 @@ export const api = createApi({
       invalidatesTags: ["Enrollments"],
     }),
     // Leads
-    getLeads: builder.query<any[], void>({
+    getLeads: builder.query<{ data: any }, void>({
       query: () => "/leads",
       providesTags: ["Leads"],
     }),

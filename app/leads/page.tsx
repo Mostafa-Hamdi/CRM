@@ -58,7 +58,8 @@ const Page = () => {
   const [selectedCourseId, setSelectedCourseId] = useState<number>(0);
   const [paidAmount, setPaidAmount] = useState<string>("");
 
-  const { data: leads, isLoading } = useGetLeadsQuery();
+  const { data: leadsResponse, isLoading } = useGetLeadsQuery();
+  const leads = leadsResponse?.data;
   const { data: courses, isLoading: coursesIsLoading } = useGetCoursesQuery();
   const [deleteLead] = useDeleteLeadMutation();
   const [convertStatus, { isLoading: isConverting }] =
