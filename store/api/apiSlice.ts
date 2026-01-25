@@ -30,10 +30,11 @@ interface RefreshResponse {
 
 const baseQuery = fetchBaseQuery({
   baseUrl: "https://jacelyn-undelineable-maynard.ngrok-free.dev/api",
-  prepareHeaders: (headers, { getState }) => {
+  prepareHeaders: (headers, { getState, endpoint }) => {
     const token = (getState() as RootState).auth.token;
 
-    if (token) {
+    // ❌ DO NOT send access token when refreshing
+    if (token && endpoint !== "refresh") {
       headers.set("Authorization", `Bearer ${token}`);
     }
 
@@ -55,12 +56,12 @@ const baseQueryWithReauth: BaseQueryFn<
   let result = await baseQuery(args, api, extraOptions);
 
   const isRefreshEndpoint =
-    (typeof args === "string" ? args : args.url) === "/auth/refresh";
+    typeof args !== "string" && args.url.includes("/auth/refresh");
 
   if (result.error?.status === 401 && !isRefreshEndpoint) {
     const refreshResult = await baseQuery(
       { url: "/auth/refresh", method: "POST" },
-      api,
+      { ...api, endpoint: "refresh" }, // 👈 important
       extraOptions,
     );
 
@@ -107,6 +108,7 @@ export const api = createApi({
           method: "POST",
           body,
         }),
+
         async onQueryStarted(_, { dispatch, queryFulfilled }) {
           try {
             const { data } = await queryFulfilled;
@@ -262,6 +264,19 @@ export const api = createApi({
       }),
       invalidatesTags: ["Students"],
     }),
+    convertStatus: builder.mutation<
+      {
+        data: string;
+      },
+      { id: number; courseId: number; paidAmount: number }
+    >({
+      query: ({ id, courseId, paidAmount }) => ({
+        url: `/leads/${id}/convert`,
+        method: "POST",
+        body: { courseId, paidAmount }, // ✅ correct shape
+      }),
+      invalidatesTags: ["Leads"],
+    }),
   }),
 });
 
@@ -292,4 +307,5 @@ export const {
   useGetStudentsQuery,
   useDeleteStudentMutation,
   useSearchStudentsMutation,
+  useConvertStatusMutation,
 } = api;
