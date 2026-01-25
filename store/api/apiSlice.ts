@@ -227,6 +227,13 @@ export const api = createApi({
       query: () => "/leads",
       providesTags: ["Leads"],
     }),
+    getSpecificLeads: builder.query<
+      { data: any },
+      { pageNumber: number; pageSize: number }
+    >({
+      query: ({ pageNumber, pageSize }) =>
+        `/leads?PageNumber=${pageNumber}&PageSize=${pageSize}`,
+    }),
     addLead: builder.mutation<
       void,
       { fullName: string; email: string; phone: string; source: string }

@@ -94,7 +94,7 @@ const Page = () => {
     } else {
       try {
         const filtered = await getFilteredLeads({ statusId }).unwrap();
-        setDisplayedLeads(filtered);
+        setDisplayedLeads(filtered.data);
       } catch (err) {
         console.error("Failed to filter leads:", err);
         Swal.fire({
