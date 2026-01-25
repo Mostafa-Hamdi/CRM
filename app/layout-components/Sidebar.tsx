@@ -39,7 +39,7 @@ const Sidebar = ({ sidebarOpen }: any) => {
     {
       title: "Main",
       items: [
-        { icon: Home, label: "Dashboard", link: "/dashboard" },
+        { icon: Home, label: "Dashboard", link: "/" },
         { icon: BoxesIcon, label: "Categories", link: "/categories" },
         { icon: GraduationCap, label: "Courses", link: "/courses" },
         {
