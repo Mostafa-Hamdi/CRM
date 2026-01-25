@@ -734,7 +734,7 @@ const Page = () => {
                     onChange={(e) =>
                       setSelectedCourseId(parseInt(e.target.value))
                     }
-                    className="w-full bg-gradient-to-r from-gray-50 to-emerald-50/50 border-2 border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 transition-all appearance-none cursor-pointer"
+                    className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all appearance-none cursor-pointer"
                   >
                     <option value={0}>Choose a course...</option>
                     {courses?.map((course: Course) => (
@@ -763,7 +763,7 @@ const Page = () => {
                     value={paidAmount}
                     onChange={(e) => setPaidAmount(e.target.value)}
                     placeholder="0.00"
-                    className="w-full bg-gradient-to-r from-gray-50 to-emerald-50/50 border-2 border-gray-200 rounded-xl pl-8 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 transition-all"
+                    className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl pl-8 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all"
                   />
                 </div>
               </div>
