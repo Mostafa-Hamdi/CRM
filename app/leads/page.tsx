@@ -203,10 +203,18 @@ const Page = () => {
 
       handleCloseModal();
     } catch (err) {
+      let message = "Failed to convert lead.";
+
+      if (typeof err === "object" && err !== null) {
+        const maybeData = (err as any).data;
+        if (typeof maybeData === "string") {
+          message = maybeData;
+        }
+      }
       Swal.fire({
         icon: "error",
         title: "Oops!",
-        text: err?.data,
+        text: message,
       });
     }
   };

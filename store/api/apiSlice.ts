@@ -265,9 +265,7 @@ export const api = createApi({
       invalidatesTags: ["Students"],
     }),
     convertStatus: builder.mutation<
-      {
-        data: string;
-      },
+      void,
       { id: number; courseId: number; paidAmount: number }
     >({
       query: ({ id, courseId, paidAmount }) => ({
