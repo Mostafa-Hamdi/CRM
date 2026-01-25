@@ -294,6 +294,14 @@ export const api = createApi({
       }),
       invalidatesTags: ["Leads"],
     }),
+    addCategory: builder.mutation<void, { name: string }>({
+      query: ({ name }) => ({
+        url: `/categories`,
+        method: "POST",
+        body: { name }, // ✅ correct shape
+      }),
+      invalidatesTags: ["Categories"],
+    }),
   }),
 });
 
@@ -327,4 +335,5 @@ export const {
   useConvertStatusMutation,
   useAddLeadMutation,
   useGetSpecificLeadsMutation,
+  useAddCategoryMutation,
 } = api;
