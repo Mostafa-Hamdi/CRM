@@ -255,9 +255,9 @@ export default function LuxuryLogin() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="relative w-full group/btn overflow-hidden"
+                    className="cursor-pointer relative w-full group/btn overflow-hidden hover:scale-105 transition duration-300"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl transition-transform group-hover/btn:scale-105 shadow-lg shadow-blue-500/30" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl transition-transform group-hover/btn:scale-100 shadow-lg shadow-blue-500/30" />
                     <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-xl opacity-0 group-hover/btn:opacity-100 transition-opacity" />
                     <div className="relative flex items-center justify-center gap-3 px-6 py-4 text-white font-bold">
                       {isLoading ? (
@@ -284,13 +284,13 @@ export default function LuxuryLogin() {
                   </div> */}
 
                   {/* Create account */}
-                  {/* <a
+                  <a
                     href="#"
                     className="flex items-center justify-center gap-2 w-full px-6 py-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-slate-700 font-bold transition-all group/link"
                   >
                     <span>Create an account</span>
                     <ArrowRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
-                  </a> */}
+                  </a>
                 </form>
               </div>
             </div>

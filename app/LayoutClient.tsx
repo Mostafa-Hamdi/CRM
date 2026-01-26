@@ -2,11 +2,15 @@
 import Layout from "./layout-components/Layout";
 import { useSelector } from "react-redux";
 import Login from "./components/Login";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LayoutClient({ children }: PropsWithChildren) {
   const isLogin = useSelector((state: any) => state.auth.isAuthenticated);
-  console.log(isLogin);
+  const router = useRouter();
+  useEffect(() => {
+    if (!isLogin) router.push("/");
+  }, [isLogin]);
   return (
     <>
       {isLogin ? (
