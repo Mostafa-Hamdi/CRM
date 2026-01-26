@@ -670,7 +670,7 @@ const Page = () => {
                       <td className="px-6 py-5">
                         <div className="flex items-center justify-center">
                           <Link
-                            href={`/leads/notes/${lead.id}`}
+                            href={`/leads/${lead.id}/notes`}
                             className="cursor-pointer p-2.5 text-amber-600 hover:text-white bg-amber-50 hover:bg-gradient-to-r hover:from-amber-600 hover:to-orange-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/30 group"
                             title="View notes"
                           >

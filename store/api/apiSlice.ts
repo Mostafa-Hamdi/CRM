@@ -264,6 +264,12 @@ export const api = createApi({
         url: `/leads/${id}/notes`,
       }),
     }),
+    getLeadFollowup: builder.query<any, { id: number }>({
+      query: ({ id }) => ({
+        url: `/leads/${id}/follow-up`,
+        method: "PUT",
+      }),
+    }),
 
     // students
     getStudents: builder.query<any[], void>({
@@ -426,6 +432,7 @@ export const {
   useGetFilteredLeadsMutation,
   useDeleteLeadMutation,
   useGetLeadNotesQuery,
+  useGetLeadFollowupQuery,
   useGetStudentsQuery,
   useDeleteStudentMutation,
   useSearchStudentsMutation,
