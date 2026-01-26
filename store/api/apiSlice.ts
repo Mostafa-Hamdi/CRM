@@ -404,6 +404,18 @@ export const api = createApi({
         method: "GET",
       }),
     }),
+    getCategory: builder.query<any, { id: number }>({
+      query: ({ id }) => ({
+        url: `/categories/${id}`,
+      }),
+    }),
+    updateCategory: builder.mutation<any, { id: number; name: string }>({
+      query: ({ id, name }) => ({
+        url: `/categories/${id}`,
+        method: "PUT",
+        body: { name },
+      }),
+    }),
   }),
 });
 
@@ -446,4 +458,6 @@ export const {
   useGetFollowupTodayQuery,
   useGetFollowupOverdueMutation,
   useGetFollowupRangeMutation,
+  useGetCategoryQuery,
+  useUpdateCategoryMutation,
 } = api;

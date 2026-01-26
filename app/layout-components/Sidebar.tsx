@@ -67,11 +67,6 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
           subItems: [
             { icon: List, label: "All Categories", link: "/categories" },
             { icon: Plus, label: "Add Category", link: "/categories/add" },
-            {
-              icon: EditIcon,
-              label: "Edit Category",
-              link: "/categories/edit/:id",
-            },
           ],
         },
 
@@ -81,7 +76,6 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
           subItems: [
             { icon: List, label: "All Courses", link: "/courses" },
             { icon: Plus, label: "Add Course", link: "/courses/add" },
-            { icon: EditIcon, label: "Edit Course", link: "/courses/edit/:id" },
           ],
         },
 
@@ -91,11 +85,6 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
           subItems: [
             { icon: List, label: "All Enrollments", link: "/enrollments" },
             { icon: Plus, label: "Add Enrollment", link: "/enrollments/add" },
-            {
-              icon: EditIcon,
-              label: "Edit Enrollment",
-              link: "/enrollments/edit/:id",
-            },
           ],
         },
 
@@ -105,7 +94,6 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
           subItems: [
             { icon: List, label: "All Leads", link: "/leads" },
             { icon: Plus, label: "Add Lead", link: "/leads/add" },
-            { icon: EditIcon, label: "Edit Lead", link: "/leads/edit/:id" },
           ],
         },
 
@@ -115,11 +103,6 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
           subItems: [
             { icon: List, label: "All Students", link: "/students" },
             { icon: Plus, label: "Add Student", link: "/students/add" },
-            {
-              icon: EditIcon,
-              label: "Edit Student",
-              link: "/students/edit/:id",
-            },
           ],
         },
 
@@ -129,11 +112,6 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
           subItems: [
             { icon: List, label: "All Follow Ups", link: "/follow-up" },
             { icon: Plus, label: "Add Follow Up", link: "/follow-up/add" },
-            {
-              icon: EditIcon,
-              label: "Edit Follow Up",
-              link: "/follow-up/edit/:id",
-            },
           ],
         },
       ],
@@ -148,7 +126,6 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
           subItems: [
             { icon: List, label: "All Users", link: "/users" },
             { icon: Plus, label: "Add User", link: "/users/add" },
-            { icon: EditIcon, label: "Edit User", link: "/users/edit/:id" },
           ],
         },
 
