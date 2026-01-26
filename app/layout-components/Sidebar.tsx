@@ -22,6 +22,7 @@ import {
   UserCheck,
   UserPlus,
   UserSquare,
+  Clock,
 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import Link from "next/link";
@@ -53,15 +54,16 @@ const Sidebar = ({ sidebarOpen }: any) => {
           link: "/leads",
         },
         { icon: UserSquare, label: "Students", link: "/students" },
+        { icon: Clock, label: "Follow Up", link: "/follow-up" },
       ],
     },
-    {
-      title: "Reports & Analytics",
-      items: [
-        { icon: FileText, label: "Reports", link: "/dashboard/reports" },
-        { icon: Brain, label: "AI Reports", link: "/dashboard/ai-reports" },
-      ],
-    },
+    // {
+    //   title: "Reports & Analytics",
+    //   items: [
+    //     { icon: FileText, label: "Reports", link: "/dashboard/reports" },
+    //     { icon: Brain, label: "AI Reports", link: "/dashboard/ai-reports" },
+    //   ],
+    // },
     {
       title: "Management",
       items: [

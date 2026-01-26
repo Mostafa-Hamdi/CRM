@@ -152,7 +152,7 @@ const Page = () => {
               <button
                 type="button"
                 onClick={handleShowToday}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
+                className={`cursor-pointer flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
                   filterMode === "today"
                     ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/40"
                     : "bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300"
