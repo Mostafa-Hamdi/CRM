@@ -267,7 +267,6 @@ export const api = createApi({
     getLeadFollowup: builder.query<any, { id: number }>({
       query: ({ id }) => ({
         url: `/leads/${id}/follow-up`,
-        method: "PUT",
       }),
     }),
 
