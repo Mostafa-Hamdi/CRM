@@ -302,6 +302,86 @@ export const api = createApi({
       }),
       invalidatesTags: ["Categories"],
     }),
+    addCourse: builder.mutation<
+      void,
+      {
+        name: string;
+        code: string;
+        description: string;
+        price: number;
+        durationInHours: number;
+        maxStudents?: number | null;
+        startDate: string;
+        endDate: string;
+        categoryId: number;
+      }
+    >({
+      query: ({
+        name,
+        code,
+        description,
+        price,
+        durationInHours,
+        maxStudents,
+        startDate,
+        endDate,
+        categoryId,
+      }) => ({
+        url: `/courses`,
+        method: "POST",
+        body: {
+          name,
+          code,
+          description,
+          price,
+          durationInHours,
+          maxStudents,
+          startDate,
+          endDate,
+          categoryId,
+        },
+      }),
+      invalidatesTags: ["Courses"],
+    }),
+    addEnrollment: builder.mutation<
+      void,
+      { studentId: number; courseId: number }
+    >({
+      query: ({ studentId, courseId }) => ({
+        url: `/enrollments?studentId=${studentId}&courseId=${courseId}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Enrollments"],
+    }),
+    addLeadNote: builder.mutation<void, { id: number; note: string }>({
+      query: ({ id, note }) => ({
+        url: `/leads/${id}/notes`,
+        method: "POST",
+        body: { note },
+      }),
+      invalidatesTags: ["Enrollments"],
+    }),
+    addStudent: builder.mutation<
+      void,
+      {
+        fullName: string;
+        email: string;
+        phoneNumber: string;
+        nationalId: string;
+        gender: string;
+        dateOfBirth: string;
+        relativeName: string;
+        parentPhoneNumber: string;
+        level: string;
+      }
+    >({
+      query: (body) => ({
+        url: `/students`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Students"],
+    }),
   }),
 });
 
@@ -336,4 +416,8 @@ export const {
   useAddLeadMutation,
   useGetSpecificLeadsMutation,
   useAddCategoryMutation,
+  useAddCourseMutation,
+  useAddEnrollmentMutation,
+  useAddLeadNoteMutation,
+  useAddStudentMutation,
 } = api;
