@@ -256,14 +256,14 @@ const Header = ({ sidebarOpen, setSidebarOpen }: any) => {
               }`}
             >
               <div className="w-9 h-9 bg-gradient-to-br from-blue-500 via-blue-600 to-cyan-500 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/30 text-sm">
-                {user?.username?.charAt(0) || "U"}
+                {user?.fullName?.charAt(0) || "U"}
               </div>
               <div className="hidden sm:block text-left">
                 <p className="text-sm font-semibold text-gray-900 leading-tight">
-                  {user?.username || "User Name"}
+                  {user?.fullName || "User Name"}
                 </p>
                 <p className="text-xs text-gray-500 leading-tight">
-                  {user?.role || "Doctor"}
+                  {user?.roles[0] || ""}
                 </p>
               </div>
               <ChevronDown
@@ -282,7 +282,7 @@ const Header = ({ sidebarOpen, setSidebarOpen }: any) => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-gray-900 truncate">
-                        {user?.username || "User Name"}
+                        {user?.fullName || "User Name"}
                       </p>
                       <p className="text-xs text-gray-600 truncate">
                         {user?.email || "user@example.com"}
