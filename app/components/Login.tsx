@@ -272,7 +272,7 @@ export default function LuxuryLogin() {
                   </button>
 
                   {/* Divider */}
-                  <div className="relative py-4">
+                  {/* <div className="relative py-4">
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-slate-200" />
                     </div>
@@ -281,16 +281,16 @@ export default function LuxuryLogin() {
                         New to InventoryPro?
                       </span>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* Create account */}
-                  <a
+                  {/* <a
                     href="#"
                     className="flex items-center justify-center gap-2 w-full px-6 py-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-slate-700 font-bold transition-all group/link"
                   >
                     <span>Create an account</span>
                     <ArrowRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
-                  </a>
+                  </a> */}
                 </form>
               </div>
             </div>
