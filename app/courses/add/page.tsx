@@ -69,12 +69,12 @@ const courseSchema = yup.object({
     .typeError("Duration must be a valid number"),
   maxStudents: yup
     .number()
+    .transform((value, originalValue) => (originalValue === "" ? null : value))
     .nullable()
     .positive("Max students must be greater than 0")
     .integer("Max students must be a whole number")
     .max(10000, "Max students is too high")
-    .transform((value, originalValue) => (originalValue === "" ? null : value)),
-
+    .default(null),
   startDate: yup
     .string()
     .required("Start date is required")
@@ -122,6 +122,7 @@ const Page = () => {
     mode: "onChange",
     defaultValues: {
       categoryId: 0,
+      maxStudents: null,
     },
   });
 
@@ -136,7 +137,7 @@ const Page = () => {
         startDate: data.startDate,
         endDate: data.endDate,
         categoryId: data.categoryId,
-        ...(data.maxStudents != null ? { maxStudents: data.maxStudents } : {}),
+        maxStudents: data.maxStudents,
       }).unwrap();
 
       await Swal.fire({
@@ -208,7 +209,7 @@ const Page = () => {
 
         {/* Form Card */}
         <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 sm:p-8 shadow-xl shadow-blue-500/10">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-6">
             {/* Basic Information Section */}
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -419,7 +420,7 @@ const Page = () => {
                     <input
                       id="maxStudents"
                       type="number"
-                      placeholder="0"
+                      placeholder="Optional"
                       {...register("maxStudents")}
                       className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                         errors.maxStudents
@@ -509,7 +510,8 @@ const Page = () => {
                 Cancel
               </button>
               <button
-                type="submit"
+                type="button"
+                onClick={handleSubmit(onSubmit)}
                 disabled={isLoading || categoriesLoading}
                 className="flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
@@ -526,7 +528,7 @@ const Page = () => {
                 )}
               </button>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>

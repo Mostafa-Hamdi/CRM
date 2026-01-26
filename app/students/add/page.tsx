@@ -42,9 +42,10 @@ const studentSchema = yup.object().shape({
     .min(10, "Phone number must be at least 10 characters"),
   nationalId: yup
     .string()
-    .optional()
+    .transform((value) => value || "")
     .min(5, "National ID must be at least 5 characters")
-    .max(50, "National ID must not exceed 50 characters"),
+    .max(50, "National ID must not exceed 50 characters")
+    .default(""),
   gender: yup
     .string()
     .required("Gender is required")
@@ -96,7 +97,7 @@ const Page = () => {
         fullName: data.fullName,
         email: data.email,
         phoneNumber: data.phoneNumber,
-        nationalId: data.nationalId,
+        nationalId: data.nationalId || "",
         gender: data.gender,
         dateOfBirth: isoDate,
         relativeName: data.relativeName,
