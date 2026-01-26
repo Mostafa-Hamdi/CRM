@@ -382,6 +382,23 @@ export const api = createApi({
       }),
       invalidatesTags: ["Students"],
     }),
+    getFollowupToday: builder.query<any, void>({
+      query: () => ({
+        url: `/leads/follow-ups/today`,
+      }),
+    }),
+    getFollowupOverdue: builder.mutation<any, void>({
+      query: () => ({
+        url: `/leads/follow-ups/overdue`,
+        method: "GET",
+      }),
+    }),
+    getFollowupRange: builder.mutation<any, { from: string; to: string }>({
+      query: ({ from, to }) => ({
+        url: `/leads/follow-ups/range?from=${from}&to=${to}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -420,4 +437,7 @@ export const {
   useAddEnrollmentMutation,
   useAddLeadNoteMutation,
   useAddStudentMutation,
+  useGetFollowupTodayQuery,
+  useGetFollowupOverdueMutation,
+  useGetFollowupRangeMutation,
 } = api;
