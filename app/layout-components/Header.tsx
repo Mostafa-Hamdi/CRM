@@ -278,7 +278,7 @@ const Header = ({ sidebarOpen, setSidebarOpen }: any) => {
                 <div className="px-4 py-4 bg-gradient-to-br from-blue-50 to-cyan-50 border-b border-gray-100">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-gradient-to-br from-blue-500 via-blue-600 to-cyan-500 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/30">
-                      {user?.username?.charAt(0) || "U"}
+                      {user?.fullName?.charAt(0) || "U"}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-gray-900 truncate">
