@@ -466,6 +466,99 @@ export const api = createApi({
       }),
       invalidatesTags: ["Leads"],
     }),
+    getStudent: builder.query<any, { id: number }>({
+      query: ({ id }) => ({
+        url: `/students/${id}`,
+      }),
+    }),
+    updateStudent: builder.mutation<
+      any,
+      {
+        id: number;
+        fullName: string;
+        email: string;
+        phoneNumber: string;
+        nationalId: string;
+        gender: string;
+        dateOfBirth: string; // ✅ FIXED
+        relativeName: string;
+        parentPhoneNumber: string;
+        level: string;
+      }
+    >({
+      query: ({
+        id,
+        fullName,
+        email,
+        phoneNumber,
+        nationalId,
+        gender,
+        dateOfBirth,
+        relativeName,
+        parentPhoneNumber,
+        level,
+      }) => ({
+        url: `/students/${id}`,
+        method: "PUT",
+        body: {
+          fullName,
+          email,
+          phoneNumber,
+          nationalId,
+          gender,
+          dateOfBirth,
+          relativeName,
+          parentPhoneNumber,
+          level,
+        },
+      }),
+      invalidatesTags: ["Students"],
+    }),
+    getCourse: builder.query<any, { id: number }>({
+      query: ({ id }) => ({
+        url: `/courses/${id}`,
+      }),
+    }),
+    updateCourse: builder.mutation<
+      any,
+      {
+        id: number;
+        name: string;
+        code: string;
+        description: string;
+        price: number;
+        durationInHours: number;
+        startDate: string;
+        endDate: string;
+        categoryId: number;
+      }
+    >({
+      query: ({
+        id,
+        name,
+        code,
+        description,
+        price,
+        durationInHours,
+        startDate,
+        endDate,
+        categoryId,
+      }) => ({
+        url: `/students/${id}`,
+        method: "PATCH",
+        body: {
+          name,
+          code,
+          description,
+          price,
+          durationInHours,
+          startDate,
+          endDate,
+          categoryId,
+        },
+      }),
+      invalidatesTags: ["Courses"],
+    }),
   }),
 });
 
@@ -515,4 +608,8 @@ export const {
   useConvertEnrollmentStatusMutation,
   useGetLeadQuery,
   useUpdateLeadMutation,
+  useGetStudentQuery,
+  useUpdateStudentMutation,
+  useGetCourseQuery,
+  useUpdateCourseMutation,
 } = api;

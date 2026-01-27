@@ -21,6 +21,7 @@ import {
   CheckCircle,
   XCircle,
   UserCircle,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
@@ -33,6 +34,9 @@ interface Student {
   nationalId: string | null;
   gender: string | null;
   dateOfBirth: string;
+  relativeName: string | null;
+  parentPhoneNumber: string | null;
+  level: string | null;
   isActive: boolean;
   createdAt: string;
 }
@@ -143,7 +147,7 @@ const Page = () => {
       <div className="fixed top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 rounded-full blur-3xl -z-10" />
       <div className="fixed bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-indigo-400/20 to-blue-400/20 rounded-full blur-3xl -z-10" />
 
-      <div className="max-w-[1600px] mx-auto space-y-6">
+      <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 sm:p-8 shadow-xl shadow-blue-500/10">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -315,7 +319,12 @@ const Page = () => {
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Enrollment Date
+                        Parent Info
+                      </span>
+                    </th>
+                    <th className="px-6 py-5 text-left">
+                      <span className="text-xs font-bold text-white uppercase tracking-wider">
+                        Level
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
@@ -349,6 +358,9 @@ const Page = () => {
                           <div>
                             <div className="font-semibold text-gray-900 text-base">
                               {student.fullName}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-0.5">
+                              ID: #{student.id}
                             </div>
                           </div>
                         </div>
@@ -416,14 +428,46 @@ const Page = () => {
                         </div>
                       </td>
 
-                      {/* Enrollment Date */}
+                      {/* Parent Info */}
                       <td className="px-6 py-5">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-gray-400" />
-                          <span className="text-gray-700 text-sm font-medium">
-                            {formatDate(student.createdAt)}
+                        {student.relativeName || student.parentPhoneNumber ? (
+                          <div className="space-y-1">
+                            {student.relativeName && (
+                              <div className="flex items-center gap-2">
+                                <Users className="w-3.5 h-3.5 text-gray-400" />
+                                <span className="text-gray-700 text-sm font-medium">
+                                  {student.relativeName}
+                                </span>
+                              </div>
+                            )}
+                            {student.parentPhoneNumber && (
+                              <div className="flex items-center gap-2">
+                                <Phone className="w-3.5 h-3.5 text-gray-400" />
+                                <span className="text-gray-600 text-xs">
+                                  {student.parentPhoneNumber}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 text-sm italic">
+                            Not provided
                           </span>
-                        </div>
+                        )}
+                      </td>
+
+                      {/* Level */}
+                      <td className="px-6 py-5">
+                        {student.level ? (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-100 to-blue-100 border border-indigo-200 text-indigo-700 rounded-lg text-xs font-bold shadow-sm">
+                            <GraduationCap className="w-3 h-3" />
+                            {student.level}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 text-sm italic">
+                            Not assigned
+                          </span>
+                        )}
                       </td>
 
                       {/* Status */}
@@ -453,7 +497,7 @@ const Page = () => {
                       <td className="px-6 py-5">
                         <div className="flex items-center justify-center gap-2">
                           <Link
-                            href={`/students/edit/${student.id}`}
+                            href={`/students/${student.id}/edit`}
                             className="cursor-pointer p-2.5 text-blue-600 hover:text-white bg-blue-50 hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 group"
                             title="Edit student"
                           >
