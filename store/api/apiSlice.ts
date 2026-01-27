@@ -97,6 +97,7 @@ export const api = createApi({
     "Enrollments",
     "Leads",
     "Students",
+    "Classes",
   ],
   endpoints: (builder) => ({
     /* ---------- AUTH ---------- */
@@ -559,6 +560,63 @@ export const api = createApi({
       }),
       invalidatesTags: ["Courses"],
     }),
+    getClasses: builder.query<any[], void>({
+      query: () => "/classes",
+      providesTags: ["Classes"],
+    }),
+    deleteClass: builder.mutation<void, { id: number }>({
+      query: ({ id }) => ({
+        url: `/classes/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Classes"],
+    }),
+    addClass: builder.mutation<
+      void,
+      {
+        courseId: number;
+        name: string;
+        code: string;
+        price: number;
+        instructorName: string;
+        startDate: string;
+        endDate: string;
+        daysOfWeek: string;
+        timeFrom: string;
+        timeTo: string;
+        maxStudents: number;
+      }
+    >({
+      query: ({
+        courseId,
+        name,
+        code,
+        price,
+        instructorName,
+        startDate,
+        endDate,
+        daysOfWeek,
+        timeFrom,
+        timeTo,
+        maxStudents,
+      }) => ({
+        url: `/courses/${courseId}/classes`,
+        method: "POST",
+        body: {
+          name,
+          code,
+          price,
+          instructorName,
+          startDate,
+          endDate,
+          daysOfWeek,
+          timeFrom,
+          timeTo,
+          maxStudents,
+        },
+      }),
+      invalidatesTags: ["Classes"],
+    }),
   }),
 });
 
@@ -612,4 +670,7 @@ export const {
   useUpdateStudentMutation,
   useGetCourseQuery,
   useUpdateCourseMutation,
+  useGetClassesQuery,
+  useDeleteClassMutation,
+  useAddClassMutation,
 } = api;
