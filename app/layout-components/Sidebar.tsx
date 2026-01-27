@@ -16,6 +16,8 @@ import {
   Edit,
   List,
   EditIcon,
+  School,
+  SchoolIcon,
 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import Link from "next/link";
@@ -76,6 +78,14 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
           subItems: [
             { icon: List, label: "All Courses", link: "/courses" },
             { icon: Plus, label: "Add Course", link: "/courses/add" },
+          ],
+        },
+        {
+          icon: SchoolIcon,
+          label: "Classes",
+          subItems: [
+            { icon: List, label: "All Classes", link: "/classes" },
+            { icon: Plus, label: "Add Class", link: "/classes/add" },
           ],
         },
 
