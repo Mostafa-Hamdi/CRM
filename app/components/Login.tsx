@@ -6,7 +6,7 @@ import {
   Lock,
   Eye,
   EyeOff,
-  Package,
+  GraduationCap,
   ArrowRight,
   Shield,
   Zap,
@@ -16,7 +16,8 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useLoginMutation } from "@/store/api/apiSlice";
-
+import Image from "next/image";
+import logo from "@/public/logo.png";
 // Define Yup validation schema
 const schema = yup.object({
   email: yup
@@ -77,51 +78,38 @@ export default function LuxuryLogin() {
           {/* Left side - Branding */}
           <div className="hidden lg:block space-y-10">
             {/* Logo */}
-            <div className="flex items-center gap-4">
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl blur-xl opacity-40 group-hover:opacity-60 transition-opacity" />
-                <div className="relative bg-gradient-to-br from-blue-600 to-cyan-600 p-4 rounded-2xl shadow-lg shadow-blue-500/30">
-                  <Package className="w-10 h-10 text-white" />
-                </div>
-              </div>
-              <div>
-                <h1 className="text-4xl font-black text-slate-900 tracking-tight">
-                  InventoryPro
-                </h1>
-                <p className="text-slate-600 text-sm font-medium tracking-wider mt-0.5">
-                  ENTERPRISE EDITION
-                </p>
-              </div>
+            <div className="flex items-center gap-4 mb-5">
+              <Image src={logo} alt="logo" className="max-w-75" />
             </div>
 
             {/* Main content */}
             <div className="space-y-6">
               <h2 className="text-6xl font-black text-slate-900 leading-tight">
-                Next-generation
+                Transform your
                 <br />
                 <span className="bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 bg-clip-text text-transparent">
-                  inventory control
+                  educational journey
                 </span>
               </h2>
 
               <p className="text-xl text-slate-600 leading-relaxed max-w-lg">
-                Enterprise-grade platform trusted by Fortune 500 companies to
-                manage billions in inventory assets.
+                Comprehensive CRM platform designed for modern academies to
+                manage courses, students, and enrollments seamlessly.
               </p>
             </div>
 
             {/* Feature stats */}
             <div className="grid grid-cols-3 gap-6 pt-8">
               <div className="space-y-2">
-                <div className="text-3xl font-black text-slate-900">99.9%</div>
+                <div className="text-3xl font-black text-slate-900">10K+</div>
                 <div className="text-sm text-slate-600 font-medium">
-                  Uptime SLA
+                  Students Managed
                 </div>
               </div>
               <div className="space-y-2">
-                <div className="text-3xl font-black text-slate-900">500K+</div>
+                <div className="text-3xl font-black text-slate-900">500+</div>
                 <div className="text-sm text-slate-600 font-medium">
-                  Daily Transactions
+                  Active Courses
                 </div>
               </div>
               <div className="space-y-2">
@@ -137,19 +125,19 @@ export default function LuxuryLogin() {
               <div className="flex items-center gap-3">
                 <Shield className="w-5 h-5 text-blue-600" />
                 <span className="text-sm text-slate-600 font-medium">
-                  SOC 2 Certified
+                  Secure & Private
                 </span>
               </div>
               <div className="flex items-center gap-3">
                 <Zap className="w-5 h-5 text-blue-600" />
                 <span className="text-sm text-slate-600 font-medium">
-                  Real-time Sync
+                  Real-time Updates
                 </span>
               </div>
               <div className="flex items-center gap-3">
                 <Globe className="w-5 h-5 text-blue-600" />
                 <span className="text-sm text-slate-600 font-medium">
-                  Global CDN
+                  Cloud-based
                 </span>
               </div>
             </div>
@@ -189,7 +177,7 @@ export default function LuxuryLogin() {
                       <input
                         type="email"
                         {...register("email")}
-                        placeholder="you@company.com"
+                        placeholder="you@academy.com"
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 py-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all"
                       />
                     </div>
@@ -271,18 +259,6 @@ export default function LuxuryLogin() {
                     </div>
                   </button>
 
-                  {/* Divider */}
-                  {/* <div className="relative py-4">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-slate-200" />
-                    </div>
-                    <div className="relative flex justify-center">
-                      <span className="bg-white px-4 text-sm text-slate-500 font-medium">
-                        New to InventoryPro?
-                      </span>
-                    </div>
-                  </div> */}
-
                   {/* Create account */}
                   <a
                     href="#"
@@ -297,7 +273,7 @@ export default function LuxuryLogin() {
 
             {/* Footer */}
             <p className="text-center text-slate-500 text-sm mt-8">
-              © 2026 InventoryPro · Secured by enterprise-grade encryption
+              © 2026 AcademyCRM · Empowering education management
             </p>
           </div>
         </div>
