@@ -417,6 +417,33 @@ export const api = createApi({
       }),
       invalidatesTags: ["Categories"],
     }),
+    getEnrollment: builder.query<any, { id: number }>({
+      query: ({ id }) => ({
+        url: `/enrollments/${id}`,
+      }),
+    }),
+    updateEnrollment: builder.mutation<
+      any,
+      { id: number; studentId: number; courseId: number }
+    >({
+      query: ({ id, studentId, courseId }) => ({
+        url: `/enrollments/${id}`,
+        method: "PUT",
+        body: { studentId, courseId },
+      }),
+      invalidatesTags: ["Enrollments"],
+    }),
+    convertEnrollmentStatus: builder.mutation<
+      void,
+      { id: number; status: number }
+    >({
+      query: ({ id, status }) => ({
+        url: `/enrollments/${id}/status`,
+        method: "PUT",
+        body: { status }, // ✅ correct shape
+      }),
+      invalidatesTags: ["Enrollments"],
+    }),
   }),
 });
 
@@ -461,4 +488,7 @@ export const {
   useGetFollowupRangeMutation,
   useGetCategoryQuery,
   useUpdateCategoryMutation,
+  useGetEnrollmentQuery,
+  useUpdateEnrollmentMutation,
+  useConvertEnrollmentStatusMutation,
 } = api;

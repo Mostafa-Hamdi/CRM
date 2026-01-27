@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useConvertEnrollmentStatusMutation,
   useDeleteEnrollmentMutation,
   useGetEnrollmentsQuery,
   useGetFilteredEnrollmentsMutation,
@@ -20,6 +21,9 @@ import {
   XCircle,
   Pause,
   Clock,
+  RefreshCw,
+  ChevronDown,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
@@ -38,9 +42,15 @@ const Page = () => {
   const [displayedEnrollments, setDisplayedEnrollments] = useState<
     Enrollment[]
   >([]);
+  const [showConvertModal, setShowConvertModal] = useState(false);
+  const [selectedEnrollment, setSelectedEnrollment] =
+    useState<Enrollment | null>(null);
+  const [selectedStatusId, setSelectedStatusId] = useState<number>(0);
 
   const { data: enrollments, isLoading } = useGetEnrollmentsQuery();
   const [deleteEnrollment] = useDeleteEnrollmentMutation();
+  const [convertStatus, { isLoading: isConverting }] =
+    useConvertEnrollmentStatusMutation();
   const [getFilteredEnrollments, { isLoading: isFilterLoading }] =
     useGetFilteredEnrollmentsMutation();
 
@@ -114,6 +124,64 @@ const Page = () => {
     }
   };
 
+  // Open convert modal
+  const handleConvertClick = (enrollment: Enrollment) => {
+    setSelectedEnrollment(enrollment);
+    setSelectedStatusId(0);
+    setShowConvertModal(true);
+  };
+
+  // Close convert modal
+  const handleCloseModal = () => {
+    setShowConvertModal(false);
+    setSelectedEnrollment(null);
+    setSelectedStatusId(0);
+  };
+
+  // Submit status conversion
+  const handleConvertSubmit = async () => {
+    if (!selectedEnrollment) return;
+
+    if (selectedStatusId === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "Missing Status",
+        text: "Please select a status.",
+      });
+      return;
+    }
+
+    try {
+      await convertStatus({
+        id: selectedEnrollment.id,
+        status: selectedStatusId,
+      }).unwrap();
+
+      await Swal.fire({
+        icon: "success",
+        title: "Status Updated!",
+        text: "Enrollment status has been updated successfully.",
+        timer: 2000,
+      });
+
+      handleCloseModal();
+    } catch (err) {
+      let message = "Failed to update enrollment status.";
+
+      if (typeof err === "object" && err !== null) {
+        const maybeData = (err as any).data;
+        if (typeof maybeData === "string") {
+          message = maybeData;
+        }
+      }
+      Swal.fire({
+        icon: "error",
+        title: "Oops!",
+        text: message,
+      });
+    }
+  };
+
   // Format date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -149,6 +217,14 @@ const Page = () => {
     const Icon = icons[status] || Clock;
     return <Icon className="w-3.5 h-3.5" />;
   };
+
+  // Status options for conversion
+  const statusOptions = [
+    { id: 1, label: "Active", color: "text-green-700" },
+    { id: 2, label: "Completed", color: "text-blue-700" },
+    { id: 3, label: "Cancelled", color: "text-red-700" },
+    { id: 4, label: "Frozen", color: "text-yellow-700" },
+  ];
 
   // Status filter buttons
   const statusFilters = [
@@ -407,6 +483,11 @@ const Page = () => {
                     </th>
                     <th className="px-6 py-5 text-center">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
+                        Convert Status
+                      </span>
+                    </th>
+                    <th className="px-6 py-5 text-center">
+                      <span className="text-xs font-bold text-white uppercase tracking-wider">
                         Operations
                       </span>
                     </th>
@@ -471,6 +552,19 @@ const Page = () => {
                           </div>
                         </td>
 
+                        {/* Convert Status */}
+                        <td className="px-6 py-5">
+                          <div className="flex items-center justify-center">
+                            <button
+                              onClick={() => handleConvertClick(enrollment)}
+                              className="cursor-pointer p-2.5 text-purple-600 hover:text-white bg-purple-50 hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30 group"
+                              title="Convert status"
+                            >
+                              <RefreshCw className="w-5 h-5" />
+                            </button>
+                          </div>
+                        </td>
+
                         {/* Actions */}
                         <td className="px-6 py-5">
                           <div className="flex items-center justify-center gap-2">
@@ -499,6 +593,106 @@ const Page = () => {
           )}
         </div>
       </div>
+
+      {/* Convert Status Modal */}
+      {showConvertModal && selectedEnrollment && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <RefreshCw className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">
+                      Convert Status
+                    </h2>
+                    <p className="text-purple-100 text-sm mt-1">
+                      {selectedEnrollment.student}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleCloseModal}
+                  className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-white" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-5">
+              {/* Current Status Info */}
+              <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                <p className="text-sm text-gray-600 mb-1">Current Status</p>
+                <p className="text-lg font-bold text-gray-900">
+                  {selectedEnrollment.status}
+                </p>
+              </div>
+
+              {/* Status Selection */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  New Status <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={selectedStatusId}
+                    onChange={(e) =>
+                      setSelectedStatusId(parseInt(e.target.value))
+                    }
+                    className="w-full bg-gradient-to-r from-gray-50 to-purple-50/50 border-2 border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 focus:outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20 focus:bg-white transition-all appearance-none cursor-pointer"
+                  >
+                    <option value={0}>Choose a status...</option>
+                    {statusOptions.map((status) => (
+                      <option
+                        key={status.id}
+                        value={status.id}
+                        className={status.color}
+                      >
+                        {status.label}
+                        // File content was too long for single message. Here's
+                        the complete version with the modal footer:
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-6 bg-gray-50 border-t border-gray-100 flex gap-3">
+              <button
+                onClick={handleCloseModal}
+                className="cursor-pointer flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConvertSubmit}
+                disabled={isConverting}
+                className="cursor-pointer flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isConverting ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Converting...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-5 h-5" />
+                    <span>Update Status</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
