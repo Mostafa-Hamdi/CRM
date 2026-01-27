@@ -444,6 +444,28 @@ export const api = createApi({
       }),
       invalidatesTags: ["Enrollments"],
     }),
+    getLead: builder.query<any, { id: number }>({
+      query: ({ id }) => ({
+        url: `/leads/${id}`,
+      }),
+    }),
+    updateLead: builder.mutation<
+      any,
+      {
+        id: number;
+        fullName: string;
+        phone: string;
+        email: string;
+        source: string;
+      }
+    >({
+      query: ({ id, fullName, phone, email, source }) => ({
+        url: `/leads/${id}`,
+        method: "PUT",
+        body: { fullName, phone, email, source },
+      }),
+      invalidatesTags: ["Leads"],
+    }),
   }),
 });
 
@@ -491,4 +513,6 @@ export const {
   useGetEnrollmentQuery,
   useUpdateEnrollmentMutation,
   useConvertEnrollmentStatusMutation,
+  useGetLeadQuery,
+  useUpdateLeadMutation,
 } = api;

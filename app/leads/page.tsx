@@ -458,7 +458,7 @@ const Page = () => {
                   key={filter.id}
                   onClick={() => handleStatusFilter(filter.id)}
                   disabled={isFilterLoading}
-                  className={`group relative cursor-pointer flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 overflow-hidden ${
+                  className={`cursor-pointer group relative cursor-pointer flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 overflow-hidden ${
                     isActive
                       ? `bg-gradient-to-r ${filter.color} text-white shadow-lg hover:shadow-xl`
                       : "bg-white/50 text-gray-700 border border-gray-200 hover:border-gray-300 hover:bg-white"
@@ -705,7 +705,7 @@ const Page = () => {
                       <td className="px-6 py-5">
                         <div className="flex items-center justify-center gap-2">
                           <Link
-                            href={`/leads/edit/${lead.id}`}
+                            href={`/leads/${lead.id}/edit`}
                             className="cursor-pointer p-2.5 text-blue-600 hover:text-white bg-blue-50 hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 group"
                             title="Edit lead"
                           >
@@ -748,7 +748,7 @@ const Page = () => {
                 <button
                   onClick={() => setPageNumber(pageNumber - 1)}
                   disabled={pageNumber === 1}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all ${
+                  className={`cursor-pointer flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all ${
                     pageNumber === 1
                       ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                       : "bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-500 hover:text-blue-600 hover:shadow-md"
@@ -774,7 +774,7 @@ const Page = () => {
                         <button
                           key={page}
                           onClick={() => setPageNumber(page)}
-                          className={`w-10 h-10 rounded-xl font-semibold transition-all ${
+                          className={`cursor-pointer w-10 h-10 rounded-xl font-semibold transition-all ${
                             page === pageNumber
                               ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
                               : "bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-500 hover:text-blue-600 hover:shadow-md"
@@ -804,7 +804,7 @@ const Page = () => {
                 <button
                   onClick={() => setPageNumber(pageNumber + 1)}
                   disabled={pageNumber === leadsResponse.totalPages}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all ${
+                  className={`cursor-pointer flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all ${
                     pageNumber === leadsResponse.totalPages
                       ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                       : "bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-500 hover:text-blue-600 hover:shadow-md"
@@ -861,7 +861,7 @@ const Page = () => {
                 </div>
                 <button
                   onClick={handleCloseModal}
-                  className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                  className="cursor-pointer p-2 hover:bg-white/20 rounded-lg transition-colors"
                 >
                   <X className="w-5 h-5 text-white" />
                 </button>
@@ -920,14 +920,14 @@ const Page = () => {
             <div className="p-6 bg-gray-50 border-t border-gray-100 flex gap-3">
               <button
                 onClick={handleCloseModal}
-                className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all"
+                className="cursor-pointer flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConvertSubmit}
                 disabled={isConverting}
-                className="flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="cursor-pointer flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isConverting ? (
                   <>
