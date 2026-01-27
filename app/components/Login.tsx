@@ -83,8 +83,8 @@ export default function LuxuryLogin() {
             </div>
 
             {/* Main content */}
-            <div className="space-y-6">
-              <h2 className="text-6xl font-black text-slate-900 leading-tight">
+            <div className="space-y-0 mb-0">
+              <h2 className="text-6xl font-black text-slate-900 leading-17.5 mb-5">
                 Transform your
                 <br />
                 <span className="bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 bg-clip-text text-transparent">
