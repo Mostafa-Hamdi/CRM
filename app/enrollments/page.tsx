@@ -30,8 +30,9 @@ import Swal from "sweetalert2";
 
 interface Enrollment {
   id: number;
-  student: string;
-  course: string;
+  studentName: string;
+  courseName: string;
+  className: string;
   status: string;
   enrollmentDate: string;
 }
@@ -89,8 +90,9 @@ const Page = () => {
     const query = searchQuery.toLowerCase();
     return displayedEnrollments.filter(
       (enrollment: Enrollment) =>
-        enrollment.student.toLowerCase().includes(query) ||
-        enrollment.course.toLowerCase().includes(query) ||
+        enrollment.studentName.toLowerCase().includes(query) ||
+        enrollment.courseName.toLowerCase().includes(query) ||
+        enrollment.className.toLowerCase().includes(query) ||
         enrollment.status.toLowerCase().includes(query),
     );
   }, [displayedEnrollments, searchQuery]);
@@ -421,7 +423,7 @@ const Page = () => {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
               <input
                 type="text"
-                placeholder="Search by student, course or status..."
+                placeholder="Search by student, course, class or status..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all"
@@ -473,6 +475,11 @@ const Page = () => {
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
+                        Class
+                      </span>
+                    </th>
+                    <th className="px-6 py-5 text-left">
+                      <span className="text-xs font-bold text-white uppercase tracking-wider">
                         Status
                       </span>
                     </th>
@@ -512,7 +519,7 @@ const Page = () => {
                             </div>
                             <div>
                               <div className="font-semibold text-gray-900 text-base">
-                                {enrollment.student}
+                                {enrollment.studentName}
                               </div>
                             </div>
                           </div>
@@ -525,7 +532,19 @@ const Page = () => {
                               <BookOpen className="w-4 h-4 text-purple-600" />
                             </div>
                             <span className="text-gray-700 text-sm font-medium">
-                              {enrollment.course}
+                              {enrollment.courseName}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Class */}
+                        <td className="px-6 py-5">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                              <UserCheck className="w-4 h-4 text-indigo-600" />
+                            </div>
+                            <span className="text-gray-700 text-sm font-medium">
+                              {enrollment.className}
                             </span>
                           </div>
                         </td>
@@ -609,8 +628,8 @@ const Page = () => {
                     <h2 className="text-2xl font-bold text-white">
                       Convert Status
                     </h2>
-                    <p className="text-purple-100 text-sm mt-1">
-                      {selectedEnrollment.student}
+                    <p className="text-blue-100 text-sm mt-1">
+                      {selectedEnrollment.studentName}
                     </p>
                   </div>
                 </div>
@@ -654,8 +673,6 @@ const Page = () => {
                         className={status.color}
                       >
                         {status.label}
-                        // File content was too long for single message. Here's
-                        the complete version with the modal footer:
                       </option>
                     ))}
                   </select>

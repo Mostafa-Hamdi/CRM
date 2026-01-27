@@ -179,8 +179,8 @@ const Page = () => {
         startDate: startDate,
         endDate: endDate,
         daysOfWeek: daysOfWeekString,
-        timeFrom: data.timeFrom,
-        timeTo: data.timeTo,
+        timeFrom: data.timeFrom + ":00",
+        timeTo: data.timeTo + ":00",
         maxStudents: data.maxStudents,
       }).unwrap();
 
