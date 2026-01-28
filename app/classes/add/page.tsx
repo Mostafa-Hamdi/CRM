@@ -170,6 +170,7 @@ const Page = () => {
       // Convert days array to comma-separated string
       const daysOfWeekString = data.daysOfWeek.join(", ");
 
+      // Note: courseId is now passed separately and used in the URL path
       await addClass({
         courseId: data.courseId,
         name: data.name,

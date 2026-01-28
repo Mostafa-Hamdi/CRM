@@ -503,6 +503,11 @@ export const api = createApi({
         url: `/courses/${id}`,
       }),
     }),
+    getClass: builder.query<any, { id: number }>({
+      query: ({ id }) => ({
+        url: `/courses/${id}/classes`,
+      }),
+    }),
     updateCourse: builder.mutation<
       any,
       {
@@ -539,6 +544,7 @@ export const api = createApi({
       }),
       invalidatesTags: ["Classes"],
     }),
+    // Updated addClass mutation
     addClass: builder.mutation<
       void,
       {

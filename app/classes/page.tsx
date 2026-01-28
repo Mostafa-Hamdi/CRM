@@ -15,10 +15,11 @@ import {
   Users,
   Calendar,
   Clock,
-  MapPin,
+  DollarSign,
   Filter,
   CheckCircle,
   XCircle,
+  Code,
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
@@ -26,14 +27,16 @@ import Swal from "sweetalert2";
 interface Class {
   id: number;
   name: string;
-  description: string;
-  schedule: string;
-  location: string;
-  capacity: number;
-  enrolledStudents: number;
+  code: string;
+  price: number;
   instructorName: string;
-  isActive: boolean;
-  createdAt: string;
+  status: number;
+  startDate: string;
+  endDate: string;
+  daysOfWeek: string;
+  timeFrom: string;
+  timeTo: string;
+  maxStudents: number;
   course: {
     id: number;
     name: string;
@@ -55,11 +58,11 @@ const Page = () => {
 
     let result = classes;
 
-    // Filter by status
+    // Filter by status (0 = inactive, 1 = active)
     if (activeFilter === "active") {
-      result = result.filter((cls: Class) => cls.isActive);
+      result = result.filter((cls: Class) => cls.status === 1);
     } else if (activeFilter === "inactive") {
-      result = result.filter((cls: Class) => !cls.isActive);
+      result = result.filter((cls: Class) => cls.status === 0);
     }
 
     // Search filter
@@ -68,9 +71,10 @@ const Page = () => {
       result = result.filter(
         (cls: Class) =>
           cls.name.toLowerCase().includes(query) ||
-          cls.description?.toLowerCase().includes(query) ||
+          cls.code?.toLowerCase().includes(query) ||
           cls.instructorName?.toLowerCase().includes(query) ||
-          cls.location?.toLowerCase().includes(query),
+          cls.course?.name?.toLowerCase().includes(query) ||
+          cls.daysOfWeek?.toLowerCase().includes(query),
       );
     }
 
@@ -124,6 +128,16 @@ const Page = () => {
       month: "short",
       day: "numeric",
     });
+  };
+
+  // Format time from "HH:mm:ss" to "HH:mm AM/PM"
+  const formatTime = (timeString: string) => {
+    if (!timeString) return "N/A";
+    const [hours, minutes] = timeString.split(":");
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
   };
 
   // Generate random colors for class icons
@@ -204,7 +218,8 @@ const Page = () => {
               <div>
                 <p className="text-gray-600 text-sm font-medium">Active</p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mt-1">
-                  {classes?.filter((cls: Class) => cls.isActive).length || 0}
+                  {classes?.filter((cls: Class) => cls.status === 1).length ||
+                    0}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl flex items-center justify-center">
@@ -218,7 +233,8 @@ const Page = () => {
               <div>
                 <p className="text-gray-600 text-sm font-medium">Inactive</p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent mt-1">
-                  {classes?.filter((cls: Class) => !cls.isActive).length || 0}
+                  {classes?.filter((cls: Class) => cls.status === 0).length ||
+                    0}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-red-100 to-rose-100 rounded-xl flex items-center justify-center">
@@ -281,7 +297,7 @@ const Page = () => {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
               <input
                 type="text"
-                placeholder="Search by class name, instructor, or location..."
+                placeholder="Search by class name, code, instructor, or course..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all"
@@ -326,7 +342,7 @@ const Page = () => {
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Description
+                        Course
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
@@ -341,7 +357,12 @@ const Page = () => {
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Location
+                        Duration
+                      </span>
+                    </th>
+                    <th className="px-6 py-5 text-left">
+                      <span className="text-xs font-bold text-white uppercase tracking-wider">
+                        Price
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
@@ -381,22 +402,26 @@ const Page = () => {
                             <div className="font-semibold text-gray-900 text-base">
                               {classItem.name}
                             </div>
-                            <div className="text-xs text-gray-500 mt-0.5">
-                              ID: #{classItem.id}
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <Code className="w-3 h-3 text-gray-400" />
+                              <span className="text-xs text-gray-500">
+                                {classItem.code}
+                              </span>
                             </div>
                           </div>
                         </div>
                       </td>
 
-                      {/* Description */}
+                      {/* Course */}
                       <td className="px-6 py-5">
-                        <p className="text-gray-700 text-sm line-clamp-2 max-w-xs">
-                          {classItem.description || (
-                            <span className="text-gray-400 italic">
-                              No description
-                            </span>
-                          )}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                            <BookOpen className="w-4 h-4 text-indigo-600" />
+                          </div>
+                          <span className="text-gray-700 text-sm font-medium">
+                            {classItem.course?.name || "N/A"}
+                          </span>
+                        </div>
                       </td>
 
                       {/* Instructor */}
@@ -419,34 +444,48 @@ const Page = () => {
 
                       {/* Schedule */}
                       <td className="px-6 py-5">
-                        {classItem.schedule ? (
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-gray-400" />
+                            <span className="text-gray-700 text-sm font-medium">
+                              {classItem.daysOfWeek || "Not scheduled"}
+                            </span>
+                          </div>
                           <div className="flex items-center gap-2">
                             <Clock className="w-4 h-4 text-gray-400" />
-                            <span className="text-gray-700 text-sm font-medium">
-                              {classItem.schedule}
+                            <span className="text-gray-700 text-sm">
+                              {formatTime(classItem.timeFrom)} -{" "}
+                              {formatTime(classItem.timeTo)}
                             </span>
                           </div>
-                        ) : (
-                          <span className="text-gray-400 text-sm italic">
-                            Not scheduled
-                          </span>
-                        )}
+                        </div>
                       </td>
 
-                      {/* Location */}
+                      {/* Duration */}
                       <td className="px-6 py-5">
-                        {classItem.location ? (
-                          <div className="flex items-center gap-2">
-                            <MapPin className="w-4 h-4 text-gray-400" />
-                            <span className="text-gray-700 text-sm font-medium">
-                              {classItem.location}
-                            </span>
+                        <div className="space-y-1">
+                          <div className="text-xs text-gray-500">Start</div>
+                          <div className="text-sm font-medium text-gray-700">
+                            {formatDate(classItem.startDate)}
                           </div>
-                        ) : (
-                          <span className="text-gray-400 text-sm italic">
-                            Not specified
+                          <div className="text-xs text-gray-500 mt-1">End</div>
+                          <div className="text-sm font-medium text-gray-700">
+                            {formatDate(classItem.endDate)}
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Price */}
+                      <td className="px-6 py-5">
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="w-4 h-4 text-green-600" />
+                          <span className="text-lg font-bold text-green-600">
+                            {classItem.price.toLocaleString("en-US", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
                           </span>
-                        )}
+                        </div>
                       </td>
 
                       {/* Capacity */}
@@ -454,37 +493,21 @@ const Page = () => {
                         <div className="flex items-center gap-2">
                           <Users className="w-4 h-4 text-gray-400" />
                           <span className="text-gray-700 text-sm font-medium">
-                            {classItem.enrolledStudents || 0} /{" "}
-                            {classItem.capacity || 0}
+                            {classItem.maxStudents || 0} students
                           </span>
                         </div>
-                        {classItem.capacity && (
-                          <div className="mt-1 w-full bg-gray-200 rounded-full h-1.5">
-                            <div
-                              className="bg-gradient-to-r from-blue-600 to-cyan-600 h-1.5 rounded-full transition-all"
-                              style={{
-                                width: `${Math.min(
-                                  ((classItem.enrolledStudents || 0) /
-                                    classItem.capacity) *
-                                    100,
-                                  100,
-                                )}%`,
-                              }}
-                            />
-                          </div>
-                        )}
                       </td>
 
                       {/* Status */}
                       <td className="px-6 py-5">
                         <span
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r border rounded-lg text-xs font-bold shadow-sm ${
-                            classItem.isActive
+                            classItem.status === 1
                               ? "from-green-100 to-emerald-100 border-green-200 text-green-700"
                               : "from-red-100 to-rose-100 border-red-200 text-red-700"
                           }`}
                         >
-                          {classItem.isActive ? (
+                          {classItem.status === 1 ? (
                             <>
                               <CheckCircle className="w-3.5 h-3.5" />
                               Active
