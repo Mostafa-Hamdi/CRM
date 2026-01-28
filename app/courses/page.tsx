@@ -14,9 +14,11 @@ import {
   Sparkles,
   GraduationCap,
   Clock,
-  Calendar,
-  DollarSign,
   Tag,
+  CheckCircle,
+  XCircle,
+  Globe,
+  Hash,
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
@@ -25,11 +27,15 @@ interface Course {
   id: number;
   name: string;
   code: string;
-  price: number;
-  durationInHours: number;
+  description: string;
+  estimatedDurationHours: number;
+  level: number;
+  language: string | null;
+  tags: string | null;
   category: string;
-  startDate: string;
-  endDate: string;
+  classesCount: number;
+  isActive: boolean;
+  createdAt: string;
 }
 
 const Page = () => {
@@ -46,7 +52,10 @@ const Page = () => {
       (course: Course) =>
         course.name.toLowerCase().includes(query) ||
         course.code.toLowerCase().includes(query) ||
-        course.category.toLowerCase().includes(query),
+        course.category.toLowerCase().includes(query) ||
+        (course.description &&
+          course.description.toLowerCase().includes(query)) ||
+        (course.tags && course.tags.toLowerCase().includes(query)),
     );
   }, [courses, searchQuery]);
 
@@ -89,6 +98,28 @@ const Page = () => {
     });
   };
 
+  // Get level name
+  const getLevelName = (level: number) => {
+    const levels: { [key: number]: string } = {
+      1: "Beginner",
+      2: "Intermediate",
+      3: "Advanced",
+    };
+    return levels[level] || "Unknown";
+  };
+
+  // Get level color
+  const getLevelColor = (level: number) => {
+    const colors: { [key: number]: string } = {
+      1: "from-green-100 to-emerald-100 border-green-200 text-green-700",
+      2: "from-yellow-100 to-orange-100 border-yellow-200 text-yellow-700",
+      3: "from-red-100 to-rose-100 border-red-200 text-red-700",
+    };
+    return (
+      colors[level] || "from-gray-100 to-gray-100 border-gray-200 text-gray-700"
+    );
+  };
+
   // Generate random colors for course icons
   const getColorForCourse = (index: number) => {
     const colors = [
@@ -103,6 +134,11 @@ const Page = () => {
     ];
     return colors[index % colors.length];
   };
+
+  // Count active and inactive courses
+  const activeCourses = courses?.filter((c: Course) => c.isActive).length || 0;
+  const inactiveCourses =
+    courses?.filter((c: Course) => !c.isActive).length || 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
@@ -145,7 +181,7 @@ const Page = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10 hover:shadow-xl hover:shadow-blue-500/20 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
@@ -165,15 +201,41 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-green-500/10 hover:shadow-xl hover:shadow-green-500/20 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">
-                  Courses Found
-                </p>
+                <p className="text-gray-600 text-sm font-medium">Active</p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mt-1">
-                  {filteredCourses.length}
+                  {activeCourses}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl flex items-center justify-center">
-                <GraduationCap className="w-6 h-6 text-green-600" />
+                <CheckCircle className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-red-500/10 hover:shadow-xl hover:shadow-red-500/20 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-medium">Inactive</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent mt-1">
+                  {inactiveCourses}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-br from-red-100 to-rose-100 rounded-xl flex items-center justify-center">
+                <XCircle className="w-6 h-6 text-red-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-purple-500/10 hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-medium">Found</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mt-1">
+                  {filteredCourses.length}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center">
+                <Search className="w-6 h-6 text-purple-600" />
               </div>
             </div>
           </div>
@@ -186,7 +248,7 @@ const Page = () => {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
               <input
                 type="text"
-                placeholder="Search courses by name, code or category..."
+                placeholder="Search courses by name, code, category, or tags..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all"
@@ -236,17 +298,32 @@ const Page = () => {
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
+                        Level
+                      </span>
+                    </th>
+                    <th className="px-6 py-5 text-left">
+                      <span className="text-xs font-bold text-white uppercase tracking-wider">
                         Duration
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Price
+                        Language
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Schedule
+                        Classes
+                      </span>
+                    </th>
+                    <th className="px-6 py-5 text-left">
+                      <span className="text-xs font-bold text-white uppercase tracking-wider">
+                        Status
+                      </span>
+                    </th>
+                    <th className="px-6 py-5 text-left">
+                      <span className="text-xs font-bold text-white uppercase tracking-wider">
+                        Created
                       </span>
                     </th>
                     <th className="px-6 py-5 text-center">
@@ -266,19 +343,21 @@ const Page = () => {
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-3">
                           <div
-                            className={`w-12 h-12 bg-gradient-to-br ${getColorForCourse(
+                            className={`w-20 h-12 bg-gradient-to-br ${getColorForCourse(
                               index,
                             )} rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30`}
                           >
                             <BookOpen className="w-6 h-6 text-white" />
                           </div>
-                          <div>
+                          <div className="max-w-xs">
                             <div className="font-semibold text-gray-900 text-base">
                               {course.name}
                             </div>
-                            <div className="text-xs text-gray-500 mt-0.5 font-mono">
-                              {course.code}
-                            </div>
+                            {course.description && (
+                              <div className="text-xs text-gray-600 mt-1 line-clamp-2">
+                                {course.description}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -291,6 +370,17 @@ const Page = () => {
                         </span>
                       </td>
 
+                      {/* Level */}
+                      <td className="px-6 py-5">
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r border rounded-lg text-xs font-bold shadow-sm ${getLevelColor(
+                            course.level,
+                          )}`}
+                        >
+                          {getLevelName(course.level)}
+                        </span>
+                      </td>
+
                       {/* Duration */}
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-2">
@@ -298,35 +388,60 @@ const Page = () => {
                             <Clock className="w-4 h-4 text-blue-600" />
                           </div>
                           <span className="text-gray-700 text-sm font-medium">
-                            {course.durationInHours} hrs
+                            {course.estimatedDurationHours} hrs
                           </span>
                         </div>
                       </td>
 
-                      {/* Price */}
+                      {/* Language */}
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                            <DollarSign className="w-4 h-4 text-green-600" />
+                          {course.language ? (
+                            <>
+                              <Globe className="w-4 h-4 text-gray-400" />
+                              <span className="text-gray-700 text-sm">
+                                {course.language}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-gray-400 text-sm italic">
+                              Not set
+                            </span>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Classes Count */}
+                      <td className="px-6 py-5">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                            <Hash className="w-4 h-4 text-indigo-600" />
                           </div>
-                          <span className="text-gray-900 text-sm font-bold">
-                            {course.price}
+                          <span className="text-gray-700 text-sm font-medium">
+                            {course.classesCount}
                           </span>
                         </div>
                       </td>
 
-                      {/* Schedule */}
+                      {/* Status */}
                       <td className="px-6 py-5">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-gray-400" />
-                          <div className="text-xs">
-                            <div className="text-gray-700 font-medium">
-                              {formatDate(course.startDate)}
-                            </div>
-                            <div className="text-gray-500">
-                              to {formatDate(course.endDate)}
-                            </div>
-                          </div>
+                        {course.isActive ? (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-green-100 to-emerald-100 border border-green-200 text-green-700 rounded-lg text-xs font-bold shadow-sm">
+                            <CheckCircle className="w-3 h-3" />
+                            Active
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-gray-100 to-slate-100 border border-gray-200 text-gray-700 rounded-lg text-xs font-bold shadow-sm">
+                            <XCircle className="w-3 h-3" />
+                            Inactive
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Created Date */}
+                      <td className="px-6 py-5">
+                        <div className="text-sm text-gray-700 font-medium">
+                          {formatDate(course.createdAt)}
                         </div>
                       </td>
 

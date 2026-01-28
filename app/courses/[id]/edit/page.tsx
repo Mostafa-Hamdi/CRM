@@ -12,16 +12,19 @@ import * as yup from "yup";
 import { useEffect } from "react";
 import {
   BookOpen,
-  Code,
-  FileText,
-  DollarSign,
-  Clock,
-  Calendar,
-  Folder,
   Sparkles,
   ArrowLeft,
   Save,
   ChevronDown,
+  AlertCircle,
+  Clock,
+  Hash,
+  Target,
+  Award,
+  Globe,
+  Tag,
+  Image,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
@@ -31,58 +34,73 @@ const courseSchema = yup.object().shape({
   name: yup
     .string()
     .required("Course name is required")
-    .min(2, "Name must be at least 2 characters")
-    .max(200, "Name must not exceed 200 characters"),
+    .min(3, "Name must be at least 3 characters")
+    .max(200, "Name must not exceed 200 characters")
+    .trim(),
   code: yup
     .string()
     .required("Course code is required")
     .min(2, "Code must be at least 2 characters")
-    .max(50, "Code must not exceed 50 characters"),
+    .max(50, "Code must not exceed 50 characters")
+    .matches(
+      /^[A-Z0-9-]+$/,
+      "Course code must be uppercase letters, numbers, and hyphens only",
+    )
+    .trim(),
   description: yup
     .string()
     .required("Description is required")
     .min(10, "Description must be at least 10 characters")
-    .max(1000, "Description must not exceed 1000 characters"),
-  price: yup
-    .number()
-    .required("Price is required")
-    .min(0, "Price must be at least 0")
-    .typeError("Price must be a valid number"),
-  durationInHours: yup
+    .max(1000, "Description must not exceed 1000 characters")
+    .trim(),
+  estimatedDurationHours: yup
     .number()
     .required("Duration is required")
-    .min(1, "Duration must be at least 1 hour")
+    .positive("Duration must be greater than 0")
+    .integer("Duration must be a whole number")
+    .max(10000, "Duration is too high")
     .typeError("Duration must be a valid number"),
-  startDate: yup
+  level: yup
+    .number()
+    .required("Level is required")
+    .oneOf([1, 2, 3], "Please select a valid level")
+    .typeError("Please select a level"),
+  learningOutcomes: yup
     .string()
-    .required("Start date is required")
-    .test("is-valid-date", "Please enter a valid date", (value) => {
-      if (!value) return false;
-      const date = new Date(value);
-      return date instanceof Date && !isNaN(date.getTime());
-    }),
-  endDate: yup
+    .required("Learning outcomes are required")
+    .min(10, "Learning outcomes must be at least 10 characters")
+    .max(2000, "Learning outcomes must not exceed 2000 characters")
+    .trim(),
+  prerequisites: yup
     .string()
-    .required("End date is required")
-    .test("is-valid-date", "Please enter a valid date", (value) => {
-      if (!value) return false;
-      const date = new Date(value);
-      return date instanceof Date && !isNaN(date.getTime());
-    })
-    .test(
-      "is-after-start",
-      "End date must be after start date",
-      function (value) {
-        const { startDate } = this.parent;
-        if (!value || !startDate) return true;
-        return new Date(value) > new Date(startDate);
-      },
-    ),
+    .nullable()
+    .transform((value) => (value === "" ? null : value))
+    .max(1000, "Prerequisites must not exceed 1000 characters")
+    .default(null),
+  language: yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? null : value))
+    .max(50, "Language must not exceed 50 characters")
+    .default(null),
+  tags: yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? null : value))
+    .max(500, "Tags must not exceed 500 characters")
+    .default(null),
+  thumbnailUrl: yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? null : value))
+    .url("Must be a valid URL")
+    .max(500, "URL must not exceed 500 characters")
+    .default(null),
   categoryId: yup
     .number()
     .required("Category is required")
-    .min(1, "Please select a category")
-    .typeError("Category must be selected"),
+    .positive("Please select a category")
+    .typeError("Please select a category"),
 });
 
 type CourseFormData = yup.InferType<typeof courseSchema>;
@@ -116,21 +134,17 @@ const Page = () => {
   // Populate form when course data is loaded
   useEffect(() => {
     if (courseData) {
-      // Format date to YYYY-MM-DD for input[type="date"]
-      const formatDateForInput = (dateString: string) => {
-        if (!dateString) return "";
-        const date = new Date(dateString);
-        return date.toISOString().split("T")[0];
-      };
-
       reset({
         name: courseData.name || "",
         code: courseData.code || "",
         description: courseData.description || "",
-        price: courseData.price || 0,
-        durationInHours: courseData.durationInHours || 0,
-        startDate: formatDateForInput(courseData.startDate) || "",
-        endDate: formatDateForInput(courseData.endDate) || "",
+        estimatedDurationHours: courseData.estimatedDurationHours || 0,
+        level: courseData.level || 1,
+        learningOutcomes: courseData.learningOutcomes || "",
+        prerequisites: courseData.prerequisites || null,
+        language: courseData.language || null,
+        tags: courseData.tags || null,
+        thumbnailUrl: courseData.thumbnailUrl || null,
         categoryId: courseData.categoryId || 0,
       });
     }
@@ -138,19 +152,18 @@ const Page = () => {
 
   const onSubmit = async (data: CourseFormData) => {
     try {
-      // Convert dates to ISO format for API
-      const startDate = new Date(data.startDate).toISOString();
-      const endDate = new Date(data.endDate).toISOString();
-
       await updateCourse({
         id,
         name: data.name,
         code: data.code,
         description: data.description,
-        price: data.price,
-        durationInHours: data.durationInHours,
-        startDate: startDate,
-        endDate: endDate,
+        estimatedDurationHours: data.estimatedDurationHours,
+        level: data.level,
+        learningOutcomes: data.learningOutcomes,
+        prerequisites: data.prerequisites || null,
+        language: data.language || null,
+        tags: data.tags || null,
+        thumbnailUrl: data.thumbnailUrl || null,
         categoryId: data.categoryId,
       }).unwrap();
 
@@ -170,6 +183,8 @@ const Page = () => {
         const maybeData = (err as any).data;
         if (typeof maybeData === "string") {
           message = maybeData;
+        } else if (maybeData?.message) {
+          message = maybeData.message;
         }
       }
 
@@ -220,7 +235,7 @@ const Page = () => {
               </p>
               <Link
                 href="/courses"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all cursor-pointer"
               >
                 <ArrowLeft className="w-5 h-5" />
                 Back to Courses
@@ -263,7 +278,7 @@ const Page = () => {
 
             <Link
               href="/courses"
-              className="group relative cursor-pointer flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-2xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300"
+              className="group relative flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-2xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 cursor-pointer"
             >
               <ArrowLeft className="w-5 h-5" />
               <span className="hidden sm:inline">Back</span>
@@ -275,9 +290,9 @@ const Page = () => {
         <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 sm:p-8 shadow-xl shadow-blue-500/10">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Basic Information Section */}
-            <div className="pb-6 border-b border-gray-200">
+            <div>
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-blue-600" />
+                <FileText className="w-5 h-5 text-blue-600" />
                 Basic Information
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -286,22 +301,19 @@ const Page = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Course Name <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                      <BookOpen className="w-5 h-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="text"
-                      {...register("name")}
-                      placeholder="Enter course name"
-                      className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
-                        errors.name ? "border-red-300" : "border-gray-200"
-                      } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all`}
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    {...register("name")}
+                    placeholder="Enter course name"
+                    className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
+                      errors.name
+                        ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                        : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                    } rounded-xl px-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:bg-white transition-all`}
+                  />
                   {errors.name && (
                     <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                      <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                      <AlertCircle className="w-4 h-4" />
                       {errors.name.message}
                     </p>
                   )}
@@ -313,21 +325,21 @@ const Page = () => {
                     Course Code <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                      <Code className="w-5 h-5 text-gray-400" />
-                    </div>
+                    <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
                       type="text"
                       {...register("code")}
-                      placeholder="e.g., CS101"
+                      placeholder="e.g., WEB-101"
                       className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
-                        errors.code ? "border-red-300" : "border-gray-200"
-                      } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all`}
+                        errors.code
+                          ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                          : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                      } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:bg-white transition-all uppercase`}
                     />
                   </div>
                   {errors.code && (
                     <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                      <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                      <AlertCircle className="w-4 h-4" />
                       {errors.code.message}
                     </p>
                   )}
@@ -342,8 +354,10 @@ const Page = () => {
                     <select
                       {...register("categoryId")}
                       className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
-                        errors.categoryId ? "border-red-300" : "border-gray-200"
-                      } rounded-xl px-4 py-3.5 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all appearance-none cursor-pointer`}
+                        errors.categoryId
+                          ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                          : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                      } rounded-xl px-4 py-3.5 text-gray-900 focus:outline-none focus:ring-4 focus:bg-white transition-all appearance-none cursor-pointer`}
                     >
                       <option value={0}>Select category</option>
                       {categories?.map((category: Category) => (
@@ -356,7 +370,7 @@ const Page = () => {
                   </div>
                   {errors.categoryId && (
                     <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                      <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                      <AlertCircle className="w-4 h-4" />
                       {errors.categoryId.message}
                     </p>
                   )}
@@ -367,24 +381,19 @@ const Page = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Description <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <div className="absolute left-4 top-4">
-                      <FileText className="w-5 h-5 text-gray-400" />
-                    </div>
-                    <textarea
-                      {...register("description")}
-                      rows={4}
-                      placeholder="Enter course description"
-                      className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
-                        errors.description
-                          ? "border-red-300"
-                          : "border-gray-200"
-                      } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all resize-none`}
-                    />
-                  </div>
+                  <textarea
+                    {...register("description")}
+                    rows={4}
+                    placeholder="Enter course description"
+                    className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
+                      errors.description
+                        ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                        : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                    } rounded-xl px-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:bg-white transition-all resize-none`}
+                  />
                   {errors.description && (
                     <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                      <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                      <AlertCircle className="w-4 h-4" />
                       {errors.description.message}
                     </p>
                   )}
@@ -392,125 +401,191 @@ const Page = () => {
               </div>
             </div>
 
-            {/* Pricing & Duration Section */}
-            <div className="pb-6 border-b border-gray-200">
+            {/* Course Details Section */}
+            <div className="border-t border-gray-200 pt-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-blue-600" />
-                Pricing & Duration
+                <BookOpen className="w-5 h-5 text-blue-600" />
+                Course Details
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Price */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Price <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                      <DollarSign className="w-5 h-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      {...register("price")}
-                      placeholder="0.00"
-                      className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
-                        errors.price ? "border-red-300" : "border-gray-200"
-                      } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all`}
-                    />
-                  </div>
-                  {errors.price && (
-                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                      <span className="w-1 h-1 bg-red-600 rounded-full"></span>
-                      {errors.price.message}
-                    </p>
-                  )}
-                </div>
-
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Duration */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Duration (Hours) <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                      <Clock className="w-5 h-5 text-gray-400" />
-                    </div>
+                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
                       type="number"
-                      min="1"
-                      {...register("durationInHours")}
-                      placeholder="e.g., 40"
+                      {...register("estimatedDurationHours")}
+                      placeholder="0"
                       className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
-                        errors.durationInHours
-                          ? "border-red-300"
-                          : "border-gray-200"
-                      } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all`}
+                        errors.estimatedDurationHours
+                          ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                          : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                      } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:bg-white transition-all`}
                     />
                   </div>
-                  {errors.durationInHours && (
+                  {errors.estimatedDurationHours && (
                     <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                      <span className="w-1 h-1 bg-red-600 rounded-full"></span>
-                      {errors.durationInHours.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Schedule Section */}
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-blue-600" />
-                Schedule
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Start Date */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Start Date <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                      <Calendar className="w-5 h-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="date"
-                      {...register("startDate")}
-                      className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
-                        errors.startDate ? "border-red-300" : "border-gray-200"
-                      } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all`}
-                    />
-                  </div>
-                  {errors.startDate && (
-                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                      <span className="w-1 h-1 bg-red-600 rounded-full"></span>
-                      {errors.startDate.message}
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.estimatedDurationHours.message}
                     </p>
                   )}
                 </div>
 
-                {/* End Date */}
+                {/* Level */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    End Date <span className="text-red-500">*</span>
+                    Level <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                      <Calendar className="w-5 h-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="date"
-                      {...register("endDate")}
+                    <Award className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <select
+                      {...register("level")}
                       className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
-                        errors.endDate ? "border-red-300" : "border-gray-200"
-                      } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all`}
+                        errors.level
+                          ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                          : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                      } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 focus:outline-none focus:ring-4 focus:bg-white transition-all appearance-none cursor-pointer`}
+                    >
+                      <option value={1}>Beginner</option>
+                      <option value={2}>Intermediate</option>
+                      <option value={3}>Advanced</option>
+                    </select>
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                  </div>
+                  {errors.level && (
+                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.level.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Language */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Language
+                  </label>
+                  <div className="relative">
+                    <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="text"
+                      {...register("language")}
+                      placeholder="e.g., English"
+                      className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
+                        errors.language
+                          ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                          : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                      } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:bg-white transition-all`}
                     />
                   </div>
-                  {errors.endDate && (
+                  {errors.language && (
                     <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                      <span className="w-1 h-1 bg-red-600 rounded-full"></span>
-                      {errors.endDate.message}
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.language.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Learning Outcomes */}
+                <div className="md:col-span-3">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Learning Outcomes <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Target className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
+                    <textarea
+                      {...register("learningOutcomes")}
+                      rows={4}
+                      placeholder="What will students learn? List the key outcomes..."
+                      className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
+                        errors.learningOutcomes
+                          ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                          : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                      } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:bg-white transition-all resize-none`}
+                    />
+                  </div>
+                  {errors.learningOutcomes && (
+                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.learningOutcomes.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Prerequisites */}
+                <div className="md:col-span-3">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Prerequisites
+                  </label>
+                  <textarea
+                    {...register("prerequisites")}
+                    rows={3}
+                    placeholder="What should students know before taking this course? (Optional)"
+                    className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
+                      errors.prerequisites
+                        ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                        : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                    } rounded-xl px-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:bg-white transition-all resize-none`}
+                  />
+                  {errors.prerequisites && (
+                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.prerequisites.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Tags */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Tags
+                  </label>
+                  <div className="relative">
+                    <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="text"
+                      {...register("tags")}
+                      placeholder="e.g., web, javascript, react (comma separated)"
+                      className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
+                        errors.tags
+                          ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                          : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                      } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:bg-white transition-all`}
+                    />
+                  </div>
+                  {errors.tags && (
+                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.tags.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Thumbnail URL */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Thumbnail URL
+                  </label>
+                  <div className="relative">
+                    <Image className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="url"
+                      {...register("thumbnailUrl")}
+                      placeholder="https://example.com/image.jpg"
+                      className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
+                        errors.thumbnailUrl
+                          ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                          : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                      } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:bg-white transition-all`}
+                    />
+                  </div>
+                  {errors.thumbnailUrl && (
+                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.thumbnailUrl.message}
                     </p>
                   )}
                 </div>
@@ -518,18 +593,18 @@ const Page = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-200">
               <button
                 type="button"
                 onClick={() => router.push("/courses")}
-                className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all"
+                className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isUpdating}
-                className="flex-1 group relative cursor-pointer flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 text-white font-semibold rounded-xl hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 hover:scale-105 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                className="flex-1 group relative flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 text-white font-semibold rounded-xl hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 hover:scale-105 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 cursor-pointer"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                 {isUpdating ? (
@@ -559,8 +634,8 @@ const Page = () => {
                 Editing Course #{id}
               </h3>
               <ul className="text-sm text-blue-700 space-y-1">
-                <li>• All fields are required for course information</li>
-                <li>• End date must be after the start date</li>
+                <li>• Fill in all required fields marked with *</li>
+                <li>• Optional fields can be left empty</li>
                 <li>• Changes will be saved immediately upon submission</li>
               </ul>
             </div>

@@ -314,41 +314,24 @@ export const api = createApi({
         name: string;
         code: string;
         description: string;
-        price: number;
-        durationInHours: number;
-        maxStudents?: number | null;
-        startDate: string;
-        endDate: string;
+        estimatedDurationHours: number;
+        level: number;
+        learningOutcomes: string;
+        prerequisites: string | null;
+        language: string | null;
+        tags: string | null;
+        thumbnailUrl: string | null;
         categoryId: number;
       }
     >({
-      query: ({
-        name,
-        code,
-        description,
-        price,
-        durationInHours,
-        maxStudents,
-        startDate,
-        endDate,
-        categoryId,
-      }) => ({
+      query: (payload) => ({
         url: `/courses`,
         method: "POST",
-        body: {
-          name,
-          code,
-          description,
-          price,
-          durationInHours,
-          maxStudents,
-          startDate,
-          endDate,
-          categoryId,
-        },
+        body: payload,
       }),
       invalidatesTags: ["Courses"],
     }),
+
     addEnrollment: builder.mutation<
       void,
       { studentId: number; courseId: number }
@@ -527,39 +510,24 @@ export const api = createApi({
         name: string;
         code: string;
         description: string;
-        price: number;
-        durationInHours: number;
-        startDate: string;
-        endDate: string;
+        estimatedDurationHours: number;
+        level: number;
+        language: string | null;
+        tags: string | null;
+        learningOutcomes: string;
+        prerequisites: string | null;
+        thumbnailUrl: string | null;
         categoryId: number;
       }
     >({
-      query: ({
-        id,
-        name,
-        code,
-        description,
-        price,
-        durationInHours,
-        startDate,
-        endDate,
-        categoryId,
-      }) => ({
+      query: ({ id, ...payload }) => ({
         url: `/courses/${id}`,
         method: "PATCH",
-        body: {
-          name,
-          code,
-          description,
-          price,
-          durationInHours,
-          startDate,
-          endDate,
-          categoryId,
-        },
+        body: payload,
       }),
       invalidatesTags: ["Courses"],
     }),
+
     getClasses: builder.query<any[], void>({
       query: () => "/classes",
       providesTags: ["Classes"],
@@ -659,6 +627,7 @@ export const api = createApi({
       query: () => ({
         url: "/leads/export",
         method: "GET",
+
         responseHandler: async (response) => {
           // Return the blob directly
           return response.blob();

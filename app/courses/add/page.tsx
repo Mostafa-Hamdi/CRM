@@ -15,12 +15,14 @@ import {
   CheckCircle,
   AlertCircle,
   ChevronDown,
-  DollarSign,
   Clock,
-  Users,
-  Calendar,
   FileText,
   Hash,
+  Target,
+  Award,
+  Globe,
+  Tag,
+  Image,
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
@@ -54,48 +56,49 @@ const courseSchema = yup.object({
     .min(10, "Description must be at least 10 characters")
     .max(1000, "Description must not exceed 1000 characters")
     .trim(),
-  price: yup
-    .number()
-    .required("Price is required")
-    .positive("Price must be greater than 0")
-    .max(999999, "Price is too high")
-    .typeError("Price must be a valid number"),
-  durationInHours: yup
+  estimatedDurationHours: yup
     .number()
     .required("Duration is required")
     .positive("Duration must be greater than 0")
     .integer("Duration must be a whole number")
     .max(10000, "Duration is too high")
     .typeError("Duration must be a valid number"),
-  maxStudents: yup
+  level: yup
     .number()
-    .transform((value, originalValue) => (originalValue === "" ? null : value))
+    .required("Level is required")
+    .oneOf([1, 2, 3], "Please select a valid level")
+    .typeError("Please select a level"),
+  learningOutcomes: yup
+    .string()
+    .required("Learning outcomes are required")
+    .min(10, "Learning outcomes must be at least 10 characters")
+    .max(2000, "Learning outcomes must not exceed 2000 characters")
+    .trim(),
+  prerequisites: yup
+    .string()
     .nullable()
-    .positive("Max students must be greater than 0")
-    .integer("Max students must be a whole number")
-    .max(10000, "Max students is too high")
+    .transform((value) => (value === "" ? null : value))
+    .max(1000, "Prerequisites must not exceed 1000 characters")
     .default(null),
-  startDate: yup
+  language: yup
     .string()
-    .required("Start date is required")
-    .test("is-valid-date", "Invalid date format", (value) => {
-      return !isNaN(Date.parse(value));
-    }),
-  endDate: yup
+    .nullable()
+    .transform((value) => (value === "" ? null : value))
+    .max(50, "Language must not exceed 50 characters")
+    .default(null),
+  tags: yup
     .string()
-    .required("End date is required")
-    .test("is-valid-date", "Invalid date format", (value) => {
-      return !isNaN(Date.parse(value));
-    })
-    .test(
-      "is-after-start",
-      "End date must be after start date",
-      function (value) {
-        const { startDate } = this.parent;
-        if (!startDate || !value) return true;
-        return new Date(value) > new Date(startDate);
-      },
-    ),
+    .nullable()
+    .transform((value) => (value === "" ? null : value))
+    .max(500, "Tags must not exceed 500 characters")
+    .default(null),
+  thumbnailUrl: yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? null : value))
+    .url("Must be a valid URL")
+    .max(500, "URL must not exceed 500 characters")
+    .default(null),
   categoryId: yup
     .number()
     .required("Category is required")
@@ -122,7 +125,11 @@ const Page = () => {
     mode: "onChange",
     defaultValues: {
       categoryId: 0,
-      maxStudents: null,
+      level: 1,
+      prerequisites: null,
+      language: null,
+      tags: null,
+      thumbnailUrl: null,
     },
   });
 
@@ -132,12 +139,14 @@ const Page = () => {
         name: data.name,
         code: data.code,
         description: data.description,
-        price: data.price,
-        durationInHours: data.durationInHours,
-        startDate: data.startDate,
-        endDate: data.endDate,
+        estimatedDurationHours: data.estimatedDurationHours,
+        level: data.level,
+        learningOutcomes: data.learningOutcomes,
+        prerequisites: data.prerequisites || null,
+        language: data.language || null,
+        tags: data.tags || null,
+        thumbnailUrl: data.thumbnailUrl || null,
         categoryId: data.categoryId,
-        maxStudents: data.maxStudents,
       }).unwrap();
 
       await Swal.fire({
@@ -346,41 +355,10 @@ const Page = () => {
                 Course Details
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Price */}
-                <div>
-                  <label
-                    htmlFor="price"
-                    className="block text-sm font-semibold text-gray-700 mb-2"
-                  >
-                    Price <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                      id="price"
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      {...register("price")}
-                      className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
-                        errors.price
-                          ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
-                          : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
-                      } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:bg-white transition-all`}
-                    />
-                  </div>
-                  {errors.price && (
-                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="w-4 h-4" />
-                      {errors.price.message}
-                    </p>
-                  )}
-                </div>
-
                 {/* Duration */}
                 <div>
                   <label
-                    htmlFor="durationInHours"
+                    htmlFor="estimatedDurationHours"
                     className="block text-sm font-semibold text-gray-700 mb-2"
                   >
                     Duration (Hours) <span className="text-red-500">*</span>
@@ -388,112 +366,201 @@ const Page = () => {
                   <div className="relative">
                     <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
-                      id="durationInHours"
+                      id="estimatedDurationHours"
                       type="number"
                       placeholder="0"
-                      {...register("durationInHours")}
+                      {...register("estimatedDurationHours")}
                       className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
-                        errors.durationInHours
+                        errors.estimatedDurationHours
                           ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
                           : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
                       } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:bg-white transition-all`}
                     />
                   </div>
-                  {errors.durationInHours && (
+                  {errors.estimatedDurationHours && (
                     <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
                       <AlertCircle className="w-4 h-4" />
-                      {errors.durationInHours.message}
+                      {errors.estimatedDurationHours.message}
                     </p>
                   )}
                 </div>
 
-                {/* Max Students */}
+                {/* Level */}
                 <div>
                   <label
-                    htmlFor="maxStudents"
+                    htmlFor="level"
                     className="block text-sm font-semibold text-gray-700 mb-2"
                   >
-                    Max Students
+                    Level <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                      id="maxStudents"
-                      type="number"
-                      placeholder="Optional"
-                      {...register("maxStudents")}
+                    <Award className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <select
+                      id="level"
+                      {...register("level")}
                       className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
-                        errors.maxStudents
+                        errors.level
+                          ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                          : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                      } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 focus:outline-none focus:ring-4 focus:bg-white transition-all appearance-none cursor-pointer`}
+                    >
+                      <option value={1}>Beginner</option>
+                      <option value={2}>Intermediate</option>
+                      <option value={3}>Advanced</option>
+                    </select>
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                  </div>
+                  {errors.level && (
+                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.level.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Language */}
+                <div>
+                  <label
+                    htmlFor="language"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                  >
+                    Language
+                  </label>
+                  <div className="relative">
+                    <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      id="language"
+                      type="text"
+                      placeholder="e.g., English"
+                      {...register("language")}
+                      className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
+                        errors.language
                           ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
                           : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
                       } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:bg-white transition-all`}
                     />
                   </div>
-                  {errors.maxStudents && (
+                  {errors.language && (
                     <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
                       <AlertCircle className="w-4 h-4" />
-                      {errors.maxStudents.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Schedule Section */}
-            <div className="border-t border-gray-200 pt-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-blue-600" />
-                Schedule
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Start Date */}
-                <div>
-                  <label
-                    htmlFor="startDate"
-                    className="block text-sm font-semibold text-gray-700 mb-2"
-                  >
-                    Start Date <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="startDate"
-                    type="date"
-                    {...register("startDate")}
-                    className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
-                      errors.startDate
-                        ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
-                        : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
-                    } rounded-xl px-4 py-3.5 text-gray-900 focus:outline-none focus:ring-4 focus:bg-white transition-all`}
-                  />
-                  {errors.startDate && (
-                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                      <AlertCircle className="w-4 h-4" />
-                      {errors.startDate.message}
+                      {errors.language.message}
                     </p>
                   )}
                 </div>
 
-                {/* End Date */}
-                <div>
+                {/* Learning Outcomes */}
+                <div className="md:col-span-3">
                   <label
-                    htmlFor="endDate"
+                    htmlFor="learningOutcomes"
                     className="block text-sm font-semibold text-gray-700 mb-2"
                   >
-                    End Date <span className="text-red-500">*</span>
+                    Learning Outcomes <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    id="endDate"
-                    type="date"
-                    {...register("endDate")}
-                    className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
-                      errors.endDate
-                        ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
-                        : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
-                    } rounded-xl px-4 py-3.5 text-gray-900 focus:outline-none focus:ring-4 focus:bg-white transition-all`}
-                  />
-                  {errors.endDate && (
+                  <div className="relative">
+                    <Target className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
+                    <textarea
+                      id="learningOutcomes"
+                      rows={4}
+                      placeholder="What will students learn? List the key outcomes..."
+                      {...register("learningOutcomes")}
+                      className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
+                        errors.learningOutcomes
+                          ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                          : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                      } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:bg-white transition-all resize-none`}
+                    />
+                  </div>
+                  {errors.learningOutcomes && (
                     <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
                       <AlertCircle className="w-4 h-4" />
-                      {errors.endDate.message}
+                      {errors.learningOutcomes.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Prerequisites */}
+                <div className="md:col-span-3">
+                  <label
+                    htmlFor="prerequisites"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                  >
+                    Prerequisites
+                  </label>
+                  <textarea
+                    id="prerequisites"
+                    rows={3}
+                    placeholder="What should students know before taking this course? (Optional)"
+                    {...register("prerequisites")}
+                    className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
+                      errors.prerequisites
+                        ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                        : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                    } rounded-xl px-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:bg-white transition-all resize-none`}
+                  />
+                  {errors.prerequisites && (
+                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.prerequisites.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Tags */}
+                <div className="md:col-span-2">
+                  <label
+                    htmlFor="tags"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                  >
+                    Tags
+                  </label>
+                  <div className="relative">
+                    <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      id="tags"
+                      type="text"
+                      placeholder="e.g., web, javascript, react (comma separated)"
+                      {...register("tags")}
+                      className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
+                        errors.tags
+                          ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                          : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                      } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:bg-white transition-all`}
+                    />
+                  </div>
+                  {errors.tags && (
+                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.tags.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Thumbnail URL */}
+                <div className="md:col-span-2">
+                  <label
+                    htmlFor="thumbnailUrl"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                  >
+                    Thumbnail URL
+                  </label>
+                  <div className="relative">
+                    <Image className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      id="thumbnailUrl"
+                      type="url"
+                      placeholder="https://example.com/image.jpg"
+                      {...register("thumbnailUrl")}
+                      className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
+                        errors.thumbnailUrl
+                          ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                          : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
+                      } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:bg-white transition-all`}
+                    />
+                  </div>
+                  {errors.thumbnailUrl && (
+                    <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.thumbnailUrl.message}
                     </p>
                   )}
                 </div>
@@ -505,7 +572,7 @@ const Page = () => {
               <button
                 type="button"
                 onClick={() => router.push("/courses")}
-                className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all"
+                className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all cursor-pointer"
               >
                 Cancel
               </button>
@@ -513,7 +580,7 @@ const Page = () => {
                 type="button"
                 onClick={handleSubmit(onSubmit)}
                 disabled={isLoading || categoriesLoading}
-                className="flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isLoading ? (
                   <>
