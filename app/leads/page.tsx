@@ -3,11 +3,13 @@
 import {
   useConvertStatusMutation,
   useDeleteLeadMutation,
+  useExportLeadsMutation,
   useGetCoursesQuery,
   useGetFilteredLeadsMutation,
   useGetSpecificLeadsMutation,
+  useImportLeadsMutation,
 } from "@/store/api/apiSlice";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import {
   Search,
   Plus,
@@ -31,6 +33,10 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Upload,
+  Download,
+  AlertCircle,
+  Check,
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
@@ -51,6 +57,13 @@ interface Course {
   name: string;
 }
 
+interface ImportResult {
+  success: boolean;
+  imported: number;
+  failed: number;
+  errors?: string[];
+}
+
 const Page = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<number>(0);
@@ -62,6 +75,12 @@ const Page = () => {
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [leadsResponse, setLeadsResponse] = useState<any>(null);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<{
+    name: string;
+    size: number;
+  } | null>(null);
 
   const [getSpecificLeads, { isLoading }] = useGetSpecificLeadsMutation();
   const { data: courses, isLoading: coursesIsLoading } = useGetCoursesQuery();
@@ -70,6 +89,9 @@ const Page = () => {
     useConvertStatusMutation();
   const [getFilteredLeads, { isLoading: isFilterLoading }] =
     useGetFilteredLeadsMutation();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importLeads, { isLoading: importLoading }] = useImportLeadsMutation();
+  const [exportLeads, { isLoading: exportLoading }] = useExportLeadsMutation();
 
   const leads = leadsResponse?.data;
 
@@ -107,7 +129,6 @@ const Page = () => {
     setActiveFilter(statusId);
 
     if (statusId === 0) {
-      // Fetch all leads again
       try {
         const result = await getSpecificLeads({
           pageNumber,
@@ -168,7 +189,6 @@ const Page = () => {
         timer: 2000,
       });
 
-      // Refresh the current page
       const result = await getSpecificLeads({ pageNumber, pageSize }).unwrap();
       setLeadsResponse(result);
       setDisplayedLeads(result.data);
@@ -181,7 +201,6 @@ const Page = () => {
     }
   };
 
-  // Open convert modal
   const handleConvertClick = (lead: Lead) => {
     setSelectedLead(lead);
     setSelectedCourseId(0);
@@ -189,7 +208,6 @@ const Page = () => {
     setShowConvertModal(true);
   };
 
-  // Close convert modal
   const handleCloseModal = () => {
     setShowConvertModal(false);
     setSelectedLead(null);
@@ -197,7 +215,6 @@ const Page = () => {
     setPaidAmount("");
   };
 
-  // Submit conversion
   const handleConvertSubmit = async () => {
     if (!selectedLead) return;
 
@@ -235,7 +252,6 @@ const Page = () => {
 
       handleCloseModal();
 
-      // Refresh the current page
       const result = await getSpecificLeads({ pageNumber, pageSize }).unwrap();
       setLeadsResponse(result);
       setDisplayedLeads(result.data);
@@ -256,7 +272,6 @@ const Page = () => {
     }
   };
 
-  // Format date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -266,7 +281,6 @@ const Page = () => {
     });
   };
 
-  // Get status badge color
   const getStatusColor = (status: number) => {
     const colors: { [key: number]: string } = {
       1: "from-blue-100 to-cyan-100 border-blue-200 text-blue-700",
@@ -283,7 +297,6 @@ const Page = () => {
     );
   };
 
-  // Generate random colors for lead icons
   const getColorForLead = (index: number) => {
     const colors = [
       "from-blue-600 to-cyan-600",
@@ -296,6 +309,210 @@ const Page = () => {
       "from-amber-600 to-orange-600",
     ];
     return colors[index % colors.length];
+  };
+
+  // Validate file before upload
+  const validateImportFile = (file: File): string | null => {
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const allowedExtensions = [".csv", ".xlsx", ".xls"];
+
+    if (file.size > maxSize) {
+      return "File size must be less than 10MB";
+    }
+
+    const fileExtension = file.name
+      .toLowerCase()
+      .substring(file.name.lastIndexOf("."));
+    if (!allowedExtensions.includes(fileExtension)) {
+      return "Only CSV, XLS, and XLSX files are allowed";
+    }
+
+    return null;
+  };
+
+  const handleImportClick = () => {
+    setShowImportModal(true);
+    setSelectedFile(null);
+    setFilePreview(null);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const error = validateImportFile(file);
+    if (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid File",
+        text: error,
+      });
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+
+    // Store file reference and preview info separately
+    setSelectedFile(file);
+    setFilePreview({
+      name: file.name,
+      size: file.size,
+    });
+  };
+
+  const handleCloseImportModal = () => {
+    setShowImportModal(false);
+    setSelectedFile(null);
+    setFilePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleImportSubmit = async () => {
+    if (!selectedFile) {
+      Swal.fire({
+        icon: "warning",
+        title: "No File Selected",
+        text: "Please select a file to import.",
+      });
+      return;
+    }
+
+    // Create FormData here, right before the API call
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    try {
+      const result = await importLeads(formData).unwrap();
+
+      let successCount = 0;
+      let failCount = 0;
+      let errorMessages: string[] = [];
+
+      if (typeof result === "object" && result !== null) {
+        if ("imported" in result) successCount = result.imported || 0;
+        if ("failed" in result) failCount = result.failed || 0;
+        if ("errors" in result && Array.isArray(result.errors)) {
+          errorMessages = result.errors;
+        }
+      }
+
+      handleCloseImportModal();
+
+      if (failCount > 0) {
+        const errorList =
+          errorMessages.length > 0
+            ? `<ul class="text-left mt-2 max-h-48 overflow-y-auto">${errorMessages
+                .slice(0, 10)
+                .map((err) => `<li class="text-sm">• ${err}</li>`)
+                .join("")}</ul>${
+                errorMessages.length > 10
+                  ? `<p class="text-sm mt-2">...and ${errorMessages.length - 10} more errors</p>`
+                  : ""
+              }`
+            : "";
+
+        await Swal.fire({
+          icon: "warning",
+          title: "Import Partially Completed",
+          html: `
+            <div class="text-center">
+              <p class="mb-2"><strong>${successCount}</strong> leads imported successfully</p>
+              <p class="mb-2"><strong>${failCount}</strong> leads failed to import</p>
+              ${errorList}
+            </div>
+          `,
+          confirmButtonColor: "#2563eb",
+        });
+      } else {
+        await Swal.fire({
+          icon: "success",
+          title: "Import Successful!",
+          html: `<p><strong>${successCount}</strong> leads imported successfully</p>`,
+          timer: 2500,
+          confirmButtonColor: "#2563eb",
+        });
+      }
+
+      const leadsResult = await getSpecificLeads({
+        pageNumber,
+        pageSize,
+      }).unwrap();
+      setLeadsResponse(leadsResult);
+      setDisplayedLeads(leadsResult.data);
+    } catch (err: any) {
+      handleCloseImportModal();
+
+      let errorMessage =
+        "Failed to import leads. Please check your file format and try again.";
+      if (err?.data?.message) {
+        errorMessage = err.data.message;
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+
+      Swal.fire({
+        icon: "error",
+        title: "Import Failed",
+        text: errorMessage,
+        confirmButtonColor: "#2563eb",
+      });
+    }
+  };
+
+  const handleExport = async () => {
+    if (!leads || leads.length === 0) {
+      Swal.fire({
+        icon: "info",
+        title: "No Data to Export",
+        text: "There are no leads to export.",
+        confirmButtonColor: "#2563eb",
+      });
+      return;
+    }
+
+    try {
+      const blob = await exportLeads().unwrap();
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+
+      const timestamp = new Date().toISOString().split("T")[0];
+      const filename = `leads-export-${timestamp}.csv`;
+
+      a.href = url;
+      a.download = filename;
+
+      document.body.appendChild(a);
+      a.click();
+
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      await Swal.fire({
+        icon: "success",
+        title: "Export Successful!",
+        html: `<p><strong>${leadsResponse?.totalCount || leads.length}</strong> leads exported to <strong>${filename}</strong></p>`,
+        timer: 2500,
+        confirmButtonColor: "#2563eb",
+      });
+    } catch (err: any) {
+      let errorMessage = "Failed to export leads. Please try again.";
+      if (err?.data?.message) {
+        errorMessage = err.data.message;
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+
+      Swal.fire({
+        icon: "error",
+        title: "Export Failed",
+        text: errorMessage,
+        confirmButtonColor: "#2563eb",
+      });
+    }
   };
 
   return (
@@ -329,7 +546,7 @@ const Page = () => {
 
             <Link
               href={"/leads/add"}
-              className="group relative cursor-pointer flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 text-white font-semibold rounded-2xl hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 hover:scale-105 overflow-hidden"
+              className="group relative flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 text-white font-semibold rounded-2xl hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 hover:scale-105 overflow-hidden cursor-pointer"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
               <Plus className="w-5 h-5 relative z-10" />
@@ -458,7 +675,7 @@ const Page = () => {
                   key={filter.id}
                   onClick={() => handleStatusFilter(filter.id)}
                   disabled={isFilterLoading}
-                  className={`cursor-pointer group relative cursor-pointer flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 overflow-hidden ${
+                  className={`group relative flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 overflow-hidden cursor-pointer ${
                     isActive
                       ? `bg-gradient-to-r ${filter.color} text-white shadow-lg hover:shadow-xl`
                       : "bg-white/50 text-gray-700 border border-gray-200 hover:border-gray-300 hover:bg-white"
@@ -497,6 +714,35 @@ const Page = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all"
               />
+            </div>
+            <div className="flex items-center gap-3">
+              {/* Import Button */}
+              <button
+                onClick={handleImportClick}
+                disabled={importLoading}
+                className="group relative flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-2xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {importLoading ? (
+                  <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-700 rounded-full animate-spin" />
+                ) : (
+                  <Upload className="w-5 h-5" />
+                )}
+                <span>Import</span>
+              </button>
+
+              {/* Export Button */}
+              <button
+                onClick={handleExport}
+                disabled={exportLoading}
+                className="group relative flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-2xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {exportLoading ? (
+                  <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-700 rounded-full animate-spin" />
+                ) : (
+                  <Download className="w-5 h-5" />
+                )}
+                <span>Export</span>
+              </button>
             </div>
             <div className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 border border-blue-400 rounded-xl shadow-lg shadow-blue-500/30">
               <TrendingUp className="w-5 h-5 text-white" />
@@ -671,7 +917,7 @@ const Page = () => {
                         <div className="flex items-center justify-center">
                           <Link
                             href={`/leads/${lead.id}/notes`}
-                            className="cursor-pointer p-2.5 text-amber-600 hover:text-white bg-amber-50 hover:bg-gradient-to-r hover:from-amber-600 hover:to-orange-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/30 group"
+                            className="p-2.5 text-amber-600 hover:text-white bg-amber-50 hover:bg-gradient-to-r hover:from-amber-600 hover:to-orange-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/30 group cursor-pointer"
                             title="View notes"
                           >
                             <FileText className="w-5 h-5" />
@@ -685,7 +931,7 @@ const Page = () => {
                           <button
                             onClick={() => handleConvertClick(lead)}
                             disabled={lead.status === 7}
-                            className={`cursor-pointer p-2.5 rounded-xl transition-all duration-300 group ${
+                            className={`p-2.5 rounded-xl transition-all duration-300 group cursor-pointer ${
                               lead.status === 7
                                 ? "text-gray-400 bg-gray-50 cursor-not-allowed"
                                 : "text-emerald-600 hover:text-white bg-emerald-50 hover:bg-gradient-to-r hover:from-emerald-600 hover:to-teal-600 hover:shadow-lg hover:shadow-emerald-500/30"
@@ -706,14 +952,14 @@ const Page = () => {
                         <div className="flex items-center justify-center gap-2">
                           <Link
                             href={`/leads/${lead.id}/edit`}
-                            className="cursor-pointer p-2.5 text-blue-600 hover:text-white bg-blue-50 hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 group"
+                            className="p-2.5 text-blue-600 hover:text-white bg-blue-50 hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 group cursor-pointer"
                             title="Edit lead"
                           >
                             <Edit2 className="w-5 h-5" />
                           </Link>
                           <button
                             onClick={() => handleDelete(lead.id)}
-                            className="cursor-pointer p-2.5 text-red-600 hover:text-white bg-red-50 hover:bg-gradient-to-r hover:from-red-600 hover:to-rose-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-red-500/30 group"
+                            className="p-2.5 text-red-600 hover:text-white bg-red-50 hover:bg-gradient-to-r hover:from-red-600 hover:to-rose-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-red-500/30 group cursor-pointer"
                             title="Delete lead"
                           >
                             <Trash2 className="w-5 h-5" />
@@ -732,7 +978,6 @@ const Page = () => {
         {leadsResponse && leadsResponse.totalPages > 1 && (
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              {/* Page Info */}
               <div className="text-sm text-gray-600">
                 Showing page{" "}
                 <span className="font-bold text-gray-900">{pageNumber}</span> of{" "}
@@ -742,13 +987,11 @@ const Page = () => {
                 ({leadsResponse.totalCount} total leads)
               </div>
 
-              {/* Pagination Buttons */}
               <div className="flex items-center gap-2">
-                {/* Previous Button */}
                 <button
                   onClick={() => setPageNumber(pageNumber - 1)}
                   disabled={pageNumber === 1}
-                  className={`cursor-pointer flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all cursor-pointer ${
                     pageNumber === 1
                       ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                       : "bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-500 hover:text-blue-600 hover:shadow-md"
@@ -758,13 +1001,11 @@ const Page = () => {
                   <span>Previous</span>
                 </button>
 
-                {/* Page Numbers */}
                 <div className="flex items-center gap-1">
                   {Array.from(
                     { length: leadsResponse.totalPages },
                     (_, i) => i + 1,
                   ).map((page) => {
-                    // Show first page, last page, current page, and pages around current
                     if (
                       page === 1 ||
                       page === leadsResponse.totalPages ||
@@ -774,7 +1015,7 @@ const Page = () => {
                         <button
                           key={page}
                           onClick={() => setPageNumber(page)}
-                          className={`cursor-pointer w-10 h-10 rounded-xl font-semibold transition-all ${
+                          className={`w-10 h-10 rounded-xl font-semibold transition-all cursor-pointer ${
                             page === pageNumber
                               ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
                               : "bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-500 hover:text-blue-600 hover:shadow-md"
@@ -800,11 +1041,10 @@ const Page = () => {
                   })}
                 </div>
 
-                {/* Next Button */}
                 <button
                   onClick={() => setPageNumber(pageNumber + 1)}
                   disabled={pageNumber === leadsResponse.totalPages}
-                  className={`cursor-pointer flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all cursor-pointer ${
                     pageNumber === leadsResponse.totalPages
                       ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                       : "bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-500 hover:text-blue-600 hover:shadow-md"
@@ -815,14 +1055,13 @@ const Page = () => {
                 </button>
               </div>
 
-              {/* Page Size Selector */}
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-600 font-medium">Show:</span>
                 <select
                   value={pageSize}
                   onChange={(e) => {
                     setPageSize(parseInt(e.target.value));
-                    setPageNumber(1); // Reset to first page when changing page size
+                    setPageNumber(1);
                   }}
                   className="px-3 py-2 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all cursor-pointer hover:border-blue-400"
                 >
@@ -839,11 +1078,132 @@ const Page = () => {
         )}
       </div>
 
+      {/* Import Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-600 to-cyan-600 p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <Upload className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">
+                      Import Leads
+                    </h2>
+                    <p className="text-cyan-100 text-sm mt-1">
+                      Upload CSV or Excel file
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleCloseImportModal}
+                  className="p-2 hover:bg-white/20 rounded-lg transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5 text-white" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-5">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Select File <span className="text-red-500">*</span>
+                </label>
+
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="relative border-2 border-dashed border-gray-300 rounded-xl p-8 hover:border-blue-500 hover:bg-blue-50/30 transition-all cursor-pointer group"
+                >
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileSelect}
+                    accept=".csv,.xlsx,.xls"
+                    className="hidden"
+                  />
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-blue-200 transition-colors">
+                      <Upload className="w-8 h-8 text-blue-600" />
+                    </div>
+                    {filePreview ? (
+                      <>
+                        <Check className="w-6 h-6 text-green-600 mb-2" />
+                        <p className="text-gray-900 font-semibold">
+                          {filePreview.name}
+                        </p>
+                        <p className="text-gray-500 text-sm mt-1">
+                          {(filePreview.size / 1024).toFixed(2)} KB
+                        </p>
+                        <p className="text-blue-600 text-sm mt-3 font-medium">
+                          Click to change file
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-gray-900 font-semibold mb-1">
+                          Click to upload or drag and drop
+                        </p>
+                        <p className="text-gray-500 text-sm">
+                          CSV, XLS, or XLSX (Max 10MB)
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div className="flex gap-3">
+                  <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-blue-900">
+                    <p className="font-semibold mb-2">File Requirements:</p>
+                    <ul className="space-y-1 text-blue-800">
+                      <li>• Maximum file size: 10MB</li>
+                      <li>• Supported formats: CSV, XLS, XLSX</li>
+                      <li>• Required columns: Full Name, Phone, Email</li>
+                      <li>• Optional: Source, Status, Assigned To</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 bg-gray-50 border-t border-gray-100 flex gap-3">
+              <button
+                onClick={handleCloseImportModal}
+                disabled={importLoading}
+                className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleImportSubmit}
+                disabled={!selectedFile || importLoading}
+                className="flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {importLoading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Importing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-5 h-5" />
+                    <span>Import Leads</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Convert Modal */}
       {showConvertModal && selectedLead && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden">
-            {/* Modal Header */}
             <div className="bg-gradient-to-r from-blue-600 to-cyan-600 p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -861,16 +1221,14 @@ const Page = () => {
                 </div>
                 <button
                   onClick={handleCloseModal}
-                  className="cursor-pointer p-2 hover:bg-white/20 rounded-lg transition-colors"
+                  className="p-2 hover:bg-white/20 rounded-lg transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5 text-white" />
                 </button>
               </div>
             </div>
 
-            {/* Modal Body */}
             <div className="p-6 space-y-5">
-              {/* Course Selection */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Select Course <span className="text-red-500">*</span>
@@ -894,7 +1252,6 @@ const Page = () => {
                 </div>
               </div>
 
-              {/* Paid Amount */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Paid Amount <span className="text-red-500">*</span>
@@ -916,18 +1273,17 @@ const Page = () => {
               </div>
             </div>
 
-            {/* Modal Footer */}
             <div className="p-6 bg-gray-50 border-t border-gray-100 flex gap-3">
               <button
                 onClick={handleCloseModal}
-                className="cursor-pointer flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all"
+                className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConvertSubmit}
                 disabled={isConverting}
-                className="cursor-pointer flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isConverting ? (
                   <>

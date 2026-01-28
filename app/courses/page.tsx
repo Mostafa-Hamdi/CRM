@@ -334,7 +334,7 @@ const Page = () => {
                       <td className="px-6 py-5">
                         <div className="flex items-center justify-center gap-2">
                           <Link
-                            href={`/courses/edit/${course.id}`}
+                            href={`/courses/${course.id}/edit`}
                             className="cursor-pointer p-2.5 text-blue-600 hover:text-white bg-blue-50 hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 group"
                             title="Edit course"
                           >

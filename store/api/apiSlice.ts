@@ -413,7 +413,7 @@ export const api = createApi({
     updateCategory: builder.mutation<any, { id: number; name: string }>({
       query: ({ id, name }) => ({
         url: `/categories/${id}`,
-        method: "PATCH",
+        method: "PUT",
         body: { name },
       }),
       invalidatesTags: ["Categories"],
@@ -545,7 +545,7 @@ export const api = createApi({
         endDate,
         categoryId,
       }) => ({
-        url: `/students/${id}`,
+        url: `/courses/${id}`,
         method: "PATCH",
         body: {
           name,
@@ -564,9 +564,9 @@ export const api = createApi({
       query: () => "/classes",
       providesTags: ["Classes"],
     }),
-    deleteClass: builder.mutation<void, { id: number }>({
-      query: ({ id }) => ({
-        url: `/classes/${id}`,
+    deleteClass: builder.mutation<void, { courseId: number; id: number }>({
+      query: ({ courseId, id }) => ({
+        url: `/courses/${courseId}/classes/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Classes"],
@@ -616,6 +616,56 @@ export const api = createApi({
         },
       }),
       invalidatesTags: ["Classes"],
+    }),
+    deleteRole: builder.mutation<void, { id: number }>({
+      query: ({ id }) => ({
+        url: `/roles/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Roles"],
+    }),
+    getPermissions: builder.query<any[], void>({
+      query: () => "/permissions",
+      // providesTags: ["Classes"],
+    }),
+    addRole: builder.mutation<
+      void,
+      {
+        name: string;
+      }
+    >({
+      query: ({ name }) => ({
+        url: `/roles`,
+        method: "POST",
+        body: {
+          name,
+        },
+      }),
+      invalidatesTags: ["Roles"],
+    }), // Import leads from file
+    importLeads: builder.mutation<any, FormData>({
+      query: (formData) => ({
+        url: "/leads/import",
+        method: "POST",
+        body: formData,
+        // Important: Let the browser set Content-Type for FormData
+        // Don't manually set it - the browser adds the boundary
+      }),
+      invalidatesTags: ["Leads"],
+    }),
+
+    // Export leads - CORRECTED
+    exportLeads: builder.mutation<Blob, void>({
+      query: () => ({
+        url: "/leads/export",
+        method: "GET",
+        responseHandler: async (response) => {
+          // Return the blob directly
+          return response.blob();
+        },
+        // Ensure we don't try to parse as JSON
+        cache: "no-cache",
+      }),
     }),
   }),
 });
@@ -673,4 +723,8 @@ export const {
   useGetClassesQuery,
   useDeleteClassMutation,
   useAddClassMutation,
+  useDeleteRoleMutation,
+  useAddRoleMutation,
+  useImportLeadsMutation,
+  useExportLeadsMutation,
 } = api;

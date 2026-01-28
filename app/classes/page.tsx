@@ -34,6 +34,10 @@ interface Class {
   instructorName: string;
   isActive: boolean;
   createdAt: string;
+  course: {
+    id: number;
+    name: string;
+  };
 }
 
 const Page = () => {
@@ -73,7 +77,7 @@ const Page = () => {
     return result;
   }, [classes, searchQuery, activeFilter]);
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: number, courseId: number) => {
     const result = await Swal.fire({
       title: "😢 Are you sure you want to delete this class?",
       icon: "warning",
@@ -87,18 +91,26 @@ const Page = () => {
     if (!result.isConfirmed) return;
 
     try {
-      await deleteClass({ id }).unwrap();
+      await deleteClass({ id, courseId }).unwrap();
+
       await Swal.fire({
         icon: "success",
         title: "Deleted!",
         text: "Class has been deleted successfully.",
         timer: 2000,
       });
-    } catch (err) {
+    } catch (err: any) {
+      console.error(err);
+
+      const errorMessage =
+        err?.data?.message ||
+        err?.error ||
+        "Something went wrong while deleting the class.";
+
       Swal.fire({
         icon: "error",
         title: "Oops!",
-        text: "Failed to delete class.",
+        text: errorMessage,
       });
     }
   };
@@ -497,7 +509,9 @@ const Page = () => {
                             <Edit2 className="w-5 h-5" />
                           </Link>
                           <button
-                            onClick={() => handleDelete(classItem.id)}
+                            onClick={() =>
+                              handleDelete(classItem.id, classItem.course.id)
+                            }
                             className="cursor-pointer p-2.5 text-red-600 hover:text-white bg-red-50 hover:bg-gradient-to-r hover:from-red-600 hover:to-rose-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-red-500/30 group"
                             title="Delete class"
                           >

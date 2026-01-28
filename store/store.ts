@@ -29,11 +29,32 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
   reducer: persistedReducer,
-
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+        // Ignore Redux Persist actions
+        ignoredActions: [
+          FLUSH,
+          REHYDRATE,
+          PAUSE,
+          PERSIST,
+          PURGE,
+          REGISTER,
+          // Also ignore RTK Query file operations
+          "api/executeMutation/pending",
+          "api/executeMutation/fulfilled",
+          "api/executeMutation/rejected",
+        ],
+        // Ignore file-related paths in actions and state
+        ignoredActionPaths: [
+          "meta.arg", // FormData for imports
+          "meta.baseQueryMeta", // Response metadata
+          "payload", // Blob for exports
+        ],
+        ignoredPaths: [
+          "api.mutations", // All mutation state (includes FormData/Blob)
+          "api.queries", // All query state
+        ],
       },
     }).concat(api.middleware),
 });

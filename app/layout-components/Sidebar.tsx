@@ -143,8 +143,8 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
           icon: Shield,
           label: "Roles",
           subItems: [
-            { icon: List, label: "All Roles", link: "/dashboard/roles" },
-            { icon: Plus, label: "Add Role", link: "/dashboard/roles/add" },
+            { icon: List, label: "All Roles", link: "/roles" },
+            { icon: Plus, label: "Add Role", link: "/roles/add" },
             {
               icon: EditIcon,
               label: "Edit Role",
