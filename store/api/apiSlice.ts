@@ -443,7 +443,14 @@ export const api = createApi({
       }),
       invalidatesTags: ["Classes"],
     }),
-
+    convertClassStatus: builder.mutation<void, { id: number; status: number }>({
+      query: ({ id, status }) => ({
+        url: `/classes/${id}/status`,
+        method: "PUT",
+        body: { status },
+      }),
+      invalidatesTags: ["Classes"],
+    }),
     /* =========================
        ENROLLMENT ENDPOINTS
        ========================= */
@@ -807,7 +814,7 @@ export const {
   useAddClassMutation,
   useUpdateClassMutation,
   useDeleteClassMutation,
-
+  useConvertClassStatusMutation,
   // Enrollments
   useGetEnrollmentsQuery,
   useGetEnrollmentQuery,
