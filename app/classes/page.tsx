@@ -81,7 +81,7 @@ const Page = () => {
     return result;
   }, [classes, searchQuery, activeFilter]);
 
-  const handleDelete = async (id: number, courseId: number) => {
+  const handleDelete = async (id: number) => {
     const result = await Swal.fire({
       title: "😢 Are you sure you want to delete this class?",
       icon: "warning",
@@ -95,7 +95,7 @@ const Page = () => {
     if (!result.isConfirmed) return;
 
     try {
-      await deleteClass({ id, courseId }).unwrap();
+      await deleteClass({ id }).unwrap();
 
       await Swal.fire({
         icon: "success",
@@ -532,9 +532,7 @@ const Page = () => {
                             <Edit2 className="w-5 h-5" />
                           </Link>
                           <button
-                            onClick={() =>
-                              handleDelete(classItem.id, classItem.course.id)
-                            }
+                            onClick={() => handleDelete(classItem.id)}
                             className="cursor-pointer p-2.5 text-red-600 hover:text-white bg-red-50 hover:bg-gradient-to-r hover:from-red-600 hover:to-rose-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-red-500/30 group"
                             title="Delete class"
                           >

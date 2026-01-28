@@ -100,7 +100,9 @@ export const api = createApi({
     "Classes",
   ],
   endpoints: (builder) => ({
-    /* ---------- AUTH ---------- */
+    /* =========================
+       AUTHENTICATION ENDPOINTS
+       ========================= */
 
     login: builder.mutation<LoginResponse, { email: string; password: string }>(
       {
@@ -109,7 +111,6 @@ export const api = createApi({
           method: "POST",
           body,
         }),
-
         async onQueryStarted(_, { dispatch, queryFulfilled }) {
           try {
             const { data } = await queryFulfilled;
@@ -136,23 +137,13 @@ export const api = createApi({
       query: () => "/auth/me",
     }),
 
-    /* ---------- USERS ---------- */
+    /* =========================
+       USER ENDPOINTS
+       ========================= */
 
     getUsers: builder.query<any[], void>({
       query: () => "/users",
       providesTags: ["Users"],
-    }),
-
-    toggleUserStatus: builder.mutation<void, { id: number; status: boolean }>({
-      query: ({ id, status }) => ({
-        url: `/users/${id}/status`,
-        method: "PUT",
-        body: JSON.stringify(status),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
-      invalidatesTags: ["Users"],
     }),
 
     addUser: builder.mutation<void, any>({
@@ -167,25 +158,91 @@ export const api = createApi({
       invalidatesTags: ["Users"],
     }),
 
+    toggleUserStatus: builder.mutation<void, { id: number; status: boolean }>({
+      query: ({ id, status }) => ({
+        url: `/users/${id}/status`,
+        method: "PUT",
+        body: JSON.stringify(status),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
+      invalidatesTags: ["Users"],
+    }),
+
     resetPass: builder.mutation<void, { id: number; newPassword: string }>({
       query: ({ id, newPassword }) => ({
         url: `/users/${id}/reset-password`,
         method: "PUT",
-        body: { newPassword }, // ✅ correct shape
+        body: { newPassword },
       }),
+      invalidatesTags: ["Users"],
     }),
 
-    /* ---------- ROLES ---------- */
+    /* =========================
+       ROLE & PERMISSION ENDPOINTS
+       ========================= */
 
     getRoles: builder.query<any[], void>({
       query: () => "/roles",
       providesTags: ["Roles"],
     }),
-    // Categories
+
+    addRole: builder.mutation<void, { name: string }>({
+      query: ({ name }) => ({
+        url: "/roles",
+        method: "POST",
+        body: { name },
+      }),
+      invalidatesTags: ["Roles"],
+    }),
+
+    deleteRole: builder.mutation<void, { id: number }>({
+      query: ({ id }) => ({
+        url: `/roles/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Roles"],
+    }),
+
+    getPermissions: builder.query<any[], void>({
+      query: () => "/permissions",
+    }),
+
+    /* =========================
+       CATEGORY ENDPOINTS
+       ========================= */
+
     getCategories: builder.query<any[], void>({
       query: () => "/categories",
       providesTags: ["Categories"],
     }),
+
+    getCategory: builder.query<any, { id: number }>({
+      query: ({ id }) => ({
+        url: `/categories/${id}`,
+      }),
+      providesTags: ["Categories"],
+    }),
+
+    addCategory: builder.mutation<void, { name: string }>({
+      query: ({ name }) => ({
+        url: "/categories",
+        method: "POST",
+        body: { name },
+      }),
+      invalidatesTags: ["Categories"],
+    }),
+
+    updateCategory: builder.mutation<any, { id: number; name: string }>({
+      query: ({ id, name }) => ({
+        url: `/categories/${id}`,
+        method: "PUT",
+        body: { name },
+      }),
+      invalidatesTags: ["Categories"],
+    }),
+
     deleteCategory: builder.mutation<void, { id: number }>({
       query: ({ id }) => ({
         url: `/categories/${id}`,
@@ -193,121 +250,23 @@ export const api = createApi({
       }),
       invalidatesTags: ["Categories"],
     }),
-    // Courses
+
+    /* =========================
+       COURSE ENDPOINTS
+       ========================= */
+
     getCourses: builder.query<any[], void>({
       query: () => "/courses",
       providesTags: ["Courses"],
     }),
-    deleteCourse: builder.mutation<void, { id: number }>({
+
+    getCourse: builder.query<any, { id: number }>({
       query: ({ id }) => ({
         url: `/courses/${id}`,
-        method: "DELETE",
       }),
-      invalidatesTags: ["Courses"],
-    }),
-    // Enrollments
-    getEnrollments: builder.query<any[], void>({
-      query: () => "/enrollments",
-      providesTags: ["Enrollments"],
-    }),
-    getFilteredEnrollments: builder.mutation<any, { statusId: number }>({
-      query: ({ statusId }) => ({
-        url: `/enrollments?status=${statusId}`,
-        method: "GET",
-      }),
-    }),
-    deleteEnrollment: builder.mutation<void, { id: number }>({
-      query: ({ id }) => ({
-        url: `/enrollments/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Enrollments"],
-    }),
-    // Leads
-    getLeads: builder.query<{ data: any }, void>({
-      query: () => "/leads",
-      providesTags: ["Leads"],
-    }),
-    getSpecificLeads: builder.mutation<
-      { data: any },
-      { pageNumber: number; pageSize: number }
-    >({
-      query: ({ pageNumber, pageSize }) => ({
-        url: `/leads?PageNumber=${pageNumber}&PageSize=${pageSize}`,
-        method: "GET",
-      }),
-    }),
-    addLead: builder.mutation<
-      void,
-      { fullName: string; email: string; phone: string; source: string }
-    >({
-      query: ({ fullName, email, phone, source }) => ({
-        url: `/leads`,
-        method: "POST",
-        body: { fullName, phone, email, source }, // ✅ correct shape
-      }),
-    }),
-    getFilteredLeads: builder.mutation<any, { statusId: number }>({
-      query: ({ statusId }) => ({
-        url: `/leads?status=${statusId}`,
-        method: "GET",
-      }),
-    }),
-    deleteLead: builder.mutation<void, { id: number }>({
-      query: ({ id }) => ({
-        url: `/leads/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Leads"],
-    }),
-    getLeadNotes: builder.query<any, { id: number }>({
-      query: ({ id }) => ({
-        url: `/leads/${id}/notes`,
-      }),
-    }),
-    getLeadFollowup: builder.query<any, { id: number }>({
-      query: ({ id }) => ({
-        url: `/leads/${id}/follow-up`,
-      }),
+      providesTags: ["Courses"],
     }),
 
-    // students
-    getStudents: builder.query<any[], void>({
-      query: () => "/students",
-      providesTags: ["Students"],
-    }),
-    searchStudents: builder.mutation<any[], { name: string }>({
-      query: ({ name }) => ({
-        url: `/students/by-name?fullname=${name}`,
-        method: "GET",
-      }),
-    }),
-    deleteStudent: builder.mutation<void, { id: number }>({
-      query: ({ id }) => ({
-        url: `/students/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Students"],
-    }),
-    convertStatus: builder.mutation<
-      void,
-      { id: number; courseId: number; paidAmount: number }
-    >({
-      query: ({ id, courseId, paidAmount }) => ({
-        url: `/leads/${id}/convert`,
-        method: "POST",
-        body: { courseId, paidAmount }, // ✅ correct shape
-      }),
-      invalidatesTags: ["Leads"],
-    }),
-    addCategory: builder.mutation<void, { name: string }>({
-      query: ({ name }) => ({
-        url: `/categories`,
-        method: "POST",
-        body: { name }, // ✅ correct shape
-      }),
-      invalidatesTags: ["Categories"],
-    }),
     addCourse: builder.mutation<
       void,
       {
@@ -325,189 +284,13 @@ export const api = createApi({
       }
     >({
       query: (payload) => ({
-        url: `/courses`,
+        url: "/courses",
         method: "POST",
         body: payload,
       }),
       invalidatesTags: ["Courses"],
     }),
 
-    addEnrollment: builder.mutation<
-      void,
-      { studentId: number; courseId: number }
-    >({
-      query: ({ studentId, courseId }) => ({
-        url: `/enrollments?studentId=${studentId}&courseId=${courseId}`,
-        method: "POST",
-      }),
-      invalidatesTags: ["Enrollments"],
-    }),
-    addLeadNote: builder.mutation<void, { id: number; note: string }>({
-      query: ({ id, note }) => ({
-        url: `/leads/${id}/notes`,
-        method: "POST",
-        body: { note },
-      }),
-      invalidatesTags: ["Enrollments"],
-    }),
-    addStudent: builder.mutation<
-      void,
-      {
-        fullName: string;
-        email: string;
-        phoneNumber: string;
-        nationalId: string;
-        gender: string;
-        dateOfBirth: string;
-        relativeName: string;
-        parentPhoneNumber: string;
-        level: string;
-      }
-    >({
-      query: (body) => ({
-        url: `/students`,
-        method: "POST",
-        body,
-      }),
-      invalidatesTags: ["Students"],
-    }),
-    getFollowupToday: builder.query<any, void>({
-      query: () => ({
-        url: `/leads/follow-ups/today`,
-      }),
-    }),
-    getFollowupOverdue: builder.mutation<any, void>({
-      query: () => ({
-        url: `/leads/follow-ups/overdue`,
-        method: "GET",
-      }),
-    }),
-    getFollowupRange: builder.mutation<any, { from: string; to: string }>({
-      query: ({ from, to }) => ({
-        url: `/leads/follow-ups/range?from=${from}&to=${to}`,
-        method: "GET",
-      }),
-    }),
-    getCategory: builder.query<any, { id: number }>({
-      query: ({ id }) => ({
-        url: `/categories/${id}`,
-      }),
-    }),
-    updateCategory: builder.mutation<any, { id: number; name: string }>({
-      query: ({ id, name }) => ({
-        url: `/categories/${id}`,
-        method: "PUT",
-        body: { name },
-      }),
-      invalidatesTags: ["Categories"],
-    }),
-    getEnrollment: builder.query<any, { id: number }>({
-      query: ({ id }) => ({
-        url: `/enrollments/${id}`,
-      }),
-    }),
-    updateEnrollment: builder.mutation<
-      any,
-      { id: number; studentId: number; courseId: number }
-    >({
-      query: ({ id, studentId, courseId }) => ({
-        url: `/enrollments/${id}`,
-        method: "PUT",
-        body: { studentId, courseId },
-      }),
-      invalidatesTags: ["Enrollments"],
-    }),
-    convertEnrollmentStatus: builder.mutation<
-      void,
-      { id: number; status: number }
-    >({
-      query: ({ id, status }) => ({
-        url: `/enrollments/${id}/status`,
-        method: "PUT",
-        body: { status }, // ✅ correct shape
-      }),
-      invalidatesTags: ["Enrollments"],
-    }),
-    getLead: builder.query<any, { id: number }>({
-      query: ({ id }) => ({
-        url: `/leads/${id}`,
-      }),
-    }),
-    updateLead: builder.mutation<
-      any,
-      {
-        id: number;
-        fullName: string;
-        phone: string;
-        email: string;
-        source: string;
-      }
-    >({
-      query: ({ id, fullName, phone, email, source }) => ({
-        url: `/leads/${id}`,
-        method: "PUT",
-        body: { fullName, phone, email, source },
-      }),
-      invalidatesTags: ["Leads"],
-    }),
-    getStudent: builder.query<any, { id: number }>({
-      query: ({ id }) => ({
-        url: `/students/${id}`,
-      }),
-    }),
-    updateStudent: builder.mutation<
-      any,
-      {
-        id: number;
-        fullName: string;
-        email: string;
-        phoneNumber: string;
-        nationalId: string;
-        gender: string;
-        dateOfBirth: string; // ✅ FIXED
-        relativeName: string;
-        parentPhoneNumber: string;
-        level: string;
-      }
-    >({
-      query: ({
-        id,
-        fullName,
-        email,
-        phoneNumber,
-        nationalId,
-        gender,
-        dateOfBirth,
-        relativeName,
-        parentPhoneNumber,
-        level,
-      }) => ({
-        url: `/students/${id}`,
-        method: "PUT",
-        body: {
-          fullName,
-          email,
-          phoneNumber,
-          nationalId,
-          gender,
-          dateOfBirth,
-          relativeName,
-          parentPhoneNumber,
-          level,
-        },
-      }),
-      invalidatesTags: ["Students"],
-    }),
-    getCourse: builder.query<any, { id: number }>({
-      query: ({ id }) => ({
-        url: `/courses/${id}`,
-      }),
-    }),
-    getClass: builder.query<any, { id: number }>({
-      query: ({ id }) => ({
-        url: `/courses/${id}/classes`,
-      }),
-    }),
     updateCourse: builder.mutation<
       any,
       {
@@ -533,18 +316,30 @@ export const api = createApi({
       invalidatesTags: ["Courses"],
     }),
 
+    deleteCourse: builder.mutation<void, { id: number }>({
+      query: ({ id }) => ({
+        url: `/courses/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Courses"],
+    }),
+
+    /* =========================
+       CLASS ENDPOINTS
+       ========================= */
+
     getClasses: builder.query<any[], void>({
       query: () => "/classes",
       providesTags: ["Classes"],
     }),
-    deleteClass: builder.mutation<void, { courseId: number; id: number }>({
-      query: ({ courseId, id }) => ({
-        url: `/courses/${courseId}/classes/${id}`,
-        method: "DELETE",
+
+    getClass: builder.query<any, { id: number }>({
+      query: ({ id }) => ({
+        url: `/classes/${id}`,
       }),
-      invalidatesTags: ["Classes"],
+      providesTags: ["Classes"],
     }),
-    // Updated addClass mutation
+
     addClass: builder.mutation<
       void,
       {
@@ -591,54 +386,379 @@ export const api = createApi({
       }),
       invalidatesTags: ["Classes"],
     }),
-    deleteRole: builder.mutation<void, { id: number }>({
-      query: ({ id }) => ({
-        url: `/roles/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Roles"],
-    }),
-    getPermissions: builder.query<any[], void>({
-      query: () => "/permissions",
-      // providesTags: ["Classes"],
-    }),
-    addRole: builder.mutation<
+
+    updateClass: builder.mutation<
       void,
       {
+        id: number;
+        courseId: number;
         name: string;
+        code: string;
+        price: number;
+        instructorName: string;
+        startDate: string;
+        endDate: string;
+        daysOfWeek: string;
+        timeFrom: string;
+        timeTo: string;
+        maxStudents: number;
       }
     >({
-      query: ({ name }) => ({
-        url: `/roles`,
-        method: "POST",
+      query: ({
+        id,
+        courseId,
+        name,
+        code,
+        price,
+        instructorName,
+        startDate,
+        endDate,
+        daysOfWeek,
+        timeFrom,
+        timeTo,
+        maxStudents,
+      }) => ({
+        url: `/classes/${id}`,
+        method: "PUT",
         body: {
           name,
+          code,
+          price,
+          instructorName,
+          startDate,
+          endDate,
+          daysOfWeek,
+          timeFrom,
+          timeTo,
+          maxStudents,
         },
       }),
-      invalidatesTags: ["Roles"],
-    }), // Import leads from file
+      invalidatesTags: ["Classes"],
+    }),
+
+    deleteClass: builder.mutation<void, { id: number }>({
+      query: ({ id }) => ({
+        url: `/classes/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Classes"],
+    }),
+
+    /* =========================
+       ENROLLMENT ENDPOINTS
+       ========================= */
+
+    getEnrollments: builder.query<any[], void>({
+      query: () => "/enrollments",
+      providesTags: ["Enrollments"],
+    }),
+
+    getEnrollment: builder.query<any, { id: number }>({
+      query: ({ id }) => ({
+        url: `/enrollments/${id}`,
+      }),
+      providesTags: ["Enrollments"],
+    }),
+
+    addEnrollment: builder.mutation<
+      void,
+      { studentId: number; courseId: number }
+    >({
+      query: ({ studentId, courseId }) => ({
+        url: `/enrollments?studentId=${studentId}&courseId=${courseId}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Enrollments"],
+    }),
+
+    updateEnrollment: builder.mutation<
+      any,
+      { id: number; studentId: number; courseId: number }
+    >({
+      query: ({ id, studentId, courseId }) => ({
+        url: `/enrollments/${id}`,
+        method: "PUT",
+        body: { studentId, courseId },
+      }),
+      invalidatesTags: ["Enrollments"],
+    }),
+
+    convertEnrollmentStatus: builder.mutation<
+      void,
+      { id: number; status: number }
+    >({
+      query: ({ id, status }) => ({
+        url: `/enrollments/${id}/status`,
+        method: "PUT",
+        body: { status },
+      }),
+      invalidatesTags: ["Enrollments"],
+    }),
+
+    getFilteredEnrollments: builder.mutation<any, { statusId: number }>({
+      query: ({ statusId }) => ({
+        url: `/enrollments?status=${statusId}`,
+        method: "GET",
+      }),
+    }),
+
+    deleteEnrollment: builder.mutation<void, { id: number }>({
+      query: ({ id }) => ({
+        url: `/enrollments/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Enrollments"],
+    }),
+
+    /* =========================
+       STUDENT ENDPOINTS
+       ========================= */
+
+    getStudents: builder.query<any[], void>({
+      query: () => "/students",
+      providesTags: ["Students"],
+    }),
+
+    getStudent: builder.query<any, { id: number }>({
+      query: ({ id }) => ({
+        url: `/students/${id}`,
+      }),
+      providesTags: ["Students"],
+    }),
+
+    addStudent: builder.mutation<
+      void,
+      {
+        fullName: string;
+        email: string;
+        phoneNumber: string;
+        nationalId: string;
+        gender: string;
+        dateOfBirth: string;
+        relativeName: string;
+        parentPhoneNumber: string;
+        level: string;
+      }
+    >({
+      query: (body) => ({
+        url: "/students",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Students"],
+    }),
+
+    updateStudent: builder.mutation<
+      any,
+      {
+        id: number;
+        fullName: string;
+        email: string;
+        phoneNumber: string;
+        nationalId: string;
+        gender: string;
+        dateOfBirth: string;
+        relativeName: string;
+        parentPhoneNumber: string;
+        level: string;
+      }
+    >({
+      query: ({
+        id,
+        fullName,
+        email,
+        phoneNumber,
+        nationalId,
+        gender,
+        dateOfBirth,
+        relativeName,
+        parentPhoneNumber,
+        level,
+      }) => ({
+        url: `/students/${id}`,
+        method: "PUT",
+        body: {
+          fullName,
+          email,
+          phoneNumber,
+          nationalId,
+          gender,
+          dateOfBirth,
+          relativeName,
+          parentPhoneNumber,
+          level,
+        },
+      }),
+      invalidatesTags: ["Students"],
+    }),
+
+    searchStudents: builder.mutation<any[], { name: string }>({
+      query: ({ name }) => ({
+        url: `/students/by-name?fullname=${name}`,
+        method: "GET",
+      }),
+    }),
+
+    deleteStudent: builder.mutation<void, { id: number }>({
+      query: ({ id }) => ({
+        url: `/students/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Students"],
+    }),
+
+    /* =========================
+       LEAD ENDPOINTS
+       ========================= */
+
+    getLeads: builder.query<{ data: any }, void>({
+      query: () => "/leads",
+      providesTags: ["Leads"],
+    }),
+
+    getLead: builder.query<any, { id: number }>({
+      query: ({ id }) => ({
+        url: `/leads/${id}`,
+      }),
+      providesTags: ["Leads"],
+    }),
+
+    addLead: builder.mutation<
+      void,
+      { fullName: string; email: string; phone: string; source: string }
+    >({
+      query: ({ fullName, email, phone, source }) => ({
+        url: "/leads",
+        method: "POST",
+        body: { fullName, phone, email, source },
+      }),
+      invalidatesTags: ["Leads"],
+    }),
+
+    updateLead: builder.mutation<
+      any,
+      {
+        id: number;
+        fullName: string;
+        phone: string;
+        email: string;
+        source: string;
+      }
+    >({
+      query: ({ id, fullName, phone, email, source }) => ({
+        url: `/leads/${id}`,
+        method: "PUT",
+        body: { fullName, phone, email, source },
+      }),
+      invalidatesTags: ["Leads"],
+    }),
+
+    getSpecificLeads: builder.mutation<
+      { data: any },
+      { pageNumber: number; pageSize: number }
+    >({
+      query: ({ pageNumber, pageSize }) => ({
+        url: `/leads?PageNumber=${pageNumber}&PageSize=${pageSize}`,
+        method: "GET",
+      }),
+    }),
+
+    getFilteredLeads: builder.mutation<any, { statusId: number }>({
+      query: ({ statusId }) => ({
+        url: `/leads?status=${statusId}`,
+        method: "GET",
+      }),
+    }),
+
+    convertStatus: builder.mutation<
+      void,
+      { id: number; courseId: number; paidAmount: number }
+    >({
+      query: ({ id, courseId, paidAmount }) => ({
+        url: `/leads/${id}/convert`,
+        method: "POST",
+        body: { courseId, paidAmount },
+      }),
+      invalidatesTags: ["Leads"],
+    }),
+
+    deleteLead: builder.mutation<void, { id: number }>({
+      query: ({ id }) => ({
+        url: `/leads/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Leads"],
+    }),
+
+    /* =========================
+       LEAD NOTES ENDPOINTS
+       ========================= */
+
+    getLeadNotes: builder.query<any, { id: number }>({
+      query: ({ id }) => ({
+        url: `/leads/${id}/notes`,
+      }),
+    }),
+
+    addLeadNote: builder.mutation<void, { id: number; note: string }>({
+      query: ({ id, note }) => ({
+        url: `/leads/${id}/notes`,
+        method: "POST",
+        body: { note },
+      }),
+      invalidatesTags: ["Leads"],
+    }),
+
+    /* =========================
+       LEAD FOLLOW-UP ENDPOINTS
+       ========================= */
+
+    getLeadFollowup: builder.query<any, { id: number }>({
+      query: ({ id }) => ({
+        url: `/leads/${id}/follow-up`,
+      }),
+    }),
+
+    getFollowupToday: builder.query<any, void>({
+      query: () => ({
+        url: "/leads/follow-ups/today",
+      }),
+    }),
+
+    getFollowupOverdue: builder.mutation<any, void>({
+      query: () => ({
+        url: "/leads/follow-ups/overdue",
+        method: "GET",
+      }),
+    }),
+
+    getFollowupRange: builder.mutation<any, { from: string; to: string }>({
+      query: ({ from, to }) => ({
+        url: `/leads/follow-ups/range?from=${from}&to=${to}`,
+        method: "GET",
+      }),
+    }),
+
+    /* =========================
+       LEAD IMPORT/EXPORT ENDPOINTS
+       ========================= */
+
     importLeads: builder.mutation<any, FormData>({
       query: (formData) => ({
         url: "/leads/import",
         method: "POST",
         body: formData,
-        // Important: Let the browser set Content-Type for FormData
-        // Don't manually set it - the browser adds the boundary
       }),
       invalidatesTags: ["Leads"],
     }),
 
-    // Export leads - CORRECTED
     exportLeads: builder.mutation<Blob, void>({
       query: () => ({
         url: "/leads/export",
         method: "GET",
-
         responseHandler: async (response) => {
-          // Return the blob directly
           return response.blob();
         },
-        // Ensure we don't try to parse as JSON
         cache: "no-cache",
       }),
     }),
@@ -646,60 +766,86 @@ export const api = createApi({
 });
 
 /* ======================
-   Hooks
+   Hooks Export
 ====================== */
 
 export const {
+  // Auth
   useLoginMutation,
   useLogoutMutation,
   useGetCurrentUserQuery,
+
+  // Users
   useGetUsersQuery,
-  useToggleUserStatusMutation,
-  useGetRolesQuery,
   useAddUserMutation,
+  useToggleUserStatusMutation,
   useResetPassMutation,
+
+  // Roles & Permissions
+  useGetRolesQuery,
+  useAddRoleMutation,
+  useDeleteRoleMutation,
+  useGetPermissionsQuery,
+
+  // Categories
   useGetCategoriesQuery,
+  useGetCategoryQuery,
+  useAddCategoryMutation,
+  useUpdateCategoryMutation,
   useDeleteCategoryMutation,
+
+  // Courses
   useGetCoursesQuery,
+  useGetCourseQuery,
+  useAddCourseMutation,
+  useUpdateCourseMutation,
   useDeleteCourseMutation,
+
+  // Classes
+  useGetClassesQuery,
+  useGetClassQuery,
+  useAddClassMutation,
+  useUpdateClassMutation,
+  useDeleteClassMutation,
+
+  // Enrollments
   useGetEnrollmentsQuery,
+  useGetEnrollmentQuery,
+  useAddEnrollmentMutation,
+  useUpdateEnrollmentMutation,
+  useConvertEnrollmentStatusMutation,
   useGetFilteredEnrollmentsMutation,
   useDeleteEnrollmentMutation,
-  useGetLeadsQuery,
-  useGetFilteredLeadsMutation,
-  useDeleteLeadMutation,
-  useGetLeadNotesQuery,
-  useGetLeadFollowupQuery,
+
+  // Students
   useGetStudentsQuery,
-  useDeleteStudentMutation,
-  useSearchStudentsMutation,
-  useConvertStatusMutation,
-  useAddLeadMutation,
-  useGetSpecificLeadsMutation,
-  useAddCategoryMutation,
-  useAddCourseMutation,
-  useAddEnrollmentMutation,
-  useAddLeadNoteMutation,
+  useGetStudentQuery,
   useAddStudentMutation,
+  useUpdateStudentMutation,
+  useSearchStudentsMutation,
+  useDeleteStudentMutation,
+
+  // Leads
+  useGetLeadsQuery,
+  useGetLeadQuery,
+  useAddLeadMutation,
+  useUpdateLeadMutation,
+  useGetSpecificLeadsMutation,
+  useGetFilteredLeadsMutation,
+  useConvertStatusMutation,
+  useDeleteLeadMutation,
+
+  // Lead Notes
+  useGetLeadNotesQuery,
+  useAddLeadNoteMutation,
+
+  // Lead Follow-ups
+  useGetLeadFollowupQuery,
   useGetFollowupTodayQuery,
   useGetFollowupOverdueMutation,
   useGetFollowupRangeMutation,
-  useGetCategoryQuery,
-  useUpdateCategoryMutation,
-  useGetEnrollmentQuery,
-  useUpdateEnrollmentMutation,
-  useConvertEnrollmentStatusMutation,
-  useGetLeadQuery,
-  useUpdateLeadMutation,
-  useGetStudentQuery,
-  useUpdateStudentMutation,
-  useGetCourseQuery,
-  useUpdateCourseMutation,
-  useGetClassesQuery,
-  useDeleteClassMutation,
-  useAddClassMutation,
-  useDeleteRoleMutation,
-  useAddRoleMutation,
+
+  // Lead Import/Export
   useImportLeadsMutation,
   useExportLeadsMutation,
 } = api;
