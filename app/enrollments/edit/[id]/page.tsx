@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useGetClassesQuery,
   useGetCoursesQuery,
   useGetEnrollmentQuery,
   useGetStudentsQuery,
@@ -30,7 +31,7 @@ interface Student {
   email?: string;
 }
 
-interface Course {
+interface Class {
   id: number;
   name: string;
   code?: string;
@@ -43,11 +44,11 @@ const enrollmentSchema = yup.object().shape({
     .required("Student is required")
     .positive("Please select a student")
     .typeError("Please select a student"),
-  courseId: yup
+  courseClassId: yup
     .number()
-    .required("Course is required")
-    .positive("Please select a course")
-    .typeError("Please select a course"),
+    .required("Class is required")
+    .positive("Please select a class")
+    .typeError("Please select a class"),
 });
 
 type EnrollmentFormData = yup.InferType<typeof enrollmentSchema>;
@@ -58,7 +59,7 @@ const Page = () => {
   const id = Number(params?.id);
 
   const { data: students, isLoading: loadingStudents } = useGetStudentsQuery();
-  const { data: courses, isLoading: loadingCourses } = useGetCoursesQuery();
+  const { data: classes, isLoading: loadingClasses } = useGetClassesQuery();
   const { data: enrollmentData, isLoading: loadingEnrollment } =
     useGetEnrollmentQuery({ id });
   const [updateEnrollment, { isLoading: updating }] =
@@ -73,7 +74,7 @@ const Page = () => {
     resolver: yupResolver(enrollmentSchema),
     defaultValues: {
       studentId: 0,
-      courseId: 0,
+      courseClassId: 0,
     },
   });
 
@@ -82,7 +83,7 @@ const Page = () => {
     if (enrollmentData) {
       reset({
         studentId: enrollmentData.studentId || 0,
-        courseId: enrollmentData.courseId || 0,
+        courseClassId: enrollmentData.courseClassId || 0,
       });
     }
   }, [enrollmentData, reset]);
@@ -92,7 +93,7 @@ const Page = () => {
       await updateEnrollment({
         id,
         studentId: data.studentId,
-        courseId: data.courseId,
+        courseClassId: data.courseClassId,
       }).unwrap();
 
       await Swal.fire({
@@ -123,7 +124,7 @@ const Page = () => {
     }
   };
 
-  const isLoading = loadingEnrollment || loadingStudents || loadingCourses;
+  const isLoading = loadingEnrollment || loadingStudents || loadingClasses;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
@@ -204,7 +205,6 @@ const Page = () => {
                     {students?.map((student: Student) => (
                       <option key={student.id} value={student.id}>
                         {student.fullName}
-                        {student.email ? ` (${student.email})` : ""}
                       </option>
                     ))}
                   </select>
@@ -224,34 +224,33 @@ const Page = () => {
                   htmlFor="courseId"
                   className="block text-sm font-semibold text-gray-700 mb-2"
                 >
-                  Course <span className="text-red-500">*</span>
+                  Class <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10" />
                   <select
                     id="courseId"
-                    {...register("courseId", { valueAsNumber: true })}
-                    disabled={loadingCourses}
+                    {...register("courseClassId", { valueAsNumber: true })}
+                    disabled={loadingClasses}
                     className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
-                      errors.courseId
+                      errors.courseClassId
                         ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
                         : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
                     } rounded-xl pl-12 pr-10 py-3.5 text-gray-900 focus:outline-none focus:ring-4 focus:bg-white transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
                     <option value={0}>Select a course...</option>
-                    {courses?.map((course: Course) => (
+                    {classes?.map((course: Class) => (
                       <option key={course.id} value={course.id}>
-                        {course.code ? `[${course.code}] ` : ""}
                         {course.name}
                       </option>
                     ))}
                   </select>
                   <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                 </div>
-                {errors.courseId && (
+                {errors.courseClassId && (
                   <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
                     <AlertCircle className="w-4 h-4" />
-                    {errors.courseId.message}
+                    {errors.courseClassId.message}
                   </p>
                 )}
               </div>

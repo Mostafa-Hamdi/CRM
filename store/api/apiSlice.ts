@@ -469,23 +469,24 @@ export const api = createApi({
 
     addEnrollment: builder.mutation<
       void,
-      { studentId: number; courseId: number }
+      { studentId: number; courseClassId: number }
     >({
-      query: ({ studentId, courseId }) => ({
-        url: `/enrollments?studentId=${studentId}&courseId=${courseId}`,
+      query: ({ studentId, courseClassId }) => ({
+        url: `/enrollments`,
         method: "POST",
+        body: { studentId, courseClassId },
       }),
       invalidatesTags: ["Enrollments"],
     }),
 
     updateEnrollment: builder.mutation<
       any,
-      { id: number; studentId: number; courseId: number }
+      { id: number; studentId: number; courseClassId: number }
     >({
-      query: ({ id, studentId, courseId }) => ({
+      query: ({ id, studentId, courseClassId }) => ({
         url: `/enrollments/${id}`,
         method: "PUT",
-        body: { studentId, courseId },
+        body: { studentId, courseClassId },
       }),
       invalidatesTags: ["Enrollments"],
     }),

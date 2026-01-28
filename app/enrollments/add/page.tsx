@@ -2,7 +2,7 @@
 
 import {
   useAddEnrollmentMutation,
-  useGetCoursesQuery,
+  useGetClassesQuery,
   useGetStudentsQuery,
 } from "@/store/api/apiSlice";
 import { useRouter } from "next/navigation";
@@ -29,7 +29,7 @@ interface Student {
   fullName: string;
 }
 
-interface Course {
+interface Class {
   id: number;
   name: string;
   code: string;
@@ -42,7 +42,7 @@ const enrollmentSchema = yup.object().shape({
     .required("Student is required")
     .positive("Please select a student")
     .typeError("Please select a student"),
-  courseId: yup
+  courseClassId: yup
     .number()
     .required("Course is required")
     .positive("Please select a course")
@@ -55,7 +55,7 @@ type EnrollmentFormData = yup.InferType<typeof enrollmentSchema>;
 const Page = () => {
   const router = useRouter();
   const { data: students, isLoading: studentsLoading } = useGetStudentsQuery();
-  const { data: courses, isLoading: coursesLoading } = useGetCoursesQuery();
+  const { data: classes, isLoading: classesLoading } = useGetClassesQuery();
   const [addEnrollment, { isLoading }] = useAddEnrollmentMutation();
 
   const {
@@ -68,7 +68,7 @@ const Page = () => {
     mode: "onChange",
     defaultValues: {
       studentId: 0,
-      courseId: 0,
+      courseClassId: 0,
     },
   });
 
@@ -76,7 +76,7 @@ const Page = () => {
     try {
       await addEnrollment({
         studentId: Number(data.studentId),
-        courseId: Number(data.courseId),
+        courseClassId: Number(data.courseClassId),
       }).unwrap();
 
       await Swal.fire({
@@ -140,7 +140,8 @@ const Page = () => {
                 Add Enrollment
               </h1>
               <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                Enroll a student in a course
+                Enroll a student in a course by filling out the information
+                below.
               </p>
             </div>
           </div>
@@ -203,37 +204,37 @@ const Page = () => {
                     htmlFor="courseId"
                     className="block text-sm font-semibold text-gray-700 mb-2"
                   >
-                    Select Course <span className="text-red-500">*</span>
+                    Select Class <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10" />
                     <select
-                      id="courseId"
-                      {...register("courseId")}
-                      disabled={coursesLoading}
+                      id="classId"
+                      {...register("courseClassId")}
+                      disabled={classesLoading}
                       className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
-                        errors.courseId
+                        errors.courseClassId
                           ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
                           : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
                       } rounded-xl pl-12 pr-12 py-3.5 text-gray-900 focus:outline-none focus:ring-4 focus:bg-white transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                       <option value={0}>
-                        {coursesLoading
-                          ? "Loading courses..."
-                          : "Select a course..."}
+                        {classesLoading
+                          ? "Loading classes..."
+                          : "Select a class..."}
                       </option>
-                      {courses?.map((course: Course) => (
-                        <option key={course.id} value={course.id}>
-                          {course.name}
+                      {classes?.map((cls: Class) => (
+                        <option key={cls.id} value={cls.id}>
+                          {cls.name}
                         </option>
                       ))}
                     </select>
                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                   </div>
-                  {errors.courseId && (
+                  {errors.courseClassId && (
                     <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
                       <AlertCircle className="w-4 h-4" />
-                      {errors.courseId.message}
+                      {errors.courseClassId.message}
                     </p>
                   )}
                 </div>
@@ -272,7 +273,7 @@ const Page = () => {
               </button>
               <button
                 type="submit"
-                disabled={isLoading || studentsLoading || coursesLoading}
+                disabled={isLoading || studentsLoading || classesLoading}
                 className="cursor-pointer flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isLoading ? (
