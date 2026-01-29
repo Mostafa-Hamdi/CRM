@@ -213,7 +213,7 @@ export const api = createApi({
        CATEGORY ENDPOINTS
        ========================= */
 
-    getCategories: builder.query<any[], void>({
+    getCategories: builder.query<any, void>({
       query: () => "/categories",
       providesTags: ["Categories"],
     }),
@@ -255,7 +255,7 @@ export const api = createApi({
        COURSE ENDPOINTS
        ========================= */
 
-    getCourses: builder.query<any[], void>({
+    getCourses: builder.query<any, void>({
       query: () => "/courses",
       providesTags: ["Courses"],
     }),
@@ -328,9 +328,13 @@ export const api = createApi({
        CLASS ENDPOINTS
        ========================= */
 
-    getClasses: builder.query<any[], void>({
+    getClasses: builder.query<any, void>({
       query: () => "/classes",
       providesTags: ["Classes"],
+    }),
+
+    getCourseClasses: builder.query<any[], { courseId: number }>({
+      query: ({ courseId }) => `/courses/${courseId}/classes`,
     }),
 
     getClass: builder.query<any, { id: number }>({
@@ -455,7 +459,7 @@ export const api = createApi({
        ENROLLMENT ENDPOINTS
        ========================= */
 
-    getEnrollments: builder.query<any[], void>({
+    getEnrollments: builder.query<any, void>({
       query: () => "/enrollments",
       providesTags: ["Enrollments"],
     }),
@@ -811,6 +815,7 @@ export const {
 
   // Classes
   useGetClassesQuery,
+  useGetCourseClassesQuery,
   useGetClassQuery,
   useAddClassMutation,
   useUpdateClassMutation,

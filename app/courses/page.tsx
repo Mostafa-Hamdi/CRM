@@ -48,7 +48,7 @@ const Page = () => {
     if (!courses) return [];
 
     const query = searchQuery.toLowerCase();
-    return courses.filter(
+    return courses.data.filter(
       (course: Course) =>
         course.name.toLowerCase().includes(query) ||
         course.code.toLowerCase().includes(query) ||
@@ -136,9 +136,10 @@ const Page = () => {
   };
 
   // Count active and inactive courses
-  const activeCourses = courses?.filter((c: Course) => c.isActive).length || 0;
+  const activeCourses =
+    courses?.data?.filter((c: Course) => c.isActive).length || 0;
   const inactiveCourses =
-    courses?.filter((c: Course) => !c.isActive).length || 0;
+    courses?.data?.filter((c: Course) => !c.isActive).length || 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
@@ -189,7 +190,7 @@ const Page = () => {
                   Total Courses
                 </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mt-1">
-                  {courses?.length || 0}
+                  {courses?.data?.length || 0}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center">
@@ -413,14 +414,19 @@ const Page = () => {
 
                       {/* Classes Count */}
                       <td className="px-6 py-5">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
-                            <Hash className="w-4 h-4 text-indigo-600" />
+                        <Link
+                          href={`/courses/${course.id}/classes`}
+                          className="hover:underline"
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                              <Hash className="w-4 h-4 text-indigo-600" />
+                            </div>
+                            <span className="text-gray-700 text-sm font-medium">
+                              {course.classesCount}
+                            </span>
                           </div>
-                          <span className="text-gray-700 text-sm font-medium">
-                            {course.classesCount}
-                          </span>
-                        </div>
+                        </Link>
                       </td>
 
                       {/* Status */}

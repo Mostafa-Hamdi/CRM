@@ -29,10 +29,10 @@ const Page = () => {
   const [deleteCategory] = useDeleteCategoryMutation();
   // Filter categories based on search query
   const filteredCategories = useMemo(() => {
-    if (!categories) return [];
+    if (!categories?.data) return [];
 
     const query = searchQuery.toLowerCase();
-    return categories.filter((category: Category) =>
+    return categories.data.filter((category: Category) =>
       category.name.toLowerCase().includes(query),
     );
   }, [categories, searchQuery]);

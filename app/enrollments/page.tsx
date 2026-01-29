@@ -57,8 +57,8 @@ const Page = () => {
 
   // Initialize displayed enrollments
   useEffect(() => {
-    if (enrollments) {
-      setDisplayedEnrollments(enrollments);
+    if (enrollments?.data) {
+      setDisplayedEnrollments(enrollments.data);
     }
   }, [enrollments]);
 
@@ -321,7 +321,7 @@ const Page = () => {
                   Total Enrollments
                 </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mt-1">
-                  {enrollments?.length || 0}
+                  {enrollments?.data?.length || 0}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center">
@@ -335,8 +335,9 @@ const Page = () => {
               <div>
                 <p className="text-gray-600 text-sm font-medium">Active</p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mt-1">
-                  {enrollments?.filter((e: Enrollment) => e.status === "Active")
-                    .length || 0}
+                  {enrollments?.data?.filter(
+                    (e: Enrollment) => e.status === "Active",
+                  ).length || 0}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl flex items-center justify-center">
@@ -350,7 +351,7 @@ const Page = () => {
               <div>
                 <p className="text-gray-600 text-sm font-medium">Completed</p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mt-1">
-                  {enrollments?.filter(
+                  {enrollments?.data?.filter(
                     (e: Enrollment) => e.status === "Completed",
                   ).length || 0}
                 </p>
@@ -405,7 +406,7 @@ const Page = () => {
                         isActive ? "bg-white/20" : "bg-gray-200 text-gray-700"
                       }`}
                     >
-                      {enrollments?.filter(
+                      {enrollments?.data?.filter(
                         (e: Enrollment) => e.status === filter.label,
                       ).length || 0}
                     </span>
