@@ -33,10 +33,13 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   Upload,
   Download,
   AlertCircle,
   Check,
+  List,
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
@@ -309,6 +312,61 @@ const Page = () => {
       "from-amber-600 to-orange-600",
     ];
     return colors[index % colors.length];
+  };
+
+  // Handle page size change
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setPageNumber(1); // Reset to first page when changing page size
+  };
+
+  // Pagination handlers
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= (leadsResponse?.totalPages || 1)) {
+      setPageNumber(page);
+    }
+  };
+
+  const goToFirstPage = () => goToPage(1);
+  const goToLastPage = () => goToPage(leadsResponse?.totalPages || 1);
+  const goToPreviousPage = () => goToPage(pageNumber - 1);
+  const goToNextPage = () => goToPage(pageNumber + 1);
+
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const totalPages = leadsResponse?.totalPages || 1;
+    const maxVisible = 5;
+
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (pageNumber <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      } else if (pageNumber >= totalPages - 2) {
+        pages.push(1);
+        pages.push("...");
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push("...");
+        pages.push(pageNumber - 1);
+        pages.push(pageNumber);
+        pages.push(pageNumber + 1);
+        pages.push("...");
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
   };
 
   // Validate file before upload
@@ -702,7 +760,7 @@ const Page = () => {
           </div>
         </div>
 
-        {/* Search Bar */}
+        {/* Search Bar with Page Size Selector */}
         <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10">
           <div className="flex flex-col sm:flex-row items-center gap-4">
             <div className="relative flex-1 w-full group">
@@ -715,6 +773,30 @@ const Page = () => {
                 className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all"
               />
             </div>
+
+            {/* Page Size Selector */}
+            <div className="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl">
+              <List className="w-5 h-5 text-gray-600" />
+              <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                Show:
+              </span>
+              <div className="flex items-center gap-2">
+                {[5, 10, 20, 50].map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => handlePageSizeChange(size)}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                      pageSize === size
+                        ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                        : "bg-white text-gray-700 hover:bg-blue-50 border border-gray-200"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="flex items-center gap-3">
               {/* Import Button */}
               <button
@@ -751,6 +833,20 @@ const Page = () => {
               </span>
             </div>
           </div>
+
+          {/* Pagination Info */}
+          {leadsResponse && leadsResponse.totalPages > 0 && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <p className="text-sm text-gray-600 text-center">
+                Showing page{" "}
+                <span className="font-bold text-blue-600">{pageNumber}</span> of{" "}
+                <span className="font-bold text-blue-600">
+                  {leadsResponse.totalPages}
+                </span>{" "}
+                ({leadsResponse.totalCount} total leads, {pageSize} per page)
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Table Card */}
@@ -978,100 +1074,64 @@ const Page = () => {
         {leadsResponse && leadsResponse.totalPages > 1 && (
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="text-sm text-gray-600">
-                Showing page{" "}
-                <span className="font-bold text-gray-900">{pageNumber}</span> of{" "}
-                <span className="font-bold text-gray-900">
-                  {leadsResponse.totalPages}
-                </span>{" "}
-                ({leadsResponse.totalCount} total leads)
-              </div>
-
+              {/* Previous buttons */}
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setPageNumber(pageNumber - 1)}
+                  onClick={goToFirstPage}
                   disabled={pageNumber === 1}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all cursor-pointer ${
-                    pageNumber === 1
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      : "bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-500 hover:text-blue-600 hover:shadow-md"
-                  }`}
+                  className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                  title="First page"
                 >
-                  <ChevronLeft className="w-4 h-4" />
-                  <span>Previous</span>
+                  <ChevronsLeft className="w-5 h-5 text-gray-600" />
                 </button>
-
-                <div className="flex items-center gap-1">
-                  {Array.from(
-                    { length: leadsResponse.totalPages },
-                    (_, i) => i + 1,
-                  ).map((page) => {
-                    if (
-                      page === 1 ||
-                      page === leadsResponse.totalPages ||
-                      (page >= pageNumber - 1 && page <= pageNumber + 1)
-                    ) {
-                      return (
-                        <button
-                          key={page}
-                          onClick={() => setPageNumber(page)}
-                          className={`w-10 h-10 rounded-xl font-semibold transition-all cursor-pointer ${
-                            page === pageNumber
-                              ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
-                              : "bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-500 hover:text-blue-600 hover:shadow-md"
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      );
-                    } else if (
-                      page === pageNumber - 2 ||
-                      page === pageNumber + 2
-                    ) {
-                      return (
-                        <span
-                          key={page}
-                          className="px-2 text-gray-400 font-semibold"
-                        >
-                          ...
-                        </span>
-                      );
-                    }
-                    return null;
-                  })}
-                </div>
-
                 <button
-                  onClick={() => setPageNumber(pageNumber + 1)}
-                  disabled={pageNumber === leadsResponse.totalPages}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all cursor-pointer ${
-                    pageNumber === leadsResponse.totalPages
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      : "bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-500 hover:text-blue-600 hover:shadow-md"
-                  }`}
+                  onClick={goToPreviousPage}
+                  disabled={pageNumber === 1}
+                  className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                  title="Previous page"
                 >
-                  <span>Next</span>
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronLeft className="w-5 h-5 text-gray-600" />
                 </button>
               </div>
 
+              {/* Page numbers */}
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 font-medium">Show:</span>
-                <select
-                  value={pageSize}
-                  onChange={(e) => {
-                    setPageSize(parseInt(e.target.value));
-                    setPageNumber(1);
-                  }}
-                  className="px-3 py-2 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all cursor-pointer hover:border-blue-400"
+                {getPageNumbers().map((page, index) => (
+                  <button
+                    key={index}
+                    onClick={() => typeof page === "number" && goToPage(page)}
+                    disabled={page === "..." || page === pageNumber}
+                    className={`min-w-[40px] h-10 px-3 rounded-lg font-semibold transition-all cursor-pointer ${
+                      page === pageNumber
+                        ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg"
+                        : page === "..."
+                          ? "cursor-default"
+                          : "border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 text-gray-700"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              {/* Next buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={goToNextPage}
+                  disabled={pageNumber === leadsResponse.totalPages}
+                  className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                  title="Next page"
                 >
-                  <option value={5}>5</option>
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                </select>
-                <span className="text-sm text-gray-600">per page</span>
+                  <ChevronRight className="w-5 h-5 text-gray-600" />
+                </button>
+                <button
+                  onClick={goToLastPage}
+                  disabled={pageNumber === leadsResponse.totalPages}
+                  className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                  title="Last page"
+                >
+                  <ChevronsRight className="w-5 h-5 text-gray-600" />
+                </button>
               </div>
             </div>
           </div>
