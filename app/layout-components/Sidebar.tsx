@@ -145,11 +145,11 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
           subItems: [
             { icon: List, label: "All Roles", link: "/roles" },
             { icon: Plus, label: "Add Role", link: "/roles/add" },
-            {
-              icon: EditIcon,
-              label: "Edit Role",
-              link: "/dashboard/roles/edit/:id",
-            },
+            // {
+            //   icon: EditIcon,
+            //   label: "Edit Role",
+            //   link: "/dashboard/roles/edit/:id",
+            // },
           ],
         },
 

@@ -239,15 +239,15 @@ const Page = () => {
                         <Icon className="w-7 h-7 text-white" />
                       </div>
                       <div className="flex items-center gap-2">
-                        <Link
+                        {/* <Link
                           href={`/roles/${role.id}/permissions`}
                           className="p-2 text-purple-600 hover:text-white hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 bg-purple-50 rounded-lg transition-all duration-300 opacity-0 group-hover:opacity-100"
                           title="Assign permissions"
                         >
                           <Key className="w-4 h-4" />
-                        </Link>
+                        </Link> */}
                         <Link
-                          href={`/roles/edit/${role.id}`}
+                          href={`/roles/${role.id}/edit`}
                           className="p-2 text-blue-600 hover:text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 bg-blue-50 rounded-lg transition-all duration-300 opacity-0 group-hover:opacity-100"
                           title="Edit role"
                         >

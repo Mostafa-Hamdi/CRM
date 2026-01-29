@@ -99,6 +99,7 @@ export const api = createApi({
     "Students",
     "Classes",
     "CourseClasses",
+    "RolePermissions",
   ],
   endpoints: (builder) => ({
     /* =========================
@@ -821,6 +822,30 @@ export const api = createApi({
         cache: "no-cache",
       }),
     }),
+    getRolePermissions: builder.query<any, { id: number }>({
+      query: ({ id }) => ({
+        url: `/roles/${id}/permissions`,
+      }),
+      providesTags: ["RolePermissions"],
+    }),
+    updateRole: builder.mutation<
+      any,
+      {
+        id: number;
+        roleName: string;
+        permissionCodes: string[];
+      }
+    >({
+      query: ({ id, roleName, permissionCodes }) => ({
+        url: `/roles/${id}`,
+        method: "PUT",
+        body: {
+          roleName,
+          permissionCodes,
+        },
+      }),
+      invalidatesTags: ["RolePermissions", "Roles"],
+    }),
   }),
 });
 
@@ -845,7 +870,8 @@ export const {
   useAddRoleMutation,
   useDeleteRoleMutation,
   useGetPermissionsQuery,
-
+  useGetRolePermissionsQuery,
+  useUpdateRoleMutation,
   // Categories
   useGetCategoriesQuery,
   useGetCategoryQuery,
