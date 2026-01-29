@@ -344,7 +344,7 @@ const Page = () => {
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-3">
                           <div
-                            className={`w-20 h-12 bg-gradient-to-br ${getColorForCourse(
+                            className={`w-12 min-w-12 h-12 bg-gradient-to-br ${getColorForCourse(
                               index,
                             )} rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30`}
                           >
@@ -416,9 +416,9 @@ const Page = () => {
                       <td className="px-6 py-5">
                         <Link
                           href={`/courses/${course.id}/classes`}
-                          className="hover:underline"
+                          className="cursor-pointer hover:underline"
                         >
-                          <div className="flex items-center gap-2">
+                          <div className="cursor-pointer flex items-center gap-2">
                             <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
                               <Hash className="w-4 h-4 text-indigo-600" />
                             </div>

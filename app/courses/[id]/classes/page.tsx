@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useConvertClassStatusMutation,
   useDeleteClassMutation,
   useGetCourseClassesQuery,
 } from "@/store/api/apiSlice";
@@ -19,6 +20,10 @@ import {
   Code,
   ArrowLeft,
   Plus,
+  RefreshCw,
+  X,
+  ChevronDown,
+  AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
@@ -47,10 +52,15 @@ const Page = () => {
   const router = useRouter();
   const id = Number(params.id);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [selectedClass, setSelectedClass] = useState<Class | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<number>(0);
 
   const { data: classes, isLoading } = useGetCourseClassesQuery({
     courseId: id,
   });
+  const [convertClassStatus, { isLoading: isConverting }] =
+    useConvertClassStatusMutation();
   const [deleteClass] = useDeleteClassMutation();
 
   // Status mapping
@@ -82,7 +92,7 @@ const Page = () => {
   };
 
   // Get course name from first class
-  const courseName = classes?.[0]?.course?.name || "Course";
+  const courseName = classes?.data?.[0]?.course?.name || "Course";
 
   // Search filter
   const filteredClasses = useMemo(() => {
@@ -99,6 +109,64 @@ const Page = () => {
         cls.daysOfWeek?.toLowerCase().includes(query),
     );
   }, [classes, searchQuery]);
+
+  // Open status conversion modal
+  const handleOpenStatusModal = (classItem: Class) => {
+    setSelectedClass(classItem);
+    setSelectedStatus(classItem.status);
+    setShowStatusModal(true);
+  };
+
+  // Close status modal
+  const handleCloseStatusModal = () => {
+    setShowStatusModal(false);
+    setSelectedClass(null);
+    setSelectedStatus(0);
+  };
+
+  // Submit status conversion
+  const handleStatusConversion = async () => {
+    if (!selectedClass) return;
+
+    if (selectedStatus === selectedClass.status) {
+      Swal.fire({
+        icon: "info",
+        title: "No Change",
+        text: "The selected status is the same as the current status.",
+      });
+      return;
+    }
+
+    try {
+      await convertClassStatus({
+        id: selectedClass.id,
+        status: selectedStatus,
+      }).unwrap();
+
+      await Swal.fire({
+        icon: "success",
+        title: "Status Updated!",
+        text: `Class status has been changed to ${getStatusInfo(selectedStatus).label}.`,
+        timer: 2000,
+      });
+
+      handleCloseStatusModal();
+    } catch (err: any) {
+      let errorMessage = "Failed to update class status.";
+
+      if (err?.data?.message) {
+        errorMessage = err.data.message;
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+
+      Swal.fire({
+        icon: "error",
+        title: "Oops!",
+        text: errorMessage,
+      });
+    }
+  };
 
   const handleDelete = async (classId: number) => {
     const result = await Swal.fire({
@@ -238,7 +306,7 @@ const Page = () => {
                   Total Classes
                 </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mt-1">
-                  {classes?.length || 0}
+                  {classes?.data?.length || 0}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center">
@@ -381,6 +449,11 @@ const Page = () => {
                     </th>
                     <th className="px-6 py-5 text-center">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
+                        Change Status
+                      </span>
+                    </th>
+                    <th className="px-6 py-5 text-center">
+                      <span className="text-xs font-bold text-white uppercase tracking-wider">
                         Operations
                       </span>
                     </th>
@@ -501,12 +574,25 @@ const Page = () => {
                         </span>
                       </td>
 
+                      {/* Change Status */}
+                      <td className="px-6 py-5">
+                        <div className="flex items-center justify-center">
+                          <button
+                            onClick={() => handleOpenStatusModal(classItem)}
+                            className="cursor-pointer p-2.5 text-blue-600 hover:text-white bg-blue-50 hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 group"
+                            title="Change status"
+                          >
+                            <RefreshCw className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </td>
+
                       {/* Operations */}
                       <td className="px-6 py-5">
                         <div className="flex items-center justify-center gap-2">
                           <Link
                             href={`/classes/${classItem.id}/edit`}
-                            className="cursor-pointer p-2.5 text-blue-600 hover:text-white bg-blue-50 hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 group"
+                            className="cursor-pointer p-2.5 text-indigo-600 hover:text-white bg-indigo-50 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/30 group"
                             title="Edit class"
                           >
                             <Edit2 className="w-5 h-5" />
@@ -528,6 +614,131 @@ const Page = () => {
           )}
         </div>
       </div>
+
+      {/* Status Conversion Modal */}
+      {showStatusModal && selectedClass && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-cyan-600 p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <RefreshCw className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">
+                      Change Status
+                    </h2>
+                    <p className="text-cyan-100 text-sm mt-1">
+                      {selectedClass.name}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleCloseStatusModal}
+                  className="p-2 hover:bg-white/20 rounded-lg transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5 text-white" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-5">
+              {/* Current Status */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Current Status
+                </label>
+                <div
+                  className={`inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r border rounded-lg text-sm font-bold ${
+                    getStatusInfo(selectedClass.status).color
+                  }`}
+                >
+                  {getStatusInfo(selectedClass.status).label}
+                </div>
+              </div>
+
+              {/* New Status Selection */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  New Status <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={selectedStatus}
+                    onChange={(e) =>
+                      setSelectedStatus(parseInt(e.target.value))
+                    }
+                    className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all appearance-none cursor-pointer"
+                  >
+                    {statusOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Info Box */}
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div className="flex gap-3">
+                  <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-blue-900">
+                    <p className="font-semibold mb-1">Status Meanings:</p>
+                    <ul className="space-y-1 text-blue-800 text-xs">
+                      <li>
+                        • <strong>Planned:</strong> Class is scheduled but not
+                        yet open
+                      </li>
+                      <li>
+                        • <strong>Open:</strong> Enrollment is open
+                      </li>
+                      <li>
+                        • <strong>Full:</strong> Maximum capacity reached
+                      </li>
+                      <li>
+                        • <strong>Closed:</strong> Enrollment closed
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-6 bg-gray-50 border-t border-gray-100 flex gap-3">
+              <button
+                onClick={handleCloseStatusModal}
+                disabled={isConverting}
+                className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleStatusConversion}
+                disabled={isConverting}
+                className="flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {isConverting ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Updating...</span>
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-5 h-5" />
+                    <span>Update Status</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

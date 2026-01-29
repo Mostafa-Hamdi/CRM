@@ -98,6 +98,7 @@ export const api = createApi({
     "Leads",
     "Students",
     "Classes",
+    "CourseClasses",
   ],
   endpoints: (builder) => ({
     /* =========================
@@ -335,6 +336,7 @@ export const api = createApi({
 
     getCourseClasses: builder.query<any, { courseId: number }>({
       query: ({ courseId }) => `/courses/${courseId}/classes`,
+      providesTags: ["CourseClasses"],
     }),
 
     getClass: builder.query<any, { id: number }>({
@@ -453,7 +455,7 @@ export const api = createApi({
         method: "PUT",
         body: { status },
       }),
-      invalidatesTags: ["Classes"],
+      invalidatesTags: ["Classes", "CourseClasses"],
     }),
     /* =========================
        ENROLLMENT ENDPOINTS
