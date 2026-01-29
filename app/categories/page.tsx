@@ -2,9 +2,9 @@
 
 import {
   useDeleteCategoryMutation,
-  useGetCategoriesQuery,
+  useGetSpecificCategoriesMutation,
 } from "@/store/api/apiSlice";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Search,
   Plus,
@@ -14,6 +14,11 @@ import {
   Sparkles,
   Tag,
   Hash,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  List,
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
@@ -23,23 +28,51 @@ interface Category {
   name: string;
 }
 
+interface PaginatedResponse {
+  data: Category[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 const Page = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: categories, isLoading } = useGetCategoriesQuery();
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [categoriesResponse, setCategoriesResponse] =
+    useState<PaginatedResponse | null>(null);
+
+  const [getSpecificCategories, { isLoading }] =
+    useGetSpecificCategoriesMutation();
   const [deleteCategory] = useDeleteCategoryMutation();
+
+  // Fetch categories on mount and when page/size changes
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const result = await getSpecificCategories({
+          pageNumber,
+          pageSize,
+        }).unwrap();
+        setCategoriesResponse(result);
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      }
+    };
+
+    fetchCategories();
+  }, [pageNumber, pageSize, getSpecificCategories]);
+
   // Filter categories based on search query
   const filteredCategories = useMemo(() => {
-    if (!categories?.data) return [];
+    if (!categoriesResponse?.data) return [];
 
     const query = searchQuery.toLowerCase();
-    return categories.data.filter((category: Category) =>
+    return categoriesResponse.data.filter((category: Category) =>
       category.name.toLowerCase().includes(query),
     );
-  }, [categories, searchQuery]);
-
-  const handleEdit = (categoryId: number) => {
-    console.log(`Edit category ${categoryId}`);
-  };
+  }, [categoriesResponse, searchQuery]);
 
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
@@ -53,15 +86,92 @@ const Page = () => {
     });
 
     if (!result.isConfirmed) return;
+
     try {
       await deleteCategory({ id }).unwrap();
-    } catch (Err) {
+
+      await Swal.fire({
+        icon: "success",
+        title: "Deleted!",
+        text: "Category has been deleted successfully.",
+        timer: 2000,
+      });
+
+      // Refresh current page
+      const result = await getSpecificCategories({
+        pageNumber,
+        pageSize,
+      }).unwrap();
+      setCategoriesResponse(result);
+    } catch (err: any) {
+      console.error(err);
+
+      const errorMessage =
+        err?.data?.message ||
+        err?.error ||
+        "Something went wrong while deleting the category.";
+
       Swal.fire({
         icon: "error",
         title: "Oops!",
-        text: "Failed to delete category.",
+        text: errorMessage,
       });
     }
+  };
+
+  // Handle page size change
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setPageNumber(1); // Reset to first page when changing page size
+  };
+
+  // Pagination handlers
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= (categoriesResponse?.totalPages || 1)) {
+      setPageNumber(page);
+    }
+  };
+
+  const goToFirstPage = () => goToPage(1);
+  const goToLastPage = () => goToPage(categoriesResponse?.totalPages || 1);
+  const goToPreviousPage = () => goToPage(pageNumber - 1);
+  const goToNextPage = () => goToPage(pageNumber + 1);
+
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const totalPages = categoriesResponse?.totalPages || 1;
+    const maxVisible = 5;
+
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (pageNumber <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      } else if (pageNumber >= totalPages - 2) {
+        pages.push(1);
+        pages.push("...");
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push("...");
+        pages.push(pageNumber - 1);
+        pages.push(pageNumber);
+        pages.push(pageNumber + 1);
+        pages.push("...");
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
   };
 
   return (
@@ -113,7 +223,7 @@ const Page = () => {
                   Total Categories
                 </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mt-1">
-                  {categories?.length || 0}
+                  {categoriesResponse?.totalCount || 0}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center">
@@ -137,9 +247,25 @@ const Page = () => {
               </div>
             </div>
           </div>
+
+          <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-purple-500/10 hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-medium">
+                  Current Page
+                </p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mt-1">
+                  {filteredCategories.length}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center">
+                <Search className="w-6 h-6 text-purple-600" />
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Search Bar */}
+        {/* Search Bar with Page Size Selector */}
         <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10">
           <div className="flex flex-col sm:flex-row items-center gap-4">
             <div className="relative flex-1 w-full group">
@@ -152,6 +278,30 @@ const Page = () => {
                 className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all"
               />
             </div>
+
+            {/* Page Size Selector */}
+            <div className="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl">
+              <List className="w-5 h-5 text-gray-600" />
+              <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                Show:
+              </span>
+              <div className="flex items-center gap-2">
+                {[5, 10, 20, 50].map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => handlePageSizeChange(size)}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                      pageSize === size
+                        ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                        : "bg-white text-gray-700 hover:bg-blue-50 border border-gray-200"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 border border-blue-400 rounded-xl shadow-lg shadow-blue-500/30">
               <FolderTree className="w-5 h-5 text-white" />
               <span className="text-sm font-bold text-white">
@@ -159,6 +309,21 @@ const Page = () => {
               </span>
             </div>
           </div>
+
+          {/* Pagination Info */}
+          {categoriesResponse && categoriesResponse.totalPages > 0 && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <p className="text-sm text-gray-600 text-center">
+                Showing page{" "}
+                <span className="font-bold text-blue-600">{pageNumber}</span> of{" "}
+                <span className="font-bold text-blue-600">
+                  {categoriesResponse.totalPages}
+                </span>{" "}
+                ({categoriesResponse.totalCount} total categories, {pageSize}{" "}
+                per page)
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Table Card */}
@@ -221,6 +386,9 @@ const Page = () => {
                         {/* Category Name */}
                         <td className="px-6 py-5">
                           <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+                              <FolderTree className="w-5 h-5 text-white" />
+                            </div>
                             <div>
                               <div className="font-semibold text-gray-900 text-base">
                                 {category.name}
@@ -256,6 +424,73 @@ const Page = () => {
             </div>
           )}
         </div>
+
+        {/* Pagination Controls */}
+        {categoriesResponse && categoriesResponse.totalPages > 1 && (
+          <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Previous buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={goToFirstPage}
+                  disabled={pageNumber === 1}
+                  className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                  title="First page"
+                >
+                  <ChevronsLeft className="w-5 h-5 text-gray-600" />
+                </button>
+                <button
+                  onClick={goToPreviousPage}
+                  disabled={pageNumber === 1}
+                  className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                  title="Previous page"
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+
+              {/* Page numbers */}
+              <div className="flex items-center gap-2">
+                {getPageNumbers().map((page, index) => (
+                  <button
+                    key={index}
+                    onClick={() => typeof page === "number" && goToPage(page)}
+                    disabled={page === "..." || page === pageNumber}
+                    className={`min-w-[40px] h-10 px-3 rounded-lg font-semibold transition-all cursor-pointer ${
+                      page === pageNumber
+                        ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg"
+                        : page === "..."
+                          ? "cursor-default"
+                          : "border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 text-gray-700"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              {/* Next buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={goToNextPage}
+                  disabled={pageNumber === categoriesResponse.totalPages}
+                  className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                  title="Next page"
+                >
+                  <ChevronRight className="w-5 h-5 text-gray-600" />
+                </button>
+                <button
+                  onClick={goToLastPage}
+                  disabled={pageNumber === categoriesResponse.totalPages}
+                  className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                  title="Last page"
+                >
+                  <ChevronsRight className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
