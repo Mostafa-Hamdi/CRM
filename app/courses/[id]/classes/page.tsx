@@ -86,12 +86,12 @@ const Page = () => {
 
   // Search filter
   const filteredClasses = useMemo(() => {
-    if (!classes) return [];
+    if (!classes?.data) return [];
 
-    if (!searchQuery.trim()) return classes;
+    if (!searchQuery.trim()) return classes?.data;
 
     const query = searchQuery.toLowerCase();
-    return classes.filter(
+    return classes?.data?.filter(
       (cls: Class) =>
         cls.name.toLowerCase().includes(query) ||
         cls.code?.toLowerCase().includes(query) ||
@@ -173,10 +173,12 @@ const Page = () => {
   };
 
   // Count by status
-  const openClasses = classes?.filter((c: Class) => c.status === 1).length || 0;
-  const fullClasses = classes?.filter((c: Class) => c.status === 2).length || 0;
+  const openClasses =
+    classes?.data?.filter((c: Class) => c.status === 1).length || 0;
+  const fullClasses =
+    classes?.data?.filter((c: Class) => c.status === 2).length || 0;
   const closedClasses =
-    classes?.filter((c: Class) => c.status === 3).length || 0;
+    classes?.data?.filter((c: Class) => c.status === 3).length || 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">

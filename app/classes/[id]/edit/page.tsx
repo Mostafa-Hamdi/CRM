@@ -365,7 +365,7 @@ const Page = () => {
                           ? "Loading courses..."
                           : "Select a course"}
                       </option>
-                      {courses?.map((course: Course) => (
+                      {courses?.data?.map((course: Course) => (
                         <option key={course.id} value={course.id}>
                           {course.name}
                         </option>

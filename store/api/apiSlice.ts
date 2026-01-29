@@ -333,7 +333,7 @@ export const api = createApi({
       providesTags: ["Classes"],
     }),
 
-    getCourseClasses: builder.query<any[], { courseId: number }>({
+    getCourseClasses: builder.query<any, { courseId: number }>({
       query: ({ courseId }) => `/courses/${courseId}/classes`,
     }),
 

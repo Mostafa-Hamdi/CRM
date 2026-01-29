@@ -360,7 +360,7 @@ const Page = () => {
                       } rounded-xl px-4 py-3.5 text-gray-900 focus:outline-none focus:ring-4 focus:bg-white transition-all appearance-none cursor-pointer`}
                     >
                       <option value={0}>Select category</option>
-                      {categories?.map((category: Category) => (
+                      {categories?.data?.map((category: Category) => (
                         <option key={category.id} value={category.id}>
                           {category.name}
                         </option>

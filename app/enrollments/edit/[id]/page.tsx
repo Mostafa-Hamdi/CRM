@@ -239,7 +239,7 @@ const Page = () => {
                     } rounded-xl pl-12 pr-10 py-3.5 text-gray-900 focus:outline-none focus:ring-4 focus:bg-white transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
                     <option value={0}>Select a course...</option>
-                    {classes?.map((course: Class) => (
+                    {classes?.data?.map((course: Class) => (
                       <option key={course.id} value={course.id}>
                         {course.name}
                       </option>
