@@ -359,9 +359,6 @@ const Page = () => {
                             <div className="font-semibold text-gray-900 text-base">
                               {student.fullName}
                             </div>
-                            <div className="text-xs text-gray-500 mt-0.5">
-                              ID: #{student.id}
-                            </div>
                           </div>
                         </div>
                       </td>
