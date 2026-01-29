@@ -528,7 +528,7 @@ export const api = createApi({
        STUDENT ENDPOINTS
        ========================= */
 
-    getStudents: builder.query<any[], void>({
+    getStudents: builder.query<any, void>({
       query: () => "/students",
       providesTags: ["Students"],
     }),

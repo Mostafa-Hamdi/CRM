@@ -3,7 +3,7 @@
 import {
   useConvertEnrollmentStatusMutation,
   useDeleteEnrollmentMutation,
-  useGetEnrollmentsQuery,
+  useGetSpecificEnrollmentsMutation,
   useGetFilteredEnrollmentsMutation,
 } from "@/store/api/apiSlice";
 import { useState, useMemo, useEffect } from "react";
@@ -24,6 +24,11 @@ import {
   RefreshCw,
   ChevronDown,
   X,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  List,
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
@@ -37,6 +42,14 @@ interface Enrollment {
   enrollmentDate: string;
 }
 
+interface PaginatedResponse {
+  data: Enrollment[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 const Page = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<number>(0);
@@ -47,27 +60,51 @@ const Page = () => {
   const [selectedEnrollment, setSelectedEnrollment] =
     useState<Enrollment | null>(null);
   const [selectedStatusId, setSelectedStatusId] = useState<number>(0);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [enrollmentsResponse, setEnrollmentsResponse] =
+    useState<PaginatedResponse | null>(null);
 
-  const { data: enrollments, isLoading } = useGetEnrollmentsQuery();
+  const [getSpecificEnrollments, { isLoading }] =
+    useGetSpecificEnrollmentsMutation();
   const [deleteEnrollment] = useDeleteEnrollmentMutation();
   const [convertStatus, { isLoading: isConverting }] =
     useConvertEnrollmentStatusMutation();
   const [getFilteredEnrollments, { isLoading: isFilterLoading }] =
     useGetFilteredEnrollmentsMutation();
 
-  // Initialize displayed enrollments
+  // Fetch enrollments on mount and when page/size changes
   useEffect(() => {
-    if (enrollments?.data) {
-      setDisplayedEnrollments(enrollments.data);
-    }
-  }, [enrollments]);
+    const fetchEnrollments = async () => {
+      try {
+        const result = await getSpecificEnrollments({
+          pageNumber,
+          pageSize,
+        }).unwrap();
+        setEnrollmentsResponse(result);
+        setDisplayedEnrollments(result.data);
+      } catch (err) {
+        console.error("Failed to fetch enrollments:", err);
+      }
+    };
+
+    fetchEnrollments();
+  }, [pageNumber, pageSize, getSpecificEnrollments]);
 
   // Filter by status
   const handleStatusFilter = async (statusId: number) => {
     setActiveFilter(statusId);
 
     if (statusId === 0) {
-      setDisplayedEnrollments(enrollments || []);
+      try {
+        const result = await getSpecificEnrollments({
+          pageNumber,
+          pageSize,
+        }).unwrap();
+        setDisplayedEnrollments(result.data);
+      } catch (err) {
+        console.error("Failed to fetch enrollments:", err);
+      }
     } else {
       try {
         const filtered = await getFilteredEnrollments({ statusId }).unwrap();
@@ -117,6 +154,14 @@ const Page = () => {
         text: "Enrollment has been deleted successfully.",
         timer: 2000,
       });
+
+      // Refresh current page
+      const result = await getSpecificEnrollments({
+        pageNumber,
+        pageSize,
+      }).unwrap();
+      setEnrollmentsResponse(result);
+      setDisplayedEnrollments(result.data);
     } catch (err) {
       Swal.fire({
         icon: "error",
@@ -167,6 +212,14 @@ const Page = () => {
       });
 
       handleCloseModal();
+
+      // Refresh current page
+      const result = await getSpecificEnrollments({
+        pageNumber,
+        pageSize,
+      }).unwrap();
+      setEnrollmentsResponse(result);
+      setDisplayedEnrollments(result.data);
     } catch (err) {
       let message = "Failed to update enrollment status.";
 
@@ -218,6 +271,61 @@ const Page = () => {
     };
     const Icon = icons[status] || Clock;
     return <Icon className="w-3.5 h-3.5" />;
+  };
+
+  // Handle page size change
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setPageNumber(1); // Reset to first page when changing page size
+  };
+
+  // Pagination handlers
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= (enrollmentsResponse?.totalPages || 1)) {
+      setPageNumber(page);
+    }
+  };
+
+  const goToFirstPage = () => goToPage(1);
+  const goToLastPage = () => goToPage(enrollmentsResponse?.totalPages || 1);
+  const goToPreviousPage = () => goToPage(pageNumber - 1);
+  const goToNextPage = () => goToPage(pageNumber + 1);
+
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const totalPages = enrollmentsResponse?.totalPages || 1;
+    const maxVisible = 5;
+
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (pageNumber <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      } else if (pageNumber >= totalPages - 2) {
+        pages.push(1);
+        pages.push("...");
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push("...");
+        pages.push(pageNumber - 1);
+        pages.push(pageNumber);
+        pages.push(pageNumber + 1);
+        pages.push("...");
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
   };
 
   // Status options for conversion
@@ -321,7 +429,7 @@ const Page = () => {
                   Total Enrollments
                 </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mt-1">
-                  {enrollments?.data?.length || 0}
+                  {enrollmentsResponse?.totalCount || 0}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center">
@@ -335,7 +443,7 @@ const Page = () => {
               <div>
                 <p className="text-gray-600 text-sm font-medium">Active</p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mt-1">
-                  {enrollments?.data?.filter(
+                  {displayedEnrollments?.filter(
                     (e: Enrollment) => e.status === "Active",
                   ).length || 0}
                 </p>
@@ -351,7 +459,7 @@ const Page = () => {
               <div>
                 <p className="text-gray-600 text-sm font-medium">Completed</p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mt-1">
-                  {enrollments?.data?.filter(
+                  {displayedEnrollments?.filter(
                     (e: Enrollment) => e.status === "Completed",
                   ).length || 0}
                 </p>
@@ -406,7 +514,7 @@ const Page = () => {
                         isActive ? "bg-white/20" : "bg-gray-200 text-gray-700"
                       }`}
                     >
-                      {enrollments?.data?.filter(
+                      {displayedEnrollments?.filter(
                         (e: Enrollment) => e.status === filter.label,
                       ).length || 0}
                     </span>
@@ -417,7 +525,7 @@ const Page = () => {
           </div>
         </div>
 
-        {/* Search Bar */}
+        {/* Search Bar with Page Size Selector */}
         <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10">
           <div className="flex flex-col sm:flex-row items-center gap-4">
             <div className="relative flex-1 w-full group">
@@ -430,6 +538,30 @@ const Page = () => {
                 className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all"
               />
             </div>
+
+            {/* Page Size Selector */}
+            <div className="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl">
+              <List className="w-5 h-5 text-gray-600" />
+              <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                Show:
+              </span>
+              <div className="flex items-center gap-2">
+                {[5, 10, 20, 50].map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => handlePageSizeChange(size)}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                      pageSize === size
+                        ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                        : "bg-white text-gray-700 hover:bg-blue-50 border border-gray-200"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 border border-blue-400 rounded-xl shadow-lg shadow-blue-500/30">
               <UserCheck className="w-5 h-5 text-white" />
               <span className="text-sm font-bold text-white">
@@ -437,6 +569,21 @@ const Page = () => {
               </span>
             </div>
           </div>
+
+          {/* Pagination Info */}
+          {enrollmentsResponse && enrollmentsResponse.totalPages > 0 && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <p className="text-sm text-gray-600 text-center">
+                Showing page{" "}
+                <span className="font-bold text-blue-600">{pageNumber}</span> of{" "}
+                <span className="font-bold text-blue-600">
+                  {enrollmentsResponse.totalPages}
+                </span>{" "}
+                ({enrollmentsResponse.totalCount} total enrollments, {pageSize}{" "}
+                per page)
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Table Card */}
@@ -612,6 +759,73 @@ const Page = () => {
             </div>
           )}
         </div>
+
+        {/* Pagination Controls */}
+        {enrollmentsResponse && enrollmentsResponse.totalPages > 1 && (
+          <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Previous buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={goToFirstPage}
+                  disabled={pageNumber === 1}
+                  className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                  title="First page"
+                >
+                  <ChevronsLeft className="w-5 h-5 text-gray-600" />
+                </button>
+                <button
+                  onClick={goToPreviousPage}
+                  disabled={pageNumber === 1}
+                  className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                  title="Previous page"
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+
+              {/* Page numbers */}
+              <div className="flex items-center gap-2">
+                {getPageNumbers().map((page, index) => (
+                  <button
+                    key={index}
+                    onClick={() => typeof page === "number" && goToPage(page)}
+                    disabled={page === "..." || page === pageNumber}
+                    className={`min-w-[40px] h-10 px-3 rounded-lg font-semibold transition-all cursor-pointer ${
+                      page === pageNumber
+                        ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg"
+                        : page === "..."
+                          ? "cursor-default"
+                          : "border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 text-gray-700"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              {/* Next buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={goToNextPage}
+                  disabled={pageNumber === enrollmentsResponse.totalPages}
+                  className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                  title="Next page"
+                >
+                  <ChevronRight className="w-5 h-5 text-gray-600" />
+                </button>
+                <button
+                  onClick={goToLastPage}
+                  disabled={pageNumber === enrollmentsResponse.totalPages}
+                  className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                  title="Last page"
+                >
+                  <ChevronsRight className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Convert Status Modal */}
@@ -636,7 +850,7 @@ const Page = () => {
                 </div>
                 <button
                   onClick={handleCloseModal}
-                  className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                  className="p-2 hover:bg-white/20 rounded-lg transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5 text-white" />
                 </button>

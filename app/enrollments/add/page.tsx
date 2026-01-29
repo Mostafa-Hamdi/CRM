@@ -182,7 +182,7 @@ const Page = () => {
                           ? "Loading students..."
                           : "Select a student..."}
                       </option>
-                      {students?.map((student: Student) => (
+                      {students?.data?.map((student: Student) => (
                         <option key={student.id} value={student.id}>
                           {student?.fullName}
                         </option>
@@ -223,7 +223,7 @@ const Page = () => {
                           ? "Loading classes..."
                           : "Select a class..."}
                       </option>
-                      {classes?.map((cls: Class) => (
+                      {classes?.data?.map((cls: Class) => (
                         <option key={cls.id} value={cls.id}>
                           {cls.name}
                         </option>
