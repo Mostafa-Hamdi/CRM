@@ -4,7 +4,7 @@ import {
   useDeleteCourseMutation,
   useGetCoursesQuery,
 } from "@/store/api/apiSlice";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Search,
   Plus,
@@ -19,6 +19,12 @@ import {
   XCircle,
   Globe,
   Hash,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  List,
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
@@ -40,6 +46,9 @@ interface Course {
 
 const Page = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
   const { data: courses, isLoading } = useGetCoursesQuery();
   const [deleteCourse] = useDeleteCourseMutation();
 
@@ -58,6 +67,21 @@ const Page = () => {
         (course.tags && course.tags.toLowerCase().includes(query)),
     );
   }, [courses, searchQuery]);
+
+  // Paginate the filtered courses
+  const paginatedCourses = useMemo(() => {
+    const startIndex = (pageNumber - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return filteredCourses.slice(startIndex, endIndex);
+  }, [filteredCourses, pageNumber, pageSize]);
+
+  // Calculate total pages
+  const totalPages = Math.ceil(filteredCourses.length / pageSize);
+
+  // Reset to first page when search query or page size changes
+  useEffect(() => {
+    setPageNumber(1);
+  }, [searchQuery, pageSize]);
 
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
@@ -140,6 +164,60 @@ const Page = () => {
     courses?.data?.filter((c: Course) => c.isActive).length || 0;
   const inactiveCourses =
     courses?.data?.filter((c: Course) => !c.isActive).length || 0;
+
+  // Handle page size change
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setPageNumber(1); // Reset to first page when changing page size
+  };
+
+  // Pagination handlers
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setPageNumber(page);
+    }
+  };
+
+  const goToFirstPage = () => goToPage(1);
+  const goToLastPage = () => goToPage(totalPages);
+  const goToPreviousPage = () => goToPage(pageNumber - 1);
+  const goToNextPage = () => goToPage(pageNumber + 1);
+
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const maxVisible = 5;
+
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (pageNumber <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      } else if (pageNumber >= totalPages - 2) {
+        pages.push(1);
+        pages.push("...");
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push("...");
+        pages.push(pageNumber - 1);
+        pages.push(pageNumber);
+        pages.push(pageNumber + 1);
+        pages.push("...");
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
@@ -242,7 +320,7 @@ const Page = () => {
           </div>
         </div>
 
-        {/* Search Bar */}
+        {/* Search Bar with Page Size Selector */}
         <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10">
           <div className="flex flex-col sm:flex-row items-center gap-4">
             <div className="relative flex-1 w-full group">
@@ -255,6 +333,30 @@ const Page = () => {
                 className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all"
               />
             </div>
+
+            {/* Page Size Selector */}
+            <div className="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl">
+              <List className="w-5 h-5 text-gray-600" />
+              <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                Show:
+              </span>
+              <div className="flex items-center gap-2">
+                {[5, 10, 20, 50].map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => handlePageSizeChange(size)}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                      pageSize === size
+                        ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                        : "bg-white text-gray-700 hover:bg-blue-50 border border-gray-200"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 border border-blue-400 rounded-xl shadow-lg shadow-blue-500/30">
               <BookOpen className="w-5 h-5 text-white" />
               <span className="text-sm font-bold text-white">
@@ -262,6 +364,18 @@ const Page = () => {
               </span>
             </div>
           </div>
+
+          {/* Pagination Info */}
+          {totalPages > 0 && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <p className="text-sm text-gray-600 text-center">
+                Showing page{" "}
+                <span className="font-bold text-blue-600">{pageNumber}</span> of{" "}
+                <span className="font-bold text-blue-600">{totalPages}</span> (
+                {filteredCourses.length} total courses, {pageSize} per page)
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Table Card */}
@@ -271,7 +385,7 @@ const Page = () => {
               <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4" />
               <p className="text-gray-600 font-medium">Loading courses...</p>
             </div>
-          ) : filteredCourses.length === 0 ? (
+          ) : paginatedCourses.length === 0 ? (
             <div className="p-20 text-center">
               <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-gray-100 to-blue-100 rounded-full mb-4">
                 <BookOpen className="w-10 h-10 text-gray-400" />
@@ -335,7 +449,7 @@ const Page = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {filteredCourses.map((course: Course, index: number) => (
+                  {paginatedCourses.map((course: Course, index: number) => (
                     <tr
                       key={course.id}
                       className="hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-cyan-50/30 transition-all duration-200"
@@ -477,6 +591,73 @@ const Page = () => {
             </div>
           )}
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Previous buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={goToFirstPage}
+                  disabled={pageNumber === 1}
+                  className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                  title="First page"
+                >
+                  <ChevronsLeft className="w-5 h-5 text-gray-600" />
+                </button>
+                <button
+                  onClick={goToPreviousPage}
+                  disabled={pageNumber === 1}
+                  className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                  title="Previous page"
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+
+              {/* Page numbers */}
+              <div className="flex items-center gap-2">
+                {getPageNumbers().map((page, index) => (
+                  <button
+                    key={index}
+                    onClick={() => typeof page === "number" && goToPage(page)}
+                    disabled={page === "..." || page === pageNumber}
+                    className={`min-w-[40px] h-10 px-3 rounded-lg font-semibold transition-all cursor-pointer ${
+                      page === pageNumber
+                        ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg"
+                        : page === "..."
+                          ? "cursor-default"
+                          : "border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 text-gray-700"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              {/* Next buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={goToNextPage}
+                  disabled={pageNumber === totalPages}
+                  className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                  title="Next page"
+                >
+                  <ChevronRight className="w-5 h-5 text-gray-600" />
+                </button>
+                <button
+                  onClick={goToLastPage}
+                  disabled={pageNumber === totalPages}
+                  className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                  title="Last page"
+                >
+                  <ChevronsRight className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

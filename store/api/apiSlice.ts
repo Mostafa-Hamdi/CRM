@@ -703,6 +703,15 @@ export const api = createApi({
         method: "GET",
       }),
     }),
+    getSpecificCourses: builder.mutation<
+      any,
+      { pageNumber: number; pageSize: number }
+    >({
+      query: ({ pageNumber, pageSize }) => ({
+        url: `/courses?PageNumber=${pageNumber}&PageSize=${pageSize}`,
+        method: "GET",
+      }),
+    }),
 
     getFilteredLeads: builder.mutation<any, { statusId: number }>({
       query: ({ statusId }) => ({
@@ -841,6 +850,7 @@ export const {
   useAddCourseMutation,
   useUpdateCourseMutation,
   useDeleteCourseMutation,
+  useGetSpecificCoursesMutation,
 
   // Classes
   useGetClassesQuery,
