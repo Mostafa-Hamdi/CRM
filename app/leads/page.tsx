@@ -4,6 +4,7 @@ import {
   useConvertStatusMutation,
   useDeleteLeadMutation,
   useExportLeadsMutation,
+  useGetClassesQuery,
   useGetCoursesQuery,
   useGetFilteredLeadsMutation,
   useGetSpecificLeadsMutation,
@@ -55,7 +56,7 @@ interface Lead {
   createdAt: string;
 }
 
-interface Course {
+interface courseClass {
   id: number;
   name: string;
 }
@@ -86,7 +87,7 @@ const Page = () => {
   } | null>(null);
 
   const [getSpecificLeads, { isLoading }] = useGetSpecificLeadsMutation();
-  const { data: courses, isLoading: coursesIsLoading } = useGetCoursesQuery();
+  const { data: classes, isLoading: classesIsLoading } = useGetClassesQuery();
   const [deleteLead] = useDeleteLeadMutation();
   const [convertStatus, { isLoading: isConverting }] =
     useConvertStatusMutation();
@@ -242,7 +243,7 @@ const Page = () => {
     try {
       await convertStatus({
         id: selectedLead.id,
-        courseId: selectedCourseId,
+        courseClassId: selectedCourseId,
         paidAmount: parseFloat(paidAmount),
       }).unwrap();
 
@@ -1291,7 +1292,7 @@ const Page = () => {
             <div className="p-6 space-y-5">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Select Course <span className="text-red-500">*</span>
+                  Select Class <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <select
@@ -1301,10 +1302,10 @@ const Page = () => {
                     }
                     className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all appearance-none cursor-pointer"
                   >
-                    <option value={0}>Choose a course...</option>
-                    {courses?.map((course: Course) => (
-                      <option key={course.id} value={course.id}>
-                        {course.name}
+                    <option value={0}>Choose a class...</option>
+                    {classes?.data?.map((item: any) => (
+                      <option key={item.id} value={item.id}>
+                        {item.name}
                       </option>
                     ))}
                   </select>

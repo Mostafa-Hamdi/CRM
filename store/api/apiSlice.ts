@@ -685,6 +685,15 @@ export const api = createApi({
         method: "GET",
       }),
     }),
+    getSpecificEnrollments: builder.mutation<
+      any,
+      { pageNumber: number; pageSize: number }
+    >({
+      query: ({ pageNumber, pageSize }) => ({
+        url: `/enrollments?PageNumber=${pageNumber}&PageSize=${pageSize}`,
+        method: "GET",
+      }),
+    }),
 
     getFilteredLeads: builder.mutation<any, { statusId: number }>({
       query: ({ statusId }) => ({
@@ -695,12 +704,12 @@ export const api = createApi({
 
     convertStatus: builder.mutation<
       void,
-      { id: number; courseId: number; paidAmount: number }
+      { id: number; courseClassId: number; paidAmount: number }
     >({
-      query: ({ id, courseId, paidAmount }) => ({
+      query: ({ id, courseClassId, paidAmount }) => ({
         url: `/leads/${id}/convert`,
         method: "POST",
-        body: { courseId, paidAmount },
+        body: { courseClassId, paidAmount },
       }),
       invalidatesTags: ["Leads"],
     }),
@@ -840,6 +849,7 @@ export const {
   useConvertEnrollmentStatusMutation,
   useGetFilteredEnrollmentsMutation,
   useDeleteEnrollmentMutation,
+  useGetSpecificEnrollmentsMutation,
 
   // Students
   useGetStudentsQuery,
