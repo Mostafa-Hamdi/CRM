@@ -1,11 +1,11 @@
 "use client";
 
 import {
-  useGetClassesQuery,
+  useGetSpecificClassesMutation,
   useDeleteClassMutation,
   useConvertClassStatusMutation,
 } from "@/store/api/apiSlice";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Search,
   Plus,
@@ -25,6 +25,11 @@ import {
   X,
   ChevronDown,
   AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  List,
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
@@ -48,6 +53,14 @@ interface Class {
   };
 }
 
+interface PaginatedResponse {
+  data: Class[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 const Page = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<
@@ -56,11 +69,32 @@ const Page = () => {
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedClass, setSelectedClass] = useState<Class | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<number>(0);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [classesResponse, setClassesResponse] =
+    useState<PaginatedResponse | null>(null);
 
-  const { data: classes, isLoading } = useGetClassesQuery();
+  const [getSpecificClasses, { isLoading }] = useGetSpecificClassesMutation();
   const [deleteClass] = useDeleteClassMutation();
   const [convertClassStatus, { isLoading: isConverting }] =
     useConvertClassStatusMutation();
+
+  // Fetch classes on mount and when page/size changes
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const result = await getSpecificClasses({
+          pageNumber,
+          pageSize,
+        }).unwrap();
+        setClassesResponse(result);
+      } catch (err) {
+        console.error("Failed to fetch classes:", err);
+      }
+    };
+
+    fetchClasses();
+  }, [pageNumber, pageSize, getSpecificClasses]);
 
   // Status mapping
   const statusOptions = [
@@ -92,9 +126,9 @@ const Page = () => {
 
   // Filter and search classes
   const filteredClasses = useMemo(() => {
-    if (!classes?.data) return [];
+    if (!classesResponse?.data) return [];
 
-    let result = classes.data;
+    let result = classesResponse.data;
 
     // Filter by status (0 = inactive, 1 = active)
     if (activeFilter === "active") {
@@ -117,7 +151,7 @@ const Page = () => {
     }
 
     return result;
-  }, [classes, searchQuery, activeFilter]);
+  }, [classesResponse, searchQuery, activeFilter]);
 
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
@@ -141,6 +175,13 @@ const Page = () => {
         text: "Class has been deleted successfully.",
         timer: 2000,
       });
+
+      // Refresh current page
+      const result = await getSpecificClasses({
+        pageNumber,
+        pageSize,
+      }).unwrap();
+      setClassesResponse(result);
     } catch (err: any) {
       console.error(err);
 
@@ -198,6 +239,13 @@ const Page = () => {
       });
 
       handleCloseStatusModal();
+
+      // Refresh current page
+      const result = await getSpecificClasses({
+        pageNumber,
+        pageSize,
+      }).unwrap();
+      setClassesResponse(result);
     } catch (err: any) {
       let errorMessage = "Failed to update class status.";
 
@@ -251,6 +299,61 @@ const Page = () => {
     return colors[index % colors.length];
   };
 
+  // Handle page size change
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setPageNumber(1); // Reset to first page when changing page size
+  };
+
+  // Pagination handlers
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= (classesResponse?.totalPages || 1)) {
+      setPageNumber(page);
+    }
+  };
+
+  const goToFirstPage = () => goToPage(1);
+  const goToLastPage = () => goToPage(classesResponse?.totalPages || 1);
+  const goToPreviousPage = () => goToPage(pageNumber - 1);
+  const goToNextPage = () => goToPage(pageNumber + 1);
+
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const totalPages = classesResponse?.totalPages || 1;
+    const maxVisible = 5;
+
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (pageNumber <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      } else if (pageNumber >= totalPages - 2) {
+        pages.push(1);
+        pages.push("...");
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push("...");
+        pages.push(pageNumber - 1);
+        pages.push(pageNumber);
+        pages.push(pageNumber + 1);
+        pages.push("...");
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
       {/* Decorative Elements */}
@@ -300,7 +403,7 @@ const Page = () => {
                   Total Classes
                 </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mt-1">
-                  {classes?.data?.length || 0}
+                  {classesResponse?.totalCount || 0}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center">
@@ -314,8 +417,9 @@ const Page = () => {
               <div>
                 <p className="text-gray-600 text-sm font-medium">Open</p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mt-1">
-                  {classes?.data?.filter((cls: Class) => cls.status === 1)
-                    .length || 0}
+                  {classesResponse?.data?.filter(
+                    (cls: Class) => cls.status === 1,
+                  ).length || 0}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl flex items-center justify-center">
@@ -329,8 +433,9 @@ const Page = () => {
               <div>
                 <p className="text-gray-600 text-sm font-medium">Full</p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent mt-1">
-                  {classes?.data?.filter((cls: Class) => cls.status === 2)
-                    .length || 0}
+                  {classesResponse?.data?.filter(
+                    (cls: Class) => cls.status === 2,
+                  ).length || 0}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-xl flex items-center justify-center">
@@ -386,7 +491,7 @@ const Page = () => {
           </div>
         </div>
 
-        {/* Search Bar */}
+        {/* Search Bar with Page Size Selector */}
         <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10">
           <div className="flex flex-col sm:flex-row items-center gap-4">
             <div className="relative flex-1 w-full group">
@@ -399,6 +504,30 @@ const Page = () => {
                 className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all"
               />
             </div>
+
+            {/* Page Size Selector */}
+            <div className="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl">
+              <List className="w-5 h-5 text-gray-600" />
+              <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                Show:
+              </span>
+              <div className="flex items-center gap-2">
+                {[5, 10, 20, 50].map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => handlePageSizeChange(size)}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+                      pageSize === size
+                        ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                        : "bg-white text-gray-700 hover:bg-blue-50 border border-gray-200"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 border border-blue-400 rounded-xl shadow-lg shadow-blue-500/30">
               <BookOpen className="w-5 h-5 text-white" />
               <span className="text-sm font-bold text-white">
@@ -406,6 +535,21 @@ const Page = () => {
               </span>
             </div>
           </div>
+
+          {/* Pagination Info */}
+          {classesResponse && classesResponse.totalPages > 0 && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <p className="text-sm text-gray-600 text-center">
+                Showing page{" "}
+                <span className="font-bold text-blue-600">{pageNumber}</span> of{" "}
+                <span className="font-bold text-blue-600">
+                  {classesResponse.totalPages}
+                </span>{" "}
+                ({classesResponse.totalCount} total classes, {pageSize} per
+                page)
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Table Card */}
@@ -649,6 +793,73 @@ const Page = () => {
             </div>
           )}
         </div>
+
+        {/* Pagination Controls */}
+        {classesResponse && classesResponse.totalPages > 1 && (
+          <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Previous buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={goToFirstPage}
+                  disabled={pageNumber === 1}
+                  className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                  title="First page"
+                >
+                  <ChevronsLeft className="w-5 h-5 text-gray-600" />
+                </button>
+                <button
+                  onClick={goToPreviousPage}
+                  disabled={pageNumber === 1}
+                  className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                  title="Previous page"
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+
+              {/* Page numbers */}
+              <div className="flex items-center gap-2">
+                {getPageNumbers().map((page, index) => (
+                  <button
+                    key={index}
+                    onClick={() => typeof page === "number" && goToPage(page)}
+                    disabled={page === "..." || page === pageNumber}
+                    className={`min-w-[40px] h-10 px-3 rounded-lg font-semibold transition-all cursor-pointer ${
+                      page === pageNumber
+                        ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg"
+                        : page === "..."
+                          ? "cursor-default"
+                          : "border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 text-gray-700"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              {/* Next buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={goToNextPage}
+                  disabled={pageNumber === classesResponse.totalPages}
+                  className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                  title="Next page"
+                >
+                  <ChevronRight className="w-5 h-5 text-gray-600" />
+                </button>
+                <button
+                  onClick={goToLastPage}
+                  disabled={pageNumber === classesResponse.totalPages}
+                  className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                  title="Last page"
+                >
+                  <ChevronsRight className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Status Conversion Modal */}

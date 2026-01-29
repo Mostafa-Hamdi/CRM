@@ -694,6 +694,15 @@ export const api = createApi({
         method: "GET",
       }),
     }),
+    getSpecificClasses: builder.mutation<
+      any,
+      { pageNumber: number; pageSize: number }
+    >({
+      query: ({ pageNumber, pageSize }) => ({
+        url: `/classes?PageNumber=${pageNumber}&PageSize=${pageSize}`,
+        method: "GET",
+      }),
+    }),
 
     getFilteredLeads: builder.mutation<any, { statusId: number }>({
       query: ({ statusId }) => ({
@@ -841,6 +850,7 @@ export const {
   useUpdateClassMutation,
   useDeleteClassMutation,
   useConvertClassStatusMutation,
+  useGetSpecificClassesMutation,
   // Enrollments
   useGetEnrollmentsQuery,
   useGetEnrollmentQuery,
