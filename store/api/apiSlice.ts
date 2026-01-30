@@ -630,6 +630,43 @@ export const api = createApi({
       query: () => "/leads",
       providesTags: ["Leads"],
     }),
+    getLeadsPipeLine: builder.query<{ leads: any }, void>({
+      query: () => ({
+        url: "/leads/pipeline",
+      }),
+      providesTags: ["Leads"],
+    }),
+    // getLeadsPipeLine: builder.query({
+    //   query: ({ pipeline }) => `/leads/pipeline/${pipeline}`,
+    //   providesTags: (result, error, { pipeline }) => [
+    //     { type: "Leads", id: pipeline },
+    //   ],
+    // }),
+
+    // NEW MUTATION - Update lead status
+    updateLeadStatus: builder.mutation({
+      query: ({ leadId, status, reason }) => ({
+        url: `/leads/${leadId}/status`,
+        method: "PUT", // or 'PATCH' depending on your API
+        body: {
+          status, // This is now a number (1-7)
+          reason, // Optional reason string
+        },
+      }),
+      // Invalidate all pipeline caches to refetch data after update
+      // invalidatesTags: (result, error, { leadId }) => [
+      //   { type: "Leads", id: "LIST" },
+      //   ...[
+      //     "new",
+      //     "contacted",
+      //     "qualified",
+      //     "proposal",
+      //     "negotiation",
+      //     "won",
+      //     "lost",
+      //   ].map((pipeline) => ({ type: "Leads", id: pipeline })),
+      // ],
+    }),
 
     getLead: builder.query<any, { id: number }>({
       query: ({ id }) => ({
@@ -916,6 +953,7 @@ export const {
   useGetSpecificStudentsMutation,
   // Leads
   useGetLeadsQuery,
+  useGetLeadsPipeLineQuery,
   useGetLeadQuery,
   useAddLeadMutation,
   useUpdateLeadMutation,
@@ -923,7 +961,7 @@ export const {
   useGetFilteredLeadsMutation,
   useConvertStatusMutation,
   useDeleteLeadMutation,
-
+  useUpdateLeadStatusMutation,
   // Lead Notes
   useGetLeadNotesQuery,
   useAddLeadNoteMutation,

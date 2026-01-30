@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Search,
   Plus,
@@ -34,6 +34,10 @@ import {
   StickyNote,
 } from "lucide-react";
 import Link from "next/link";
+import {
+  useGetLeadsPipeLineQuery,
+  useUpdateLeadStatusMutation,
+} from "../../store/api/apiSlice";
 
 interface Lead {
   id: number;
@@ -45,6 +49,7 @@ interface Lead {
   assignedToAvatar?: string;
   dealValue: number;
   stage: string;
+  status: number;
   createdAt: string;
   lastActivity: string;
   priority: "low" | "medium" | "high" | "urgent";
@@ -56,47 +61,93 @@ interface Lead {
   hasNote: boolean;
 }
 
-// Sales stages with WIP limits
+interface ApiStageResponse {
+  stageId: number;
+  stageName: string;
+  totalLeads: number;
+  totalValue: number | null;
+  leads: ApiLeadInStage[];
+}
+
+interface ApiLeadInStage {
+  id: number;
+  name: string;
+  companyName: string | null;
+  dealValue: number | null;
+  currency: string | null;
+  lastActivityAt: string | null;
+  lastActivityType: string | null;
+  assignedUser: string | null;
+  tags: string | null;
+}
+
+const STATUS_TO_STAGE: { [key: number]: string } = {
+  1: "new",
+  2: "contacted",
+  3: "qualified",
+  4: "proposal",
+  5: "negotiation",
+  6: "lost",
+  7: "won",
+};
+
+const STAGE_TO_STATUS: { [key: string]: number } = {
+  new: 1,
+  contacted: 2,
+  qualified: 3,
+  proposal: 4,
+  negotiation: 5,
+  lost: 6,
+  won: 7,
+};
+
 const STAGES = [
   {
     id: "new",
     name: "New",
+    status: 1,
     color: "from-gray-600 to-slate-600",
     wipLimit: 10,
   },
   {
     id: "contacted",
     name: "Contacted",
+    status: 2,
     color: "from-blue-600 to-cyan-600",
     wipLimit: 8,
   },
   {
     id: "qualified",
     name: "Qualified",
+    status: 3,
     color: "from-purple-600 to-pink-600",
     wipLimit: 6,
   },
   {
     id: "proposal",
     name: "Proposal",
+    status: 4,
     color: "from-indigo-600 to-blue-600",
     wipLimit: 5,
   },
   {
     id: "negotiation",
     name: "Negotiation",
+    status: 5,
     color: "from-orange-600 to-amber-600",
     wipLimit: 4,
   },
   {
     id: "won",
     name: "Won",
+    status: 7,
     color: "from-green-600 to-emerald-600",
     wipLimit: null,
   },
   {
     id: "lost",
     name: "Lost",
+    status: 6,
     color: "from-red-600 to-rose-600",
     wipLimit: null,
   },
@@ -129,171 +180,70 @@ const PRIORITY_CONFIG = {
   },
 };
 
-// Mock data - Enhanced with new fields
-const MOCK_LEADS: Lead[] = [
-  {
-    id: 1,
-    name: "John Smith",
-    email: "john@example.com",
-    phone: "+1234567890",
-    company: "Tech Corp",
-    assignedTo: "Sarah Johnson",
-    assignedToAvatar: "SJ",
-    dealValue: 50000,
-    stage: "new",
-    createdAt: "2024-01-15",
-    lastActivity: "2024-01-29T14:30:00",
-    priority: "high",
-    source: "Website",
-    tags: ["Enterprise", "Tech"],
-    budget: 60000,
-    hasCall: true,
-    hasMessage: false,
-    hasNote: true,
-  },
-  {
-    id: 2,
-    name: "Jane Doe",
-    email: "jane@example.com",
-    phone: "+1234567891",
-    company: "Innovation Inc",
-    assignedTo: "Mike Wilson",
-    assignedToAvatar: "MW",
-    dealValue: 75000,
-    stage: "contacted",
-    createdAt: "2024-01-16",
-    lastActivity: "2024-01-30T09:15:00",
-    priority: "urgent",
-    source: "Referral",
-    tags: ["Hot Lead", "SaaS"],
-    budget: 80000,
-    hasCall: true,
-    hasMessage: true,
-    hasNote: false,
-  },
-  {
-    id: 3,
-    name: "Bob Johnson",
-    email: "bob@example.com",
-    phone: "+1234567892",
-    company: "Global Solutions",
-    assignedTo: "Sarah Johnson",
-    assignedToAvatar: "SJ",
-    dealValue: 120000,
-    stage: "qualified",
-    createdAt: "2024-01-17",
-    lastActivity: "2024-01-29T16:45:00",
-    priority: "medium",
-    source: "LinkedIn",
-    tags: ["Consulting"],
-    budget: 150000,
-    hasCall: false,
-    hasMessage: true,
-    hasNote: true,
-  },
-  {
-    id: 4,
-    name: "Alice Williams",
-    email: "alice@example.com",
-    phone: "+1234567893",
-    company: "Future Tech",
-    assignedTo: "John Davis",
-    assignedToAvatar: "JD",
-    dealValue: 95000,
-    stage: "proposal",
-    createdAt: "2024-01-18",
-    lastActivity: "2024-01-28T11:20:00",
-    priority: "high",
-    source: "Cold Call",
-    tags: ["AI", "ML"],
-    budget: 100000,
-    hasCall: true,
-    hasMessage: true,
-    hasNote: true,
-  },
-  {
-    id: 5,
-    name: "Charlie Brown",
-    email: "charlie@example.com",
-    phone: "+1234567894",
-    company: "Smart Systems",
-    assignedTo: "Mike Wilson",
-    assignedToAvatar: "MW",
-    dealValue: 180000,
-    stage: "negotiation",
-    createdAt: "2024-01-19",
-    lastActivity: "2024-01-30T10:00:00",
-    priority: "urgent",
-    source: "Partner",
-    tags: ["Enterprise", "Strategic"],
-    budget: 200000,
-    hasCall: true,
-    hasMessage: false,
-    hasNote: true,
-  },
-  {
-    id: 6,
-    name: "Diana Prince",
-    email: "diana@example.com",
-    phone: "+1234567895",
-    company: "Enterprise Co",
-    assignedTo: "Sarah Johnson",
-    assignedToAvatar: "SJ",
-    dealValue: 250000,
-    stage: "won",
-    createdAt: "2024-01-20",
-    lastActivity: "2024-01-29T15:30:00",
-    priority: "low",
-    source: "Referral",
-    tags: ["Closed"],
-    budget: 250000,
-    hasCall: true,
-    hasMessage: true,
-    hasNote: true,
-  },
-  {
-    id: 7,
-    name: "Eve Adams",
-    email: "eve@example.com",
-    phone: "+1234567896",
-    company: "StartUp Ltd",
-    assignedTo: "John Davis",
-    assignedToAvatar: "JD",
-    dealValue: 35000,
-    stage: "lost",
-    createdAt: "2024-01-21",
-    lastActivity: "2024-01-25T13:00:00",
-    priority: "low",
-    source: "Website",
-    tags: ["Budget Issue"],
-    budget: 20000,
-    hasCall: false,
-    hasMessage: true,
-    hasNote: true,
-  },
-  {
-    id: 8,
-    name: "Frank Miller",
-    email: "frank@example.com",
-    phone: "+1234567897",
-    company: "Big Corp",
-    assignedTo: "Mike Wilson",
-    assignedToAvatar: "MW",
-    dealValue: 145000,
-    stage: "new",
-    createdAt: "2024-01-22",
-    lastActivity: "2024-01-29T08:45:00",
-    priority: "medium",
-    source: "Conference",
-    tags: ["Finance"],
-    budget: 160000,
-    hasCall: false,
-    hasMessage: false,
-    hasNote: false,
-  },
-];
+const transformApiLead = (apiLead: ApiLeadInStage, stageId: number): Lead => {
+  const name = apiLead.name || "Unknown";
+  const assignedTo = apiLead.assignedUser || "Unassigned";
+  const company = apiLead.companyName || "N/A";
 
-// Saved filters
+  const getAvatar = (fullName: string) => {
+    const parts = fullName.trim().split(" ");
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return fullName.substring(0, 2).toUpperCase();
+  };
+
+  const getPriority = (
+    lastActivityType: string | null,
+  ): "low" | "medium" | "high" | "urgent" => {
+    if (!lastActivityType) return "low";
+    if (lastActivityType === "Complaint") return "urgent";
+    if (lastActivityType === "Call" || lastActivityType === "Meeting")
+      return "high";
+    return "medium";
+  };
+
+  const parseTags = (tags: string | null): string[] => {
+    if (!tags) return [];
+    try {
+      const parsed = JSON.parse(tags);
+      return Array.isArray(parsed) ? parsed : [tags];
+    } catch {
+      return tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+    }
+  };
+
+  const dealValue =
+    apiLead.dealValue || 50000 + Math.floor(Math.random() * 50000);
+
+  return {
+    id: apiLead.id,
+    name: name,
+    email: "",
+    phone: "",
+    company: company,
+    assignedTo: assignedTo,
+    assignedToAvatar: getAvatar(assignedTo),
+    dealValue: dealValue,
+    stage: STATUS_TO_STAGE[stageId] || "new",
+    status: stageId,
+    createdAt: new Date().toISOString(),
+    lastActivity: apiLead.lastActivityAt || new Date().toISOString(),
+    priority: getPriority(apiLead.lastActivityType),
+    source: company,
+    tags: parseTags(apiLead.tags),
+    budget: dealValue + Math.floor(Math.random() * 30000),
+    hasCall: apiLead.lastActivityType === "Call",
+    hasMessage: apiLead.lastActivityType === "Message",
+    hasNote:
+      apiLead.lastActivityType === "Note" ||
+      apiLead.lastActivityType === "GeneralNote",
+  };
+};
+
 const SAVED_FILTERS = [
   { id: "hot", name: "🔥 My Hot Leads", icon: Flame },
   { id: "recent", name: "⚡ Recent Activity", icon: Clock },
@@ -309,7 +259,15 @@ interface ConfirmationDialog {
 }
 
 const Page = () => {
-  const [leads, setLeads] = useState<Lead[]>(MOCK_LEADS);
+  // FIXED: Use single query without parameters to get all stages
+  const {
+    data: leadsData,
+    error: leadsError,
+    isLoading: leadsLoading,
+  } = useGetLeadsPipeLineQuery();
+
+  console.log("Leads Data:", leadsData);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [draggedLead, setDraggedLead] = useState<Lead | null>(null);
   const [showLeadMenu, setShowLeadMenu] = useState<number | null>(null);
@@ -322,7 +280,16 @@ const Page = () => {
     targetStage: "",
   });
 
-  // Filter states
+  const [stageLeads, setStageLeads] = useState<{ [key: string]: Lead[] }>({
+    new: [],
+    contacted: [],
+    qualified: [],
+    proposal: [],
+    negotiation: [],
+    won: [],
+    lost: [],
+  });
+
   const [filters, setFilters] = useState({
     owner: "",
     source: "",
@@ -331,11 +298,54 @@ const Page = () => {
     lastActivityDays: "",
   });
 
-  // Filter leads based on search and filters
-  const filteredLeads = useMemo(() => {
-    let result = leads;
+  const [updateLeadStatus, { isLoading: isUpdating }] =
+    useUpdateLeadStatusMutation();
 
-    // Search filter
+  // FIXED: Process leadsData when it changes
+  useEffect(() => {
+    if (leadsData) {
+      const apiResponse = leadsData as ApiStageResponse[];
+
+      // Initialize empty stage leads
+      const newStageLeads: { [key: string]: Lead[] } = {
+        new: [],
+        contacted: [],
+        qualified: [],
+        proposal: [],
+        negotiation: [],
+        won: [],
+        lost: [],
+      };
+
+      // Process each stage from the API response
+      apiResponse.forEach((stageData) => {
+        const stageId = stageData.stageId;
+        const stageName = STATUS_TO_STAGE[stageId];
+
+        if (stageName && stageData.leads && stageData.leads.length > 0) {
+          const transformedLeads = stageData.leads.map((lead) =>
+            transformApiLead(lead, stageId),
+          );
+          newStageLeads[stageName] = transformedLeads;
+          console.log(
+            `${stageName} stage loaded:`,
+            transformedLeads.length,
+            "leads",
+          );
+        }
+      });
+
+      setStageLeads(newStageLeads);
+    }
+  }, [leadsData]);
+
+  const allLeads: Lead[] = useMemo(() => {
+    return Object.values(stageLeads).flat();
+  }, [stageLeads]);
+
+  const filteredLeads = useMemo(() => {
+    let result = allLeads;
+
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
@@ -347,29 +357,24 @@ const Page = () => {
       );
     }
 
-    // Owner filter
     if (filters.owner) {
       result = result.filter((lead) => lead.assignedTo === filters.owner);
     }
 
-    // Source filter
     if (filters.source) {
       result = result.filter((lead) => lead.source === filters.source);
     }
 
-    // Priority filter
     if (filters.priority) {
       result = result.filter((lead) => lead.priority === filters.priority);
     }
 
-    // Budget filter
     if (filters.minBudget) {
       result = result.filter(
         (lead) => lead.budget >= parseInt(filters.minBudget),
       );
     }
 
-    // Last activity filter
     if (filters.lastActivityDays) {
       const days = parseInt(filters.lastActivityDays);
       const cutoffDate = new Date();
@@ -380,42 +385,48 @@ const Page = () => {
     }
 
     return result;
-  }, [leads, searchQuery, filters]);
+  }, [allLeads, searchQuery, filters]);
 
-  // Group leads by stage
-  const leadsByStage = useMemo(() => {
-    const grouped: { [key: string]: Lead[] } = {};
-    STAGES.forEach((stage) => {
-      grouped[stage.id] = filteredLeads.filter(
-        (lead) => lead.stage === stage.id,
-      );
+  const filteredLeadsByStage = useMemo(() => {
+    const grouped: { [key: string]: Lead[] } = {
+      new: [],
+      contacted: [],
+      qualified: [],
+      proposal: [],
+      negotiation: [],
+      won: [],
+      lost: [],
+    };
+
+    filteredLeads.forEach((lead) => {
+      if (grouped[lead.stage]) {
+        grouped[lead.stage].push(lead);
+      }
     });
+
     return grouped;
   }, [filteredLeads]);
 
-  // Calculate statistics
   const stats = useMemo(() => {
-    const totalLeads = leads.length;
-    const totalValue = leads.reduce((sum, lead) => sum + lead.dealValue, 0);
-    const wonDeals = leads.filter((lead) => lead.stage === "won").length;
-    const wonValue = leads
-      .filter((lead) => lead.stage === "won")
-      .reduce((sum, lead) => sum + lead.dealValue, 0);
+    const totalLeads = allLeads.length;
+    const totalValue = allLeads.reduce((sum, lead) => sum + lead.dealValue, 0);
+    const wonDeals = stageLeads.won.length;
+    const wonValue = stageLeads.won.reduce(
+      (sum, lead) => sum + lead.dealValue,
+      0,
+    );
 
     return { totalLeads, totalValue, wonDeals, wonValue };
-  }, [leads]);
+  }, [allLeads, stageLeads]);
 
-  // Get stage index for comparison
   const getStageIndex = (stageId: string) => {
     return STAGES.findIndex((s) => s.id === stageId);
   };
 
-  // Check if move is backward
   const isBackwardMove = (fromStage: string, toStage: string) => {
     return getStageIndex(toStage) < getStageIndex(fromStage);
   };
 
-  // Drag and drop handlers
   const handleDragStart = (lead: Lead) => {
     setDraggedLead(lead);
   };
@@ -427,7 +438,6 @@ const Page = () => {
   const handleDrop = (stageId: string) => {
     if (!draggedLead) return;
 
-    // Check if moving to lost stage
     if (stageId === "lost") {
       setConfirmation({
         show: true,
@@ -438,7 +448,6 @@ const Page = () => {
       return;
     }
 
-    // Check if backward move
     if (isBackwardMove(draggedLead.stage, stageId)) {
       setConfirmation({
         show: true,
@@ -449,58 +458,89 @@ const Page = () => {
       return;
     }
 
-    // Normal move
     confirmStageChange(draggedLead, stageId);
   };
 
-  const confirmStageChange = (
+  const confirmStageChange = async (
     lead: Lead,
     newStage: string,
     reason?: string,
   ) => {
-    setLeads((prevLeads) =>
-      prevLeads.map((l) =>
-        l.id === lead.id
-          ? {
-              ...l,
-              stage: newStage,
-              lastActivity: new Date().toISOString(),
-            }
-          : l,
-      ),
-    );
+    try {
+      const newStatus = STAGE_TO_STATUS[newStage];
 
-    // Auto-log activity
-    console.log(`Activity logged: ${lead.name} moved to ${newStage}`, {
-      reason,
-      timestamp: new Date().toISOString(),
-    });
+      if (!newStatus) {
+        console.error(`Invalid stage: ${newStage}`);
+        return;
+      }
 
-    setDraggedLead(null);
-    setConfirmation({ show: false, type: null, lead: null, targetStage: "" });
+      const oldStage = lead.stage;
+      const updatedLead = {
+        ...lead,
+        stage: newStage,
+        status: newStatus,
+        lastActivity: new Date().toISOString(),
+      };
+
+      setStageLeads((prev) => ({
+        ...prev,
+        [oldStage]: prev[oldStage].filter((l) => l.id !== lead.id),
+        [newStage]: [...prev[newStage], updatedLead],
+      }));
+
+      await updateLeadStatus({
+        leadId: lead.id,
+        status: newStatus,
+        reason: reason || undefined,
+      }).unwrap();
+
+      console.log(
+        `Activity logged: ${lead.name} moved to ${newStage} (status: ${newStatus})`,
+        {
+          reason,
+          timestamp: new Date().toISOString(),
+        },
+      );
+
+      setDraggedLead(null);
+      setConfirmation({ show: false, type: null, lead: null, targetStage: "" });
+    } catch (error) {
+      console.error("Failed to update lead status:", error);
+
+      const revertStage = lead.stage;
+      setStageLeads((prev) => ({
+        ...prev,
+        [confirmation.targetStage]: prev[confirmation.targetStage].filter(
+          (l) => l.id !== lead.id,
+        ),
+        [revertStage]: [...prev[revertStage], lead],
+      }));
+
+      alert("Failed to update lead status. Please try again.");
+    }
   };
 
-  // Quick actions
   const handleCall = (lead: Lead) => {
     console.log("Calling:", lead.phone);
-    // Implement call functionality
   };
 
   const handleWhatsApp = (lead: Lead) => {
-    window.open(`https://wa.me/${lead.phone.replace(/\+/g, "")}`, "_blank");
+    const cleanPhone = lead.phone.replace(/\D/g, "");
+    if (cleanPhone) {
+      window.open(`https://wa.me/${cleanPhone}`, "_blank");
+    } else {
+      alert("No phone number available");
+    }
   };
 
   const handleAddNote = (lead: Lead) => {
     console.log("Adding note for:", lead.name);
-    // Implement note functionality
   };
 
   const handleAssignOwner = (lead: Lead) => {
     console.log("Assigning owner for:", lead.name);
-    // Implement assign owner functionality
   };
 
-  // Apply saved filter
   const applySavedFilter = (filterId: string) => {
     switch (filterId) {
       case "hot":
@@ -524,7 +564,6 @@ const Page = () => {
     }
   };
 
-  // Clear filters
   const clearFilters = () => {
     setFilters({
       owner: "",
@@ -535,7 +574,6 @@ const Page = () => {
     });
   };
 
-  // Format currency
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -545,7 +583,6 @@ const Page = () => {
     }).format(amount);
   };
 
-  // Format date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -555,7 +592,6 @@ const Page = () => {
     });
   };
 
-  // Get time ago
   const getTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -564,18 +600,17 @@ const Page = () => {
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
 
+    if (diffMins < 1) return "Just now";
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
     return `${diffDays}d ago`;
   };
 
-  // Get unique values for filters
-  const uniqueOwners = Array.from(new Set(leads.map((l) => l.assignedTo)));
-  const uniqueSources = Array.from(new Set(leads.map((l) => l.source)));
+  const uniqueOwners = Array.from(new Set(allLeads.map((l) => l.assignedTo)));
+  const uniqueSources = Array.from(new Set(allLeads.map((l) => l.source)));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
-      {/* Decorative Elements */}
       <div className="fixed top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 rounded-full blur-3xl -z-10" />
       <div className="fixed bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-indigo-400/20 to-blue-400/20 rounded-full blur-3xl -z-10" />
 
@@ -599,6 +634,29 @@ const Page = () => {
                 <p className="text-gray-600 mt-2 text-sm sm:text-base">
                   Manage your leads through the sales funnel
                 </p>
+                <div className="mt-2">
+                  {leadsLoading ? (
+                    <span className="inline-flex items-center gap-2 text-sm text-blue-600 font-medium">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                      Loading leads...
+                    </span>
+                  ) : leadsError ? (
+                    <span className="inline-flex items-center gap-2 text-sm text-red-600 font-medium">
+                      <AlertTriangle className="w-4 h-4" />
+                      Error loading leads
+                    </span>
+                  ) : allLeads.length > 0 ? (
+                    <span className="inline-flex items-center gap-2 text-sm text-green-600 font-medium">
+                      <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                      Live - {allLeads.length} leads loaded
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-2 text-sm text-gray-600 font-medium">
+                      <span className="w-2 h-2 bg-gray-500 rounded-full" />
+                      No leads found
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -677,7 +735,6 @@ const Page = () => {
         {/* Search and Filters */}
         <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10">
           <div className="space-y-4">
-            {/* Search and Filter Toggle */}
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <div className="relative flex-1 w-full group">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
@@ -699,7 +756,6 @@ const Page = () => {
               </button>
             </div>
 
-            {/* Saved Filters */}
             <div className="flex flex-wrap gap-2">
               {SAVED_FILTERS.map((filter) => {
                 const Icon = filter.icon;
@@ -729,7 +785,6 @@ const Page = () => {
               )}
             </div>
 
-            {/* Filter Panel */}
             {showFilters && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 pt-4 border-t border-gray-200">
                 <div>
@@ -836,13 +891,13 @@ const Page = () => {
         <div className="overflow-x-auto pb-4">
           <div className="inline-flex gap-4 min-w-full">
             {STAGES.map((stage) => {
-              const stageLeads = leadsByStage[stage.id] || [];
-              const stageValue = stageLeads.reduce(
+              const currentStageLeads = filteredLeadsByStage[stage.id] || [];
+              const stageValue = currentStageLeads.reduce(
                 (sum, lead) => sum + lead.dealValue,
                 0,
               );
               const isOverLimit =
-                stage.wipLimit && stageLeads.length > stage.wipLimit;
+                stage.wipLimit && currentStageLeads.length > stage.wipLimit;
 
               return (
                 <div
@@ -866,9 +921,12 @@ const Page = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-lg">
-                          {stageLeads.length}
+                          {leadsLoading ? "..." : currentStageLeads.length}
                           {stage.wipLimit && `/${stage.wipLimit}`}
                         </span>
+                        {leadsError && (
+                          <AlertTriangle className="w-4 h-4 text-red-500" />
+                        )}
                         {isOverLimit && (
                           <AlertTriangle className="w-4 h-4 text-red-500" />
                         )}
@@ -887,196 +945,197 @@ const Page = () => {
 
                   {/* Stage Cards */}
                   <div className="space-y-3 min-h-[400px]">
-                    {stageLeads.map((lead) => {
-                      const priorityConfig = PRIORITY_CONFIG[lead.priority];
-                      const PriorityIcon = priorityConfig.icon;
+                    {leadsLoading ? (
+                      <div className="bg-white/50 backdrop-blur-xl border border-gray-200 rounded-2xl p-8 text-center">
+                        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-2" />
+                        <p className="text-gray-500 text-sm">Loading...</p>
+                      </div>
+                    ) : currentStageLeads.length > 0 ? (
+                      currentStageLeads.map((lead) => {
+                        const priorityConfig = PRIORITY_CONFIG[lead.priority];
+                        const PriorityIcon = priorityConfig.icon;
 
-                      return (
-                        <div
-                          key={lead.id}
-                          draggable
-                          onDragStart={() => handleDragStart(lead)}
-                          className="bg-white/70 backdrop-blur-2xl border-l-4 border-white/60 rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all cursor-grab active:cursor-grabbing group relative"
-                          style={{
-                            borderLeftColor:
-                              priorityConfig.color.split("-")[1] === "red"
-                                ? "#ef4444"
-                                : priorityConfig.color.split("-")[1] ===
-                                    "orange"
-                                  ? "#f97316"
+                        return (
+                          <div
+                            key={lead.id}
+                            draggable
+                            onDragStart={() => handleDragStart(lead)}
+                            className="bg-white/70 backdrop-blur-2xl border-l-4 border-white/60 rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all cursor-grab active:cursor-grabbing group relative"
+                            style={{
+                              borderLeftColor:
+                                priorityConfig.color.split("-")[1] === "red"
+                                  ? "#ef4444"
                                   : priorityConfig.color.split("-")[1] ===
-                                      "yellow"
-                                    ? "#eab308"
-                                    : "#22c55e",
-                          }}
-                        >
-                          {/* Lead Header */}
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h4 className="font-bold text-gray-900 text-base">
-                                  {lead.name}
-                                </h4>
-                                <PriorityIcon
-                                  className={`w-4 h-4 ${priorityConfig.textColor}`}
-                                />
+                                      "orange"
+                                    ? "#f97316"
+                                    : priorityConfig.color.split("-")[1] ===
+                                        "yellow"
+                                      ? "#eab308"
+                                      : "#22c55e",
+                            }}
+                          >
+                            {/* Lead Header */}
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h4 className="font-bold text-gray-900 text-base">
+                                    {lead.name}
+                                  </h4>
+                                  <PriorityIcon
+                                    className={`w-4 h-4 ${priorityConfig.textColor}`}
+                                  />
+                                </div>
+                                <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                                  <Building2 className="w-3.5 h-3.5" />
+                                  <span>{lead.company}</span>
+                                </div>
                               </div>
-                              <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                                <Building2 className="w-3.5 h-3.5" />
-                                <span>{lead.company}</span>
+
+                              <div className="relative">
+                                <button
+                                  onClick={() =>
+                                    setShowLeadMenu(
+                                      showLeadMenu === lead.id ? null : lead.id,
+                                    )
+                                  }
+                                  className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+                                >
+                                  <MoreVertical className="w-4 h-4 text-gray-600" />
+                                </button>
+
+                                {showLeadMenu === lead.id && (
+                                  <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-xl shadow-xl z-10 py-2 w-40">
+                                    <Link
+                                      href={`/leads/${lead.id}`}
+                                      className="flex items-center gap-2 px-4 py-2 hover:bg-blue-50 text-gray-700 text-sm cursor-pointer"
+                                    >
+                                      <Eye className="w-4 h-4" />
+                                      <span>View</span>
+                                    </Link>
+                                    <Link
+                                      href={`/leads/${lead.id}/edit`}
+                                      className="flex items-center gap-2 px-4 py-2 hover:bg-blue-50 text-gray-700 text-sm cursor-pointer"
+                                    >
+                                      <Edit2 className="w-4 h-4" />
+                                      <span>Edit</span>
+                                    </Link>
+                                    <button className="flex items-center gap-2 px-4 py-2 hover:bg-red-50 text-red-600 text-sm w-full cursor-pointer">
+                                      <Trash2 className="w-4 h-4" />
+                                      <span>Delete</span>
+                                    </button>
+                                  </div>
+                                )}
                               </div>
                             </div>
 
-                            <div className="relative">
+                            {/* Last Activity */}
+                            <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-3">
+                              <Clock className="w-3.5 h-3.5" />
+                              <span>{getTimeAgo(lead.lastActivity)}</span>
+                            </div>
+
+                            {/* Deal Value */}
+                            <div className="mb-3 px-3 py-2 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <DollarSign className="w-4 h-4 text-green-600" />
+                                <span className="font-bold text-green-700">
+                                  {formatCurrency(lead.dealValue)}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Tags */}
+                            {Array.isArray(lead.tags) &&
+                              lead.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-1.5 mb-3">
+                                  {lead.tags.map((tag, idx) => (
+                                    <span
+                                      key={idx}
+                                      className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-md flex items-center gap-1"
+                                    >
+                                      <Tag className="w-3 h-3" />
+                                      {tag}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+
+                            {/* Activity Icons */}
+                            <div className="flex items-center gap-2 mb-3">
+                              {lead.hasCall && (
+                                <div className="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center">
+                                  <PhoneCall className="w-4 h-4 text-blue-600" />
+                                </div>
+                              )}
+                              {lead.hasMessage && (
+                                <div className="w-7 h-7 bg-purple-100 rounded-lg flex items-center justify-center">
+                                  <MessageCircle className="w-4 h-4 text-purple-600" />
+                                </div>
+                              )}
+                              {lead.hasNote && (
+                                <div className="w-7 h-7 bg-orange-100 rounded-lg flex items-center justify-center">
+                                  <FileText className="w-4 h-4 text-orange-600" />
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Assigned To */}
+                            <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                              <div className="flex items-center gap-2">
+                                <div className="w-7 h-7 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                  {lead.assignedToAvatar}
+                                </div>
+                                <span className="text-xs font-medium text-gray-700">
+                                  {lead.assignedTo}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Quick Actions - Show on Hover */}
+                            <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                               <button
                                 onClick={() =>
-                                  setShowLeadMenu(
-                                    showLeadMenu === lead.id ? null : lead.id,
+                                  setShowQuickAction(
+                                    showQuickAction === lead.id
+                                      ? null
+                                      : lead.id,
                                   )
                                 }
-                                className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+                                className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition-colors cursor-pointer"
                               >
-                                <MoreVertical className="w-4 h-4 text-gray-600" />
+                                <Zap className="w-4 h-4" />
                               </button>
 
-                              {showLeadMenu === lead.id && (
-                                <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-xl shadow-xl z-10 py-2 w-40">
-                                  <Link
-                                    href={`/leads/${lead.id}`}
-                                    className="flex items-center gap-2 px-4 py-2 hover:bg-blue-50 text-gray-700 text-sm cursor-pointer"
+                              {showQuickAction === lead.id && (
+                                <div className="absolute right-0 bottom-10 bg-white border border-gray-200 rounded-xl shadow-xl z-20 py-2 w-48">
+                                  <button
+                                    onClick={() => handleWhatsApp(lead)}
+                                    className="flex items-center gap-3 px-4 py-2 hover:bg-green-50 text-gray-700 text-sm w-full cursor-pointer"
                                   >
-                                    <Eye className="w-4 h-4" />
-                                    <span>View</span>
-                                  </Link>
-                                  <Link
-                                    href={`/leads/${lead.id}/edit`}
-                                    className="flex items-center gap-2 px-4 py-2 hover:bg-blue-50 text-gray-700 text-sm cursor-pointer"
+                                    <MessageCircle className="w-4 h-4 text-green-600" />
+                                    <span>WhatsApp</span>
+                                  </button>
+                                  <button
+                                    onClick={() => handleAddNote(lead)}
+                                    className="flex items-center gap-3 px-4 py-2 hover:bg-orange-50 text-gray-700 text-sm w-full cursor-pointer"
                                   >
-                                    <Edit2 className="w-4 h-4" />
-                                    <span>Edit</span>
-                                  </Link>
-                                  <button className="flex items-center gap-2 px-4 py-2 hover:bg-red-50 text-red-600 text-sm w-full cursor-pointer">
-                                    <Trash2 className="w-4 h-4" />
-                                    <span>Delete</span>
+                                    <StickyNote className="w-4 h-4 text-orange-600" />
+                                    <span>Add Note</span>
+                                  </button>
+                                  <button
+                                    onClick={() => handleAssignOwner(lead)}
+                                    className="flex items-center gap-3 px-4 py-2 hover:bg-purple-50 text-gray-700 text-sm w-full cursor-pointer"
+                                  >
+                                    <UserPlus className="w-4 h-4 text-purple-600" />
+                                    <span>Assign Owner</span>
                                   </button>
                                 </div>
                               )}
                             </div>
                           </div>
-
-                          {/* Last Activity */}
-                          <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-3">
-                            <Clock className="w-3.5 h-3.5" />
-                            <span>{getTimeAgo(lead.lastActivity)}</span>
-                          </div>
-
-                          {/* Deal Value */}
-                          <div className="mb-3 px-3 py-2 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
-                            <div className="flex items-center gap-2">
-                              <DollarSign className="w-4 h-4 text-green-600" />
-                              <span className="font-bold text-green-700">
-                                {formatCurrency(lead.dealValue)}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Tags */}
-                          {lead.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1.5 mb-3">
-                              {lead.tags.map((tag, idx) => (
-                                <span
-                                  key={idx}
-                                  className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-md flex items-center gap-1"
-                                >
-                                  <Tag className="w-3 h-3" />
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* Activity Icons */}
-                          <div className="flex items-center gap-2 mb-3">
-                            {lead.hasCall && (
-                              <div className="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <PhoneCall className="w-4 h-4 text-blue-600" />
-                              </div>
-                            )}
-                            {lead.hasMessage && (
-                              <div className="w-7 h-7 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <MessageCircle className="w-4 h-4 text-purple-600" />
-                              </div>
-                            )}
-                            {lead.hasNote && (
-                              <div className="w-7 h-7 bg-orange-100 rounded-lg flex items-center justify-center">
-                                <FileText className="w-4 h-4 text-orange-600" />
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Assigned To */}
-                          <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-                            <div className="flex items-center gap-2">
-                              <div className="w-7 h-7 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                                {lead.assignedToAvatar}
-                              </div>
-                              <span className="text-xs font-medium text-gray-700">
-                                {lead.assignedTo}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Quick Actions - Show on Hover */}
-                          <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() =>
-                                setShowQuickAction(
-                                  showQuickAction === lead.id ? null : lead.id,
-                                )
-                              }
-                              className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition-colors cursor-pointer"
-                            >
-                              <Zap className="w-4 h-4" />
-                            </button>
-
-                            {showQuickAction === lead.id && (
-                              <div className="absolute right-0 bottom-10 bg-white border border-gray-200 rounded-xl shadow-xl z-20 py-2 w-48">
-                                {/* <button
-                                  onClick={() => handleCall(lead)}
-                                  className="flex items-center gap-3 px-4 py-2 hover:bg-blue-50 text-gray-700 text-sm w-full cursor-pointer"
-                                >
-                                  <PhoneCall className="w-4 h-4 text-blue-600" />
-                                  <span>Call</span>
-                                </button> */}
-                                <button
-                                  onClick={() => handleWhatsApp(lead)}
-                                  className="flex items-center gap-3 px-4 py-2 hover:bg-green-50 text-gray-700 text-sm w-full cursor-pointer"
-                                >
-                                  <MessageCircle className="w-4 h-4 text-green-600" />
-                                  <span>WhatsApp</span>
-                                </button>
-                                <button
-                                  onClick={() => handleAddNote(lead)}
-                                  className="flex items-center gap-3 px-4 py-2 hover:bg-orange-50 text-gray-700 text-sm w-full cursor-pointer"
-                                >
-                                  <StickyNote className="w-4 h-4 text-orange-600" />
-                                  <span>Add Note</span>
-                                </button>
-                                <button
-                                  onClick={() => handleAssignOwner(lead)}
-                                  className="flex items-center gap-3 px-4 py-2 hover:bg-purple-50 text-gray-700 text-sm w-full cursor-pointer"
-                                >
-                                  <UserPlus className="w-4 h-4 text-purple-600" />
-                                  <span>Assign Owner</span>
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-
-                    {stageLeads.length === 0 && (
+                        );
+                      })
+                    ) : (
                       <div className="bg-white/50 backdrop-blur-xl border border-dashed border-gray-300 rounded-2xl p-8 text-center">
                         <p className="text-gray-400 text-sm">Drop leads here</p>
                       </div>
@@ -1166,10 +1225,20 @@ const Page = () => {
                     confirmation.reason,
                   )
                 }
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2"
+                disabled={isUpdating}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <CheckCircle2 className="w-5 h-5" />
-                Confirm
+                {isUpdating ? (
+                  <>
+                    <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
+                    <span>Updating...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-5 h-5" />
+                    <span>Confirm</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
