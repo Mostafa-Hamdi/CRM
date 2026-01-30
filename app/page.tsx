@@ -294,7 +294,7 @@ const Dashboard = () => {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="flex items-start gap-4">
               <div className="relative">
-                <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 via-orange-500 to-yellow-600 rounded-2xl flex items-center justify-center shadow-lg shadow-yellow-500/40 rotate-3 transition-transform hover:rotate-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 via-cyan-600 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/40 rotate-3 transition-transform hover:rotate-6">
                   <Crown className="w-8 h-8 text-white" />
                 </div>
                 <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-full flex items-center justify-center shadow-lg">
