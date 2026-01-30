@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Search,
   Plus,
@@ -305,7 +305,7 @@ const Page = () => {
   // FIXED: Process leadsData when it changes
   useEffect(() => {
     if (leadsData) {
-      const apiResponse = leadsData as ApiStageResponse[];
+      const apiResponse = leadsData as any;
 
       console.log("Processing API response:", apiResponse);
 
@@ -321,7 +321,7 @@ const Page = () => {
       };
 
       // Process each stage from the API response
-      apiResponse.forEach((stageData) => {
+      apiResponse.forEach((stageData: any) => {
         const stageId = stageData.stageId;
         const stageName = STATUS_TO_STAGE[stageId];
 
@@ -331,7 +331,7 @@ const Page = () => {
         });
 
         if (stageName && stageData.leads && stageData.leads.length > 0) {
-          const transformedLeads = stageData.leads.map((lead) =>
+          const transformedLeads = stageData.leads.map((lead: any) =>
             transformApiLead(lead, stageId),
           );
           newStageLeads[stageName] = transformedLeads;
@@ -344,7 +344,7 @@ const Page = () => {
           console.warn(`⚠️ Unknown stageId: ${stageId}, mapping to 'new'`);
           // Fallback: if stageId is not recognized, add to "new"
           if (stageData.leads && stageData.leads.length > 0) {
-            const transformedLeads = stageData.leads.map((lead) =>
+            const transformedLeads = stageData.leads.map((lead: any) =>
               transformApiLead(lead, stageId),
             );
             newStageLeads.new = [...newStageLeads.new, ...transformedLeads];
@@ -1066,7 +1066,7 @@ const Page = () => {
                             {Array.isArray(lead.tags) &&
                               lead.tags.length > 0 && (
                                 <div className="flex flex-wrap gap-1.5 mb-3">
-                                  {lead.tags.map((tag, idx) => (
+                                  {lead.tags.map((tag: string, idx: number) => (
                                     <span
                                       key={idx}
                                       className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-md flex items-center gap-1"
