@@ -81,7 +81,9 @@ interface ApiLeadInStage {
   tags: string | null;
 }
 
+// FIXED: Handle stageId 0 and map it to "new"
 const STATUS_TO_STAGE: { [key: number]: string } = {
+  0: "new", // Added mapping for stageId 0
   1: "new",
   2: "contacted",
   3: "qualified",
@@ -259,7 +261,6 @@ interface ConfirmationDialog {
 }
 
 const Page = () => {
-  // FIXED: Use single query without parameters to get all stages
   const {
     data: leadsData,
     error: leadsError,
@@ -306,6 +307,8 @@ const Page = () => {
     if (leadsData) {
       const apiResponse = leadsData as ApiStageResponse[];
 
+      console.log("Processing API response:", apiResponse);
+
       // Initialize empty stage leads
       const newStageLeads: { [key: string]: Lead[] } = {
         new: [],
@@ -322,19 +325,34 @@ const Page = () => {
         const stageId = stageData.stageId;
         const stageName = STATUS_TO_STAGE[stageId];
 
+        console.log(`Processing stage ${stageId} -> ${stageName}`, {
+          leadsCount: stageData.leads?.length || 0,
+          stageData,
+        });
+
         if (stageName && stageData.leads && stageData.leads.length > 0) {
           const transformedLeads = stageData.leads.map((lead) =>
             transformApiLead(lead, stageId),
           );
           newStageLeads[stageName] = transformedLeads;
           console.log(
-            `${stageName} stage loaded:`,
+            `✅ ${stageName} stage loaded:`,
             transformedLeads.length,
             "leads",
           );
+        } else if (!stageName) {
+          console.warn(`⚠️ Unknown stageId: ${stageId}, mapping to 'new'`);
+          // Fallback: if stageId is not recognized, add to "new"
+          if (stageData.leads && stageData.leads.length > 0) {
+            const transformedLeads = stageData.leads.map((lead) =>
+              transformApiLead(lead, stageId),
+            );
+            newStageLeads.new = [...newStageLeads.new, ...transformedLeads];
+          }
         }
       });
 
+      console.log("Final stage leads:", newStageLeads);
       setStageLeads(newStageLeads);
     }
   }, [leadsData]);
