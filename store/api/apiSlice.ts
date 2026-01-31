@@ -803,8 +803,11 @@ export const api = createApi({
 
     deleteLead: builder.mutation<void, { id: number }>({
       query: ({ id }) => ({
-        url: `/leads/${id}`,
+        url: `/leads/${id}/archive`,
         method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
       }),
       invalidatesTags: ["Leads"],
     }),
