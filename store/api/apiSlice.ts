@@ -804,7 +804,7 @@ export const api = createApi({
     deleteLead: builder.mutation<void, { id: number }>({
       query: ({ id }) => ({
         url: `/leads/${id}`,
-        method: "DELETE",
+        method: "PUT",
       }),
       invalidatesTags: ["Leads"],
     }),
