@@ -332,12 +332,13 @@ const Page = () => {
             </div>
             <div>
               <h3 className="font-bold text-gray-900 mb-1">
-                {t("passwordRequirements")}
+                Password Requirements
               </h3>
               <ul className="text-sm text-gray-600 space-y-1">
-                {t("passwordReqs").map((p: string, i: number) => (
-                  <li key={i}>• {p}</li>
-                ))}
+                <li>• Minimum 8 characters long</li>
+                <li>• At least one uppercase letter (A-Z)</li>
+                <li>• At least one lowercase letter (a-z)</li>
+                <li>• At least one number (0-9)</li>
               </ul>
             </div>
           </div>
