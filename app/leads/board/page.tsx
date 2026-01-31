@@ -36,7 +36,7 @@ import {
   useGetLeadsPipeLineQuery,
   useGetUsersQuery,
   useUpdateLeadStatusMutation,
-} from "../../store/api/apiSlice";
+} from "../../../store/api/apiSlice";
 import Swal from "sweetalert2";
 
 interface Lead {

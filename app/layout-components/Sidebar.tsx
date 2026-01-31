@@ -18,6 +18,7 @@ import {
   EditIcon,
   School,
   SchoolIcon,
+  KanbanSquare,
 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import Link from "next/link";
@@ -105,6 +106,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
           icon: UserPlus,
           label: t("leads"),
           subItems: [
+            { icon: KanbanSquare, label: t("board"), link: "/leads/board" },
             { icon: List, label: t("allLeads"), link: "/leads" },
             { icon: Plus, label: t("addLead"), link: "/leads/add" },
           ],
