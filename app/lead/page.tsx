@@ -412,10 +412,13 @@ const Page = () => {
                 <Edit className="w-5 h-5" />
                 Add Note
               </button>
-              <button className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-purple-500/40 transition-all">
+              <Link
+                href={`/leads/${leadData.id}/task`}
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-purple-500/40 transition-all"
+              >
                 <Bell className="w-5 h-5" />
                 Add Task
-              </button>
+              </Link>
               {/* <button className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-cyan-500/40 transition-all">
                 <TrendingUp className="w-5 h-5" />
                 Change Stage

@@ -433,10 +433,13 @@ const Page = () => {
                 <Edit className="w-5 h-5" />
                 Add Note
               </Link>
-              <button className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-purple-500/40 transition-all">
+              <Link
+                href={`/leads/${leadInfo.id}/task`}
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-purple-500/40 transition-all"
+              >
                 <Bell className="w-5 h-5" />
                 Add Task
-              </button>
+              </Link>
               <button
                 onClick={() => handleDelete(leadInfo.id)}
                 className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-red-500/40 transition-all"

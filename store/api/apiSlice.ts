@@ -830,6 +830,17 @@ export const api = createApi({
       }),
       invalidatesTags: ["Leads"],
     }),
+    addLeadTask: builder.mutation<
+      void,
+      { id: number; title: string; dueDate: string }
+    >({
+      query: ({ id, title, dueDate }) => ({
+        url: `/leads/${id}/tasks`,
+        method: "POST",
+        body: { title, dueDate },
+      }),
+      invalidatesTags: ["Leads"],
+    }),
 
     /* =========================
        LEAD FOLLOW-UP ENDPOINTS
@@ -990,6 +1001,7 @@ export const {
   useDeleteLeadMutation,
   useUpdateLeadStatusMutation,
   useAssignLeadMutation,
+  useAddLeadTaskMutation,
   // Lead Notes
   useGetLeadNotesQuery,
   useAddLeadNoteMutation,
