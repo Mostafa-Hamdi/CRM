@@ -91,9 +91,9 @@ const Page = () => {
     currentStage,
     allStages,
     stageHistory,
-    activityTimeline,
+    activityTimeline = [],
     metrics,
-  } = leadDetails;
+  } = leadDetails?.data || {};
 
   // Map stage colors
   const stageColorMap: { [key: string]: string } = {
