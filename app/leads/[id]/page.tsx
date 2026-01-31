@@ -91,9 +91,9 @@ const Page = () => {
     currentStage,
     allStages,
     stageHistory,
-    activityTimeline = [],
+    activityTimeline,
     metrics,
-  } = leadDetails?.data || {};
+  } = leadDetails;
 
   // Map stage colors
   const stageColorMap: { [key: string]: string } = {
@@ -419,7 +419,7 @@ const Page = () => {
                 Whats App
               </Link>
               <Link
-                href={`/leads/${leadInfo.id}/notes/add`}
+                href={`/leads/${leadInfo.id}/notes`}
                 className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-amber-500/40 transition-all"
               >
                 <Edit className="w-5 h-5" />
