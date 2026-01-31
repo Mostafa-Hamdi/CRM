@@ -792,6 +792,14 @@ export const api = createApi({
       }),
       invalidatesTags: ["Leads"],
     }),
+    assignLead: builder.mutation<void, { id: number; userId: number }>({
+      query: ({ id, userId }) => ({
+        url: `/leads/${id}/assign`,
+        method: "PUT",
+        body: { userId },
+      }),
+      invalidatesTags: ["Leads"],
+    }),
 
     deleteLead: builder.mutation<void, { id: number }>({
       query: ({ id }) => ({
@@ -981,6 +989,7 @@ export const {
   useConvertLeadStatusMutation,
   useDeleteLeadMutation,
   useUpdateLeadStatusMutation,
+  useAssignLeadMutation,
   // Lead Notes
   useGetLeadNotesQuery,
   useAddLeadNoteMutation,

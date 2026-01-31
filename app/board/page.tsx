@@ -8,10 +8,6 @@ import {
   Users,
   DollarSign,
   Building2,
-  User,
-  Mail,
-  Phone,
-  Calendar,
   TrendingUp,
   MoreVertical,
   Eye,
@@ -35,9 +31,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import {
+  useAssignLeadMutation,
+  useDeleteLeadMutation,
   useGetLeadsPipeLineQuery,
+  useGetUsersQuery,
   useUpdateLeadStatusMutation,
 } from "../../store/api/apiSlice";
+import Swal from "sweetalert2";
 
 interface Lead {
   id: number;
@@ -77,8 +77,14 @@ interface ApiLeadInStage {
   currency: string | null;
   lastActivityAt: string | null;
   lastActivityType: string | null;
-  assignedUser: string | null;
+  // Assigned user can come as a simple string or an object from the API
+  assignedUser: { id: number; fullName: string } | string | null;
   tags: string | null;
+}
+
+interface AssignOwnerDialog {
+  show: boolean;
+  lead: Lead | null;
 }
 
 // FIXED: Handle stageId 0 and map it to "new"
@@ -184,11 +190,16 @@ const PRIORITY_CONFIG = {
 
 const transformApiLead = (apiLead: ApiLeadInStage, stageId: number): Lead => {
   const name = apiLead.name || "Unknown";
-  const assignedTo = apiLead.assignedUser || "Unassigned";
+  // assignedUser might be an object with { id, fullName } or a string
+  const assignedToName =
+    typeof apiLead.assignedUser === "string"
+      ? apiLead.assignedUser
+      : (apiLead.assignedUser?.fullName ?? "Unassigned");
+  const assignedTo = assignedToName;
   const company = apiLead.companyName || "N/A";
 
   const getAvatar = (fullName: string) => {
-    const parts = fullName.trim().split(" ");
+    const parts = fullName?.trim().split(" ");
     if (parts.length >= 2) {
       return (parts[0][0] + parts[1][0]).toUpperCase();
     }
@@ -268,7 +279,10 @@ const Page = () => {
   } = useGetLeadsPipeLineQuery();
 
   console.log("Leads Data:", leadsData);
-
+  const { data: users, isLoading: usersLoading } = useGetUsersQuery();
+  console.log("Users Data:", users);
+  const [assignLead, { isLoading: isAssigning }] = useAssignLeadMutation();
+  const [deleteLead, { isLoading: isDeleting }] = useDeleteLeadMutation();
   const [searchQuery, setSearchQuery] = useState("");
   const [draggedLead, setDraggedLead] = useState<Lead | null>(null);
   const [showLeadMenu, setShowLeadMenu] = useState<number | null>(null);
@@ -280,6 +294,13 @@ const Page = () => {
     lead: null,
     targetStage: "",
   });
+  const [assignOwnerDialog, setAssignOwnerDialog] = useState<AssignOwnerDialog>(
+    {
+      show: false,
+      lead: null,
+    },
+  );
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
   const [stageLeads, setStageLeads] = useState<{ [key: string]: Lead[] }>({
     new: [],
@@ -493,6 +514,14 @@ const Page = () => {
       }
 
       const oldStage = lead.stage;
+
+      // Prevent duplicate: if lead is already in the target stage, do nothing
+      if (oldStage === newStage) {
+        console.log(`Lead ${lead.name} is already in ${newStage} stage`);
+        setDraggedLead(null);
+        return;
+      }
+
       const updatedLead = {
         ...lead,
         stage: newStage,
@@ -500,11 +529,20 @@ const Page = () => {
         lastActivity: new Date().toISOString(),
       };
 
-      setStageLeads((prev) => ({
-        ...prev,
-        [oldStage]: prev[oldStage].filter((l) => l.id !== lead.id),
-        [newStage]: [...prev[newStage], updatedLead],
-      }));
+      setStageLeads((prev) => {
+        // Remove from old stage
+        const updatedOldStage = prev[oldStage].filter((l) => l.id !== lead.id);
+        // Add to new stage only if it doesn't already exist there
+        const updatedNewStage = prev[newStage].some((l) => l.id === lead.id)
+          ? prev[newStage]
+          : [...prev[newStage], updatedLead];
+
+        return {
+          ...prev,
+          [oldStage]: updatedOldStage,
+          [newStage]: updatedNewStage,
+        };
+      });
 
       await updateLeadStatus({
         leadId: lead.id,
@@ -538,25 +576,85 @@ const Page = () => {
     }
   };
 
-  const handleCall = (lead: Lead) => {
-    console.log("Calling:", lead.phone);
+  const handleAssignOwner = (lead: Lead) => {
+    setAssignOwnerDialog({
+      show: true,
+      lead: lead,
+    });
+    setSelectedUserId(null);
+    setShowQuickAction(null);
   };
 
-  const handleWhatsApp = (lead: Lead) => {
-    const cleanPhone = lead.phone.replace(/\D/g, "");
-    if (cleanPhone) {
-      window.open(`https://wa.me/${cleanPhone}`, "_blank");
-    } else {
-      alert("No phone number available");
+  const confirmAssignOwner = async () => {
+    if (!assignOwnerDialog.lead || !selectedUserId) {
+      alert("Please select a user");
+      return;
+    }
+
+    try {
+      // Send the lead id (from dialog) along with the selected userId
+      await assignLead({
+        id: assignOwnerDialog.lead.id,
+        userId: selectedUserId,
+      }).unwrap();
+
+      // Update local state
+      const selectedUser = users?.find((u: any) => u.id === selectedUserId);
+      if (selectedUser) {
+        setStageLeads((prev) => {
+          const stage = assignOwnerDialog.lead!.stage;
+          const updatedLeads = prev[stage].map((l) =>
+            l.id === assignOwnerDialog.lead!.id
+              ? {
+                  ...l,
+                  assignedTo: selectedUser.fullName,
+                  assignedToAvatar: selectedUser.fullName
+                    .substring(0, 2)
+                    .toUpperCase(),
+                }
+              : l,
+          );
+          return {
+            ...prev,
+            [stage]: updatedLeads,
+          };
+        });
+      }
+
+      setAssignOwnerDialog({ show: false, lead: null });
+      setSelectedUserId(null);
+    } catch (error) {
+      console.error("Failed to assign lead:", error);
     }
   };
 
-  const handleAddNote = (lead: Lead) => {
-    console.log("Adding note for:", lead.name);
-  };
+  const handleDelete = async (id: number) => {
+    const result = await Swal.fire({
+      title: "😢 Are you sure you want to delete this lead?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+      confirmButtonColor: "#2563eb",
+      cancelButtonColor: "#e5e7eb",
+    });
 
-  const handleAssignOwner = (lead: Lead) => {
-    console.log("Assigning owner for:", lead.name);
+    if (!result.isConfirmed) return;
+    try {
+      await deleteLead({ id }).unwrap();
+      await Swal.fire({
+        icon: "success",
+        title: "Deleted!",
+        text: "Lead has been deleted successfully.",
+        timer: 2000,
+      });
+    } catch (err) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops!",
+        text: "Failed to delete lead.",
+      });
+    }
   };
 
   const applySavedFilter = (filterId: string) => {
@@ -905,7 +1003,7 @@ const Page = () => {
           </div>
         </div>
 
-        {/* Kanban Board */}
+        {/* Kanban Board - Continued in next message due to length */}
         <div className="overflow-x-auto pb-4">
           <div className="inline-flex gap-4 min-w-full">
             {STAGES.map((stage) => {
@@ -1037,7 +1135,10 @@ const Page = () => {
                                       <Edit2 className="w-4 h-4" />
                                       <span>Edit</span>
                                     </Link>
-                                    <button className="flex items-center gap-2 px-4 py-2 hover:bg-red-50 text-red-600 text-sm w-full cursor-pointer">
+                                    <button
+                                      onClick={() => handleDelete(lead.id)}
+                                      className="flex items-center gap-2 px-4 py-2 hover:bg-red-50 text-red-600 text-sm w-full cursor-pointer"
+                                    >
                                       <Trash2 className="w-4 h-4" />
                                       <span>Delete</span>
                                     </button>
@@ -1126,20 +1227,22 @@ const Page = () => {
 
                               {showQuickAction === lead.id && (
                                 <div className="absolute right-0 bottom-10 bg-white border border-gray-200 rounded-xl shadow-xl z-20 py-2 w-48">
-                                  <button
-                                    onClick={() => handleWhatsApp(lead)}
+                                  <Link
+                                    href={`tel:${lead.phone}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="flex items-center gap-3 px-4 py-2 hover:bg-green-50 text-gray-700 text-sm w-full cursor-pointer"
                                   >
                                     <MessageCircle className="w-4 h-4 text-green-600" />
                                     <span>WhatsApp</span>
-                                  </button>
-                                  <button
-                                    onClick={() => handleAddNote(lead)}
+                                  </Link>
+                                  <Link
+                                    href={`/leads/${lead.id}/notes/add`}
                                     className="flex items-center gap-3 px-4 py-2 hover:bg-orange-50 text-gray-700 text-sm w-full cursor-pointer"
                                   >
                                     <StickyNote className="w-4 h-4 text-orange-600" />
                                     <span>Add Note</span>
-                                  </button>
+                                  </Link>
                                   <button
                                     onClick={() => handleAssignOwner(lead)}
                                     className="flex items-center gap-3 px-4 py-2 hover:bg-purple-50 text-gray-700 text-sm w-full cursor-pointer"
@@ -1255,6 +1358,87 @@ const Page = () => {
                   <>
                     <CheckCircle2 className="w-5 h-5" />
                     <span>Confirm</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Assign Owner Dialog */}
+      {assignOwnerDialog.show && assignOwnerDialog.lead && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center">
+                <UserPlus className="w-6 h-6 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">
+                  Assign Owner
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Assign this lead to a team member
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 rounded-xl p-4 mb-4">
+              <p className="text-sm text-gray-700">
+                <strong>{assignOwnerDialog.lead.name}</strong> from{" "}
+                {assignOwnerDialog.lead.company}
+              </p>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select User <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={selectedUserId || ""}
+                onChange={(e) => setSelectedUserId(Number(e.target.value))}
+                className="w-full bg-white border-2 border-gray-200 rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all"
+              >
+                <option value="">Select a user...</option>
+                {usersLoading ? (
+                  <option disabled>Loading users...</option>
+                ) : users && Array.isArray(users) ? (
+                  users.map((user: any) => (
+                    <option key={user.id} value={user.id}>
+                      {user.fullName}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>No users available</option>
+                )}
+              </select>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setAssignOwnerDialog({ show: false, lead: null });
+                  setSelectedUserId(null);
+                }}
+                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => confirmAssignOwner()}
+                disabled={isAssigning || !selectedUserId}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isAssigning ? (
+                  <>
+                    <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
+                    <span>Assigning...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-5 h-5" />
+                    <span>Assign</span>
                   </>
                 )}
               </button>

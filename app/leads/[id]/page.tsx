@@ -97,6 +97,12 @@ const Page = () => {
     metrics = {},
   } = rawDetails;
 
+  // assignedUser can be either a string or an object { id, fullName } depending on API
+  const assignedName =
+    typeof leadInfo.assignedUser === "string"
+      ? leadInfo.assignedUser
+      : (leadInfo.assignedUser?.fullName ?? "Unassigned");
+
   // Map stage colors
   const stageColorMap: { [key: string]: string } = {
     New: "blue",
@@ -792,7 +798,7 @@ const Page = () => {
                     <div>
                       <p className="text-xs text-gray-500">Assigned To</p>
                       <p className="font-semibold text-gray-900">
-                        {leadInfo.assignedUser}
+                        {assignedName}
                       </p>
                     </div>
                   </div>
