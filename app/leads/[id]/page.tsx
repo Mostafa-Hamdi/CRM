@@ -86,14 +86,16 @@ const Page = () => {
     );
   }
 
+  // The API returns { data: ... } so normalize here and provide safe defaults
+  const rawDetails = (leadDetails as any)?.data ?? leadDetails ?? {};
   const {
-    leadInfo,
-    currentStage,
-    allStages,
-    stageHistory,
-    activityTimeline,
-    metrics,
-  } = leadDetails;
+    leadInfo = {},
+    currentStage = { id: 0, name: "0" },
+    allStages = [],
+    stageHistory = [],
+    activityTimeline = [],
+    metrics = {},
+  } = rawDetails;
 
   // Map stage colors
   const stageColorMap: { [key: string]: string } = {
@@ -127,8 +129,8 @@ const Page = () => {
 
   // Confirm stage change
   const confirmStageChange = () => {
-    if (targetStage) {
-      // Here you would call your API to update the lead stage
+    if (targetStage && leadInfo?.id) {
+      // Call API to update the lead stage (guarding on lead id)
       convertLeadStatus({ id: leadInfo.id, status: targetStage.id });
       setShowStageConfirm(false);
       setTargetStage(null);
