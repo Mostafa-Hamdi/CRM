@@ -26,6 +26,8 @@ import { logout } from "@/store/slices/auth";
 import Swal from "sweetalert2";
 import { useLogoutMutation } from "@/store/api/apiSlice";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useIsRTL } from "@/app/i18n/LocaleProvider";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -56,95 +58,96 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>(
     {},
   );
+  const t = useTranslations("sidebar");
 
   const navSections: NavSection[] = [
     {
-      title: "Main",
+      title: t("sections.main"),
       items: [
-        { icon: Home, label: "Dashboard", link: "/" },
+        { icon: Home, label: t("dashboard"), link: "/" },
 
         {
           icon: Boxes,
-          label: "Categories",
+          label: t("categories"),
           subItems: [
-            { icon: List, label: "All Categories", link: "/categories" },
-            { icon: Plus, label: "Add Category", link: "/categories/add" },
+            { icon: List, label: t("allCategories"), link: "/categories" },
+            { icon: Plus, label: t("addCategory"), link: "/categories/add" },
           ],
         },
 
         {
           icon: GraduationCap,
-          label: "Courses",
+          label: t("courses"),
           subItems: [
-            { icon: List, label: "All Courses", link: "/courses" },
-            { icon: Plus, label: "Add Course", link: "/courses/add" },
+            { icon: List, label: t("allCourses"), link: "/courses" },
+            { icon: Plus, label: t("addCourse"), link: "/courses/add" },
           ],
         },
         {
           icon: SchoolIcon,
-          label: "Classes",
+          label: t("classes"),
           subItems: [
-            { icon: List, label: "All Classes", link: "/classes" },
-            { icon: Plus, label: "Add Class", link: "/classes/add" },
+            { icon: List, label: t("allClasses"), link: "/classes" },
+            { icon: Plus, label: t("addClass"), link: "/classes/add" },
           ],
         },
 
         {
           icon: UserCheck,
-          label: "Enrollments",
+          label: t("enrollments"),
           subItems: [
-            { icon: List, label: "All Enrollments", link: "/enrollments" },
-            { icon: Plus, label: "Add Enrollment", link: "/enrollments/add" },
+            { icon: List, label: t("allEnrollments"), link: "/enrollments" },
+            { icon: Plus, label: t("addEnrollment"), link: "/enrollments/add" },
           ],
         },
 
         {
           icon: UserPlus,
-          label: "Leads",
+          label: t("leads"),
           subItems: [
-            { icon: List, label: "All Leads", link: "/leads" },
-            { icon: Plus, label: "Add Lead", link: "/leads/add" },
+            { icon: List, label: t("allLeads"), link: "/leads" },
+            { icon: Plus, label: t("addLead"), link: "/leads/add" },
           ],
         },
 
         {
           icon: UserSquare,
-          label: "Students",
+          label: t("students"),
           subItems: [
-            { icon: List, label: "All Students", link: "/students" },
-            { icon: Plus, label: "Add Student", link: "/students/add" },
+            { icon: List, label: t("allStudents"), link: "/students" },
+            { icon: Plus, label: t("addStudent"), link: "/students/add" },
           ],
         },
 
         {
           icon: Clock,
-          label: "Follow Up",
+          label: t("followUp"),
           subItems: [
-            { icon: List, label: "All Follow Ups", link: "/follow-up" },
-            { icon: Plus, label: "Add Follow Up", link: "/follow-up/add" },
+            { icon: List, label: t("allFollowUps"), link: "/follow-up" },
+            { icon: Plus, label: t("addFollowUp"), link: "/follow-up/add" },
           ],
         },
       ],
     },
 
     {
-      title: "System",
+      title: t("sections.system"),
       items: [
         {
           icon: UserCircle,
-          label: "Users",
+          label: t("users"),
           subItems: [
-            { icon: List, label: "All Users", link: "/users" },
-            { icon: Plus, label: "Add User", link: "/users/add" },
+            { icon: List, label: t("allUsers"), link: "/users" },
+            { icon: Plus, label: t("addUser"), link: "/users/add" },
           ],
         },
 
         {
           icon: Shield,
-          label: "Roles",
+          label: t("roles"),
           subItems: [
-            { icon: List, label: "All Roles", link: "/roles" },
-            { icon: Plus, label: "Add Role", link: "/roles/add" },
+            { icon: List, label: t("allRoles"), link: "/roles" },
+            { icon: Plus, label: t("addRole"), link: "/roles/add" },
             // {
             //   icon: EditIcon,
             //   label: "Edit Role",
@@ -155,21 +158,21 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
 
         {
           icon: Settings,
-          label: "Settings",
+          label: t("settings"),
           subItems: [
             {
               icon: Edit,
-              label: "General Settings",
+              label: t("generalSettings"),
               link: "/dashboard/settings",
             },
             {
               icon: Edit,
-              label: "System Config",
+              label: t("systemConfig"),
               link: "/dashboard/settings/config",
             },
             {
               icon: EditIcon,
-              label: "Edit Settings",
+              label: t("editSettings"),
               link: "/dashboard/settings/edit",
             },
           ],
@@ -177,17 +180,17 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
 
         {
           icon: UserCircle2,
-          label: "Profile",
+          label: t("profile"),
           subItems: [
-            { icon: Edit, label: "Edit Profile", link: "/dashboard/profile" },
+            { icon: Edit, label: t("editProfile"), link: "/dashboard/profile" },
             {
               icon: Edit,
-              label: "Change Password",
+              label: t("changePassword"),
               link: "/dashboard/profile/password",
             },
             {
               icon: EditIcon,
-              label: "Advanced Edit",
+              label: t("advancedEdit"),
               link: "/dashboard/profile/edit",
             },
           ],
@@ -239,14 +242,14 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
       Swal.fire("Logout failed", "", "error");
     }
   };
-
+  const isRTL = useIsRTL();
   return (
     <aside
       className={`
-        fixed left-0 top-[98px] z-30 h-[calc(100vh-98px)] w-64
-        bg-white/95 backdrop-blur-xl border-r border-blue-100 shadow-lg
-        transition-transform duration-300  
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+        fixed ${isRTL ? "right-0" : "left-0"} top-[98px] z-30 h-[calc(100vh-98px)] w-64
+        bg-white/95 backdrop-blur-xl ${isRTL ? "border-l" : "border-r"} border-blue-100 shadow-lg
+        transition-transform duration-300
+        ${sidebarOpen ? "translate-x-0" : `${isRTL ? "translate-x-full" : "-translate-x-full"} lg:translate-x-0`}
       `}
     >
       <nav className="p-4 space-y-6 h-full pb-20 overflow-y-auto">
@@ -293,7 +296,9 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
                               : "max-h-0 opacity-0"
                           }`}
                         >
-                          <div className="ml-4 pl-4 border-l-2 border-blue-200 space-y-1">
+                          <div
+                            className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
+                          >
                             {item.subItems!.map((subItem, subIdx) => {
                               const isSubActive = path === subItem.link;
 
@@ -341,7 +346,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
           text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all mt-8"
         >
           <LogOut className="w-5 h-5" />
-          <span className="font-medium">Logout</span>
+          <span className="font-medium">{t("signOut")}</span>
         </button>
       </nav>
     </aside>

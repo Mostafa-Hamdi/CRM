@@ -44,6 +44,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
+import { useTranslations } from "next-intl";
 
 interface Lead {
   id: number;
@@ -71,6 +72,7 @@ interface ImportResult {
 const Page = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<number>(0);
+  const t = useTranslations("leads");
   const [displayedLeads, setDisplayedLeads] = useState<Lead[]>([]);
   const [showConvertModal, setShowConvertModal] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -478,8 +480,8 @@ const Page = () => {
           title: "Import Partially Completed",
           html: `
             <div class="text-center">
-              <p class="mb-2"><strong>${successCount}</strong> leads imported successfully</p>
-              <p class="mb-2"><strong>${failCount}</strong> leads failed to import</p>
+              <p class="mb-2">${t("importSuccess", { successCount })}</p>
+              <p class="mb-2">${t("importFail", { failCount })}</p>
               ${errorList}
             </div>
           `,
@@ -489,7 +491,7 @@ const Page = () => {
         await Swal.fire({
           icon: "success",
           title: "Import Successful!",
-          html: `<p><strong>${successCount}</strong> leads imported successfully</p>`,
+          html: `<p>${t("importSuccess", { successCount })}</p>`,
           timer: 2500,
           confirmButtonColor: "#2563eb",
         });
@@ -526,7 +528,7 @@ const Page = () => {
       Swal.fire({
         icon: "info",
         title: "No Data to Export",
-        text: "There are no leads to export.",
+        text: t("noLeadsToExport"),
         confirmButtonColor: "#2563eb",
       });
       return;
@@ -553,7 +555,7 @@ const Page = () => {
       await Swal.fire({
         icon: "success",
         title: "Export Successful!",
-        html: `<p><strong>${leadsResponse?.totalCount || leads.length}</strong> leads exported to <strong>${filename}</strong></p>`,
+        html: `<p>${t("exportedToFile", { count: leadsResponse?.totalCount || leads.length, filename })}</p>`,
         timer: 2500,
         confirmButtonColor: "#2563eb",
       });
@@ -595,10 +597,10 @@ const Page = () => {
               </div>
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
-                  Leads
+                  {t("title")}
                 </h1>
                 <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                  Manage and track your sales leads pipeline
+                  {t("subtitle")}
                 </p>
               </div>
             </div>
@@ -609,7 +611,7 @@ const Page = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
               <Plus className="w-5 h-5 relative z-10" />
-              <span className="relative z-10">Add Lead</span>
+              <span className="relative z-10">{t("addLead")}</span>
             </Link>
           </div>
         </div>
@@ -619,7 +621,9 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10 hover:shadow-xl hover:shadow-blue-500/20 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Total Leads</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  {t("totalLeads")}
+                </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mt-1">
                   {leadsResponse?.totalCount || 0}
                 </p>
@@ -633,7 +637,7 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-green-500/10 hover:shadow-xl hover:shadow-green-500/20 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">New</p>
+                <p className="text-gray-600 text-sm font-medium">{t("new")}</p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mt-1">
                   {leads?.filter((l: Lead) => l.status === 1).length || 0}
                 </p>
@@ -647,7 +651,9 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-emerald-500/10 hover:shadow-xl hover:shadow-emerald-500/20 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Converted</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  {t("converted")}
+                </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mt-1">
                   {leads?.filter((l: Lead) => l.status === 7).length || 0}
                 </p>
@@ -661,7 +667,9 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-purple-500/10 hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Found</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  {t("found")}
+                </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mt-1">
                   {filteredLeads.length}
                 </p>
@@ -679,31 +687,31 @@ const Page = () => {
             {[
               {
                 id: 0,
-                label: "All",
+                label: t("filters.all"),
                 icon: Filter,
                 color: "from-gray-600 to-gray-700",
               },
               {
                 id: 1,
-                label: "New",
+                label: t("filters.new"),
                 icon: Tag,
                 color: "from-blue-600 to-cyan-600",
               },
               {
                 id: 2,
-                label: "Contacted",
+                label: t("filters.contacted"),
                 icon: Phone,
                 color: "from-purple-600 to-pink-600",
               },
               {
                 id: 3,
-                label: "Interested",
+                label: t("filters.interested"),
                 icon: Users,
                 color: "from-green-600 to-emerald-600",
               },
               {
                 id: 4,
-                label: "Followup",
+                label: t("filters.followup"),
                 icon: Calendar,
                 color: "from-yellow-600 to-orange-600",
               },
@@ -768,7 +776,7 @@ const Page = () => {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
               <input
                 type="text"
-                placeholder="Search by name, phone, email or source..."
+                placeholder={t("searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all"
@@ -1302,7 +1310,7 @@ const Page = () => {
                     }
                     className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all appearance-none cursor-pointer"
                   >
-                    <option value={0}>Choose a class...</option>
+                    <option value={0}>{t("chooseClass")}</option>
                     {classes?.data?.map((item: any) => (
                       <option key={item.id} value={item.id}>
                         {item.name}

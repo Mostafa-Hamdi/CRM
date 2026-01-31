@@ -17,6 +17,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useAddUserMutation, useGetRolesQuery } from "@/store/api/apiSlice";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 // Validation Schema
@@ -56,6 +57,7 @@ const Page = () => {
   );
 
   const { data: roles, isLoading } = useGetRolesQuery();
+  const t = useTranslations("users");
   const [addUser] = useAddUserMutation();
 
   const {
@@ -120,7 +122,7 @@ const Page = () => {
             </div>
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
-                Add New User
+                {t("addTitle")}
               </h1>
               <p className="text-gray-600 mt-2 text-sm sm:text-base">
                 Create a new team member account with roles and permissions
@@ -137,9 +139,7 @@ const Page = () => {
               </div>
               <div>
                 <p className="font-bold text-lg">Success!</p>
-                <p className="text-white/90">
-                  User has been added successfully
-                </p>
+                <p className="text-white/90">{t("addSuccess")}</p>
               </div>
             </div>
           </div>
@@ -187,7 +187,7 @@ const Page = () => {
                   <input
                     {...register("email")}
                     type="email"
-                    placeholder="Enter email address"
+                    placeholder={t("enterEmail")}
                     className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 rounded-xl px-6 py-4 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 transition-all font-medium ${
                       errors.email
                         ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
@@ -301,12 +301,12 @@ const Page = () => {
                 {isSubmitting ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin relative z-10" />
-                    <span className="relative z-10">Creating User...</span>
+                    <span className="relative z-10">{t("creating")}</span>
                   </>
                 ) : (
                   <>
                     <UserPlus className="w-5 h-5 relative z-10" />
-                    <span className="relative z-10">Create User</span>
+                    <span className="relative z-10">{t("create")}</span>
                   </>
                 )}
               </button>
@@ -319,7 +319,7 @@ const Page = () => {
                 }}
                 className="cursor-pointer flex-1 sm:flex-none px-8 py-4 bg-white/80 backdrop-blur-xl border-2 border-gray-200 text-gray-700 font-semibold rounded-2xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 hover:shadow-lg"
               >
-                Reset Form
+                {t("resetForm")}
               </button>
             </div>
           </form>
@@ -332,13 +332,12 @@ const Page = () => {
             </div>
             <div>
               <h3 className="font-bold text-gray-900 mb-1">
-                Password Requirements
+                {t("passwordRequirements")}
               </h3>
               <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Minimum 8 characters long</li>
-                <li>• At least one uppercase letter (A-Z)</li>
-                <li>• At least one lowercase letter (a-z)</li>
-                <li>• At least one number (0-9)</li>
+                {t("passwordReqs").map((p: string, i: number) => (
+                  <li key={i}>• {p}</li>
+                ))}
               </ul>
             </div>
           </div>

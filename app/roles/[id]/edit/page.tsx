@@ -19,6 +19,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import Swal from "sweetalert2";
+import { useTranslations } from "next-intl";
 
 interface Permission {
   id: number;
@@ -44,6 +45,8 @@ const Page = () => {
   const { data: rolePermissions, isLoading: loadingRolePermissions } =
     useGetRolePermissionsQuery({ id });
   const [updateRole, { isLoading: isUpdating }] = useUpdateRoleMutation();
+
+  const t = useTranslations("roles");
 
   const [roleName, setRoleName] = useState("");
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
@@ -131,7 +134,7 @@ const Page = () => {
       Swal.fire({
         icon: "error",
         title: "Validation Error",
-        text: "Role name is required.",
+        text: t("permissions.roleNameRequired"),
       });
       return;
     }
@@ -146,7 +149,7 @@ const Page = () => {
       await Swal.fire({
         icon: "success",
         title: "Success!",
-        text: "Role permissions updated successfully.",
+        text: t("permissions.updatedSuccess"),
         timer: 2000,
       });
 
@@ -155,9 +158,7 @@ const Page = () => {
       console.error(err);
 
       const errorMessage =
-        err?.data?.message ||
-        err?.error ||
-        "Failed to update role permissions.";
+        err?.data?.message || err?.error || t("permissions.updatedFail");
 
       Swal.fire({
         icon: "error",
@@ -190,7 +191,7 @@ const Page = () => {
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4 mx-auto" />
           <p className="text-gray-600 font-medium">
-            Loading role permissions...
+            {t("permissions.loading")}
           </p>
         </div>
       </div>
@@ -228,10 +229,10 @@ const Page = () => {
               </div>
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
-                  Edit Role Permissions
+                  {t("editRole")}
                 </h1>
                 <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                  Manage permissions for this role
+                  {t("permissions.title")}
                 </p>
               </div>
             </div>
@@ -244,7 +245,7 @@ const Page = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">
-                  Total Permissions
+                  {t("permissions.totalPermissions")}
                 </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mt-1">
                   {allPermissions?.length || 0}
@@ -322,7 +323,7 @@ const Page = () => {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
                   <input
                     type="text"
-                    placeholder="Search permissions..."
+                    placeholder={t("permissions.searchPlaceholder")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all"

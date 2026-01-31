@@ -16,25 +16,26 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useLoginMutation } from "@/store/api/apiSlice";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import logo from "@/public/logo.png";
-// Define Yup validation schema
-const schema = yup.object({
-  email: yup
-    .string()
-    .email("Invalid email address")
-    .required("Email is required"),
-  password: yup
-    .string()
-    .min(6, "Password must be at least 6 characters")
-    .required("Password is required"),
-});
-
-type FormData = yup.InferType<typeof schema>;
+type FormData = {
+  email: string;
+  password: string;
+};
 
 export default function LuxuryLogin() {
+  const t = useTranslations("login");
   const [showPassword, setShowPassword] = useState(false);
   const [login, { isLoading }] = useLoginMutation();
+
+  const schema = yup.object({
+    email: yup.string().email(t("invalidEmail")).required(t("emailRequired")),
+    password: yup
+      .string()
+      .min(6, t("passwordMin", { min: 6 }))
+      .required(t("passwordRequired")),
+  });
 
   const {
     register,
@@ -85,16 +86,15 @@ export default function LuxuryLogin() {
             {/* Main content */}
             <div className="space-y-0 mb-0">
               <h2 className="text-6xl font-black text-slate-900 leading-17.5 mb-5">
-                Transform your
+                {t("marketingTitleTop")}
                 <br />
                 <span className="bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 bg-clip-text text-transparent">
-                  educational journey
+                  {t("marketingTitleBottom")}
                 </span>
               </h2>
 
               <p className="text-xl text-slate-600 leading-relaxed max-w-lg">
-                Comprehensive CRM platform designed for modern academies to
-                manage courses, students, and enrollments seamlessly.
+                {t("marketingDesc")}
               </p>
             </div>
 
@@ -103,19 +103,19 @@ export default function LuxuryLogin() {
               <div className="space-y-2">
                 <div className="text-3xl font-black text-slate-900">10K+</div>
                 <div className="text-sm text-slate-600 font-medium">
-                  Students Managed
+                  {t("studentsManaged")}
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="text-3xl font-black text-slate-900">500+</div>
                 <div className="text-sm text-slate-600 font-medium">
-                  Active Courses
+                  {t("activeCourses")}
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="text-3xl font-black text-slate-900">24/7</div>
                 <div className="text-sm text-slate-600 font-medium">
-                  Support
+                  {t("support")}
                 </div>
               </div>
             </div>
@@ -125,19 +125,19 @@ export default function LuxuryLogin() {
               <div className="flex items-center gap-3">
                 <Shield className="w-5 h-5 text-blue-600" />
                 <span className="text-sm text-slate-600 font-medium">
-                  Secure & Private
+                  {t("securePrivate")}
                 </span>
               </div>
               <div className="flex items-center gap-3">
                 <Zap className="w-5 h-5 text-blue-600" />
                 <span className="text-sm text-slate-600 font-medium">
-                  Real-time Updates
+                  {t("realTime")}
                 </span>
               </div>
               <div className="flex items-center gap-3">
                 <Globe className="w-5 h-5 text-blue-600" />
                 <span className="text-sm text-slate-600 font-medium">
-                  Cloud-based
+                  {t("cloud")}
                 </span>
               </div>
             </div>
@@ -155,11 +155,9 @@ export default function LuxuryLogin() {
                 {/* Header */}
                 <div className="px-10 pt-10 pb-8 border-b border-slate-200/60">
                   <h3 className="text-3xl font-black text-slate-900 mb-2">
-                    Welcome back
+                    {t("welcomeBack")}
                   </h3>
-                  <p className="text-slate-600">
-                    Sign in to access your dashboard
-                  </p>
+                  <p className="text-slate-600">{t("signInToAccess")}</p>
                 </div>
 
                 {/* Form */}
@@ -170,14 +168,14 @@ export default function LuxuryLogin() {
                   {/* Email */}
                   <div className="space-y-3">
                     <label className="block text-sm font-bold text-slate-700 uppercase tracking-wider">
-                      Email Address
+                      {t("emailLabel")}
                     </label>
                     <div className="relative group/input">
                       <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within/input:text-blue-600 transition-colors" />
                       <input
                         type="email"
                         {...register("email")}
-                        placeholder="you@academy.com"
+                        placeholder={t("emailPlaceholder")}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 py-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all"
                       />
                     </div>
@@ -191,14 +189,14 @@ export default function LuxuryLogin() {
                   {/* Password */}
                   <div className="space-y-3">
                     <label className="block text-sm font-bold text-slate-700 uppercase tracking-wider">
-                      Password
+                      {t("passwordLabel")}
                     </label>
                     <div className="relative group/input">
                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within/input:text-blue-600 transition-colors" />
                       <input
                         type={showPassword ? "text" : "password"}
                         {...register("password")}
-                        placeholder="Enter your password"
+                        placeholder={t("passwordPlaceholder")}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-12 py-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all"
                       />
                       <button
@@ -228,14 +226,14 @@ export default function LuxuryLogin() {
                         className="w-4 h-4 rounded border-slate-300 bg-white text-blue-600 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
                       />
                       <span className="text-sm text-slate-600 group-hover/check:text-slate-900 transition-colors font-medium">
-                        Remember me
+                        {t("rememberMe")}
                       </span>
                     </label>
                     <a
                       href="#"
                       className="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors"
                     >
-                      Forgot password?
+                      {t("forgotPassword")}
                     </a>
                   </div>
 
@@ -252,7 +250,7 @@ export default function LuxuryLogin() {
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       ) : (
                         <>
-                          <span>Sign In</span>
+                          <span>{t("signIn")}</span>
                           <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
                         </>
                       )}
@@ -264,7 +262,7 @@ export default function LuxuryLogin() {
                     href="#"
                     className="flex items-center justify-center gap-2 w-full px-6 py-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-slate-700 font-bold transition-all group/link"
                   >
-                    <span>Create an account</span>
+                    <span>{t("createAccount")}</span>
                     <ArrowRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
                   </a>
                 </form>
@@ -273,7 +271,7 @@ export default function LuxuryLogin() {
 
             {/* Footer */}
             <p className="text-center text-slate-500 text-sm mt-8">
-              © 2026 AcademyCRM · Empowering education management
+              {t("copyright")}
             </p>
           </div>
         </div>

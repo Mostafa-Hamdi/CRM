@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
+import { useTranslations } from "next-intl";
 
 interface Category {
   id: number;
@@ -45,6 +46,8 @@ const Page = () => {
 
   const [getSpecificCategories, { isLoading }] =
     useGetSpecificCategoriesMutation();
+
+  const t = useTranslations("categories");
   const [deleteCategory] = useDeleteCategoryMutation();
 
   // Fetch categories on mount and when page/size changes
@@ -195,10 +198,10 @@ const Page = () => {
               </div>
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
-                  Categories
+                  {t("title")}
                 </h1>
                 <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                  Organize and manage your product categories
+                  {t("subtitle")}
                 </p>
               </div>
             </div>
@@ -209,7 +212,7 @@ const Page = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
               <Plus className="w-5 h-5 relative z-10" />
-              <span className="relative z-10">Add Category</span>
+              <span className="relative z-10">{t("addButton")}</span>
             </Link>
           </div>
         </div>
@@ -272,7 +275,7 @@ const Page = () => {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
               <input
                 type="text"
-                placeholder="Search categories by name..."
+                placeholder={t("searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all"
@@ -305,7 +308,7 @@ const Page = () => {
             <div className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 border border-blue-400 rounded-xl shadow-lg shadow-blue-500/30">
               <FolderTree className="w-5 h-5 text-white" />
               <span className="text-sm font-bold text-white">
-                {filteredCategories.length} Categories
+                {filteredCategories.length} {t("title")}
               </span>
             </div>
           </div>
@@ -339,9 +342,7 @@ const Page = () => {
                 <FolderTree className="w-10 h-10 text-gray-400" />
               </div>
               <p className="text-gray-600 font-medium text-lg">
-                {searchQuery
-                  ? "No categories found matching your search"
-                  : "No categories yet"}
+                {searchQuery ? t("noCategoriesFound") : t("noCategoriesYet")}
               </p>
             </div>
           ) : (

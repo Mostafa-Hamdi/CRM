@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
+import { useTranslations } from "next-intl";
 
 interface Role {
   id: number;
@@ -26,6 +27,8 @@ const Page = () => {
 
   const { data: roles, isLoading } = useGetRolesQuery();
   const [deleteRole] = useDeleteRoleMutation();
+
+  const t = useTranslations("roles");
 
   // Search filter
   const filteredRoles = useMemo(() => {
@@ -39,7 +42,7 @@ const Page = () => {
 
   const handleDelete = async (id: number, name: string) => {
     const result = await Swal.fire({
-      title: `😢 Are you sure you want to delete "${name}" role?`,
+      title: t("deleteConfirm"),
       text: "This action cannot be undone!",
       icon: "warning",
       showCancelButton: true,
@@ -54,15 +57,15 @@ const Page = () => {
       await deleteRole({ id }).unwrap();
       await Swal.fire({
         icon: "success",
-        title: "Deleted!",
-        text: "Role has been deleted successfully.",
+        title: t("deleteSuccess"),
+        text: "",
         timer: 2000,
       });
     } catch (err) {
       Swal.fire({
         icon: "error",
         title: "Oops!",
-        text: "Failed to delete role.",
+        text: t("deleteFail"),
       });
     }
   };
@@ -114,10 +117,10 @@ const Page = () => {
               </div>
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
-                  Roles & Permissions
+                  {t("rolesAndPermissions")}
                 </h1>
                 <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                  Manage user roles and access control
+                  {t("manage")}
                 </p>
               </div>
             </div>
@@ -128,7 +131,7 @@ const Page = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
               <Plus className="w-5 h-5 relative z-10" />
-              <span className="relative z-10">Add Role</span>
+              <span className="relative z-10">{t("addButton")}</span>
             </Link>
           </div>
         </div>
@@ -138,7 +141,9 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10 hover:shadow-xl hover:shadow-blue-500/20 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Total Roles</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  {t("totalRoles")}
+                </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mt-1">
                   {roles?.length || 0}
                 </p>
@@ -168,7 +173,9 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-green-500/10 hover:shadow-xl hover:shadow-green-500/20 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Found</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  {t("found")}
+                </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mt-1">
                   {filteredRoles.length}
                 </p>
@@ -187,7 +194,7 @@ const Page = () => {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
               <input
                 type="text"
-                placeholder="Search roles..."
+                placeholder={t("searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all"
@@ -196,7 +203,7 @@ const Page = () => {
             <div className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 border border-blue-400 rounded-xl shadow-lg shadow-blue-500/30">
               <Shield className="w-5 h-5 text-white" />
               <span className="text-sm font-bold text-white">
-                {filteredRoles.length} Roles
+                {filteredRoles.length} {t("title")}
               </span>
             </div>
           </div>
@@ -207,7 +214,7 @@ const Page = () => {
           {isLoading ? (
             <div className="py-20 flex flex-col items-center justify-center">
               <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4" />
-              <p className="text-gray-600 font-medium">Loading roles...</p>
+              <p className="text-gray-600 font-medium">{t("loading")}</p>
             </div>
           ) : filteredRoles.length === 0 ? (
             <div className="py-20 text-center">
@@ -215,9 +222,7 @@ const Page = () => {
                 <Shield className="w-10 h-10 text-gray-400" />
               </div>
               <p className="text-gray-600 font-medium text-lg">
-                {searchQuery
-                  ? "No roles found matching your search"
-                  : "No roles yet"}
+                {searchQuery ? t("noRolesFound") : t("noRolesYet")}
               </p>
             </div>
           ) : (

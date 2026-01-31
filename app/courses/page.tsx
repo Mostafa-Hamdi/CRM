@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
+import { useTranslations } from "next-intl";
 
 interface Course {
   id: number;
@@ -51,6 +52,8 @@ const Page = () => {
 
   const { data: courses, isLoading } = useGetCoursesQuery();
   const [deleteCourse] = useDeleteCourseMutation();
+
+  const t = useTranslations("courses");
 
   // Filter courses based on search query
   const filteredCourses = useMemo(() => {
@@ -85,7 +88,7 @@ const Page = () => {
 
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
-      title: "😢 Are you sure you want to delete this course?",
+      title: t("deleteConfirm"),
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Yes",
@@ -99,15 +102,15 @@ const Page = () => {
       await deleteCourse({ id }).unwrap();
       await Swal.fire({
         icon: "success",
-        title: "Deleted!",
-        text: "Course has been deleted successfully.",
+        title: t("deleteSuccess"),
+        text: "",
         timer: 2000,
       });
     } catch (err) {
       Swal.fire({
         icon: "error",
         title: "Oops!",
-        text: "Failed to delete course.",
+        text: t("deleteFail"),
       });
     }
   };
@@ -122,14 +125,13 @@ const Page = () => {
     });
   };
 
-  // Get level name
+  // Get level name (from translations)
   const getLevelName = (level: number) => {
-    const levels: { [key: number]: string } = {
-      1: "Beginner",
-      2: "Intermediate",
-      3: "Advanced",
-    };
-    return levels[level] || "Unknown";
+    try {
+      return t(`level.${level}`);
+    } catch (e) {
+      return "Unknown";
+    }
   };
 
   // Get level color
@@ -240,10 +242,10 @@ const Page = () => {
               </div>
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
-                  Courses
+                  {t("title")}
                 </h1>
                 <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                  Manage and organize your educational courses
+                  {t("subtitle")}
                 </p>
               </div>
             </div>
@@ -254,7 +256,7 @@ const Page = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
               <Plus className="w-5 h-5 relative z-10" />
-              <span className="relative z-10">Add Course</span>
+              <span className="relative z-10">{t("addButton")}</span>
             </Link>
           </div>
         </div>
@@ -265,7 +267,7 @@ const Page = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">
-                  Total Courses
+                  {t("totalCourses")}
                 </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mt-1">
                   {courses?.data?.length || 0}
@@ -280,7 +282,9 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-green-500/10 hover:shadow-xl hover:shadow-green-500/20 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Active</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  {t("active")}
+                </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mt-1">
                   {activeCourses}
                 </p>
@@ -294,7 +298,9 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-red-500/10 hover:shadow-xl hover:shadow-red-500/20 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Inactive</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  {t("inactive")}
+                </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent mt-1">
                   {inactiveCourses}
                 </p>
@@ -327,7 +333,7 @@ const Page = () => {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
               <input
                 type="text"
-                placeholder="Search courses by name, code, category, or tags..."
+                placeholder={t("searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all"
@@ -360,7 +366,7 @@ const Page = () => {
             <div className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 border border-blue-400 rounded-xl shadow-lg shadow-blue-500/30">
               <BookOpen className="w-5 h-5 text-white" />
               <span className="text-sm font-bold text-white">
-                {filteredCourses.length} Courses
+                {filteredCourses.length} {t("title")}
               </span>
             </div>
           </div>
@@ -383,7 +389,7 @@ const Page = () => {
           {isLoading ? (
             <div className="p-20 flex flex-col items-center justify-center">
               <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4" />
-              <p className="text-gray-600 font-medium">Loading courses...</p>
+              <p className="text-gray-600 font-medium">{t("loading")}</p>
             </div>
           ) : paginatedCourses.length === 0 ? (
             <div className="p-20 text-center">
@@ -391,9 +397,7 @@ const Page = () => {
                 <BookOpen className="w-10 h-10 text-gray-400" />
               </div>
               <p className="text-gray-600 font-medium text-lg">
-                {searchQuery
-                  ? "No courses found matching your search"
-                  : "No courses yet"}
+                {searchQuery ? t("noCoursesFound") : t("noCoursesYet")}
               </p>
             </div>
           ) : (

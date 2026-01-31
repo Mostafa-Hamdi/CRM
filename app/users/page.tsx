@@ -16,6 +16,7 @@ import {
   useGetUsersQuery,
   useToggleUserStatusMutation,
 } from "@/store/api/apiSlice";
+import { useTranslations } from "next-intl";
 
 interface User {
   id: number;
@@ -26,6 +27,7 @@ interface User {
 }
 
 const Page = () => {
+  const t = useTranslations("users");
   const [searchQuery, setSearchQuery] = useState("");
   const { data, isLoading } = useGetUsersQuery();
   const [toggleUserStatus] = useToggleUserStatusMutation();
@@ -75,10 +77,10 @@ const Page = () => {
               </div>
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
-                  User Management
+                  {t("title")}
                 </h1>
                 <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                  Manage your team members and permissions with ease
+                  {t("subtitle")}
                 </p>
               </div>
             </div>
@@ -89,7 +91,7 @@ const Page = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
               <UserPlus className="w-5 h-5 relative z-10" />
-              <span className="relative z-10">Add User</span>
+              <span className="relative z-10">{t("addUser")}</span>
             </Link>
           </div>
         </div>
@@ -99,7 +101,9 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10 hover:shadow-xl hover:shadow-blue-500/20 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Total Users</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  {t("totalUsers")}
+                </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mt-1">
                   {data?.length}
                 </p>
@@ -114,7 +118,7 @@ const Page = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">
-                  Active Users
+                  {t("activeUsers")}
                 </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mt-1">
                   {data?.filter((u: any) => u.isActive).length}

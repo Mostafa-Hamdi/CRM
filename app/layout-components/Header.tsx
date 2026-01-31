@@ -19,6 +19,8 @@ import Swal from "sweetalert2";
 import { logout } from "@/store/slices/auth";
 import { useRouter } from "next/navigation";
 import { useLogoutMutation } from "@/store/api/apiSlice";
+import { useTranslations } from "next-intl";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const Header = ({ sidebarOpen, setSidebarOpen }: any) => {
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -29,6 +31,7 @@ const Header = ({ sidebarOpen, setSidebarOpen }: any) => {
   const dispatch = useDispatch();
   const [removeRefreshToken] = useLogoutMutation();
   const user = useSelector((state: any) => state.auth.user);
+  const t = useTranslations("header");
   // Sample notifications data with types
   const notifications = [
     {
@@ -106,11 +109,11 @@ const Header = ({ sidebarOpen, setSidebarOpen }: any) => {
   };
   const handleLogout = async () => {
     const result = await Swal.fire({
-      title: "😢 Are you sure to logout?",
+      title: t("logout.confirmTitle"),
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes",
-      cancelButtonText: "No",
+      confirmButtonText: t("logout.confirmYes"),
+      cancelButtonText: t("logout.confirmNo"),
       confirmButtonColor: "#2563eb",
       cancelButtonColor: "#e5e7eb",
     });
@@ -124,11 +127,11 @@ const Header = ({ sidebarOpen, setSidebarOpen }: any) => {
       router.replace("/login");
 
       await Swal.fire({
-        title: "Logged out successfully!",
+        title: t("logout.success"),
         icon: "success",
       });
     } catch (error) {
-      Swal.fire("Logout failed", "", "error");
+      Swal.fire(t("logout.failed"), "", "error");
     }
   };
 
@@ -154,6 +157,11 @@ const Header = ({ sidebarOpen, setSidebarOpen }: any) => {
 
         {/* Right section */}
         <div className="flex items-center gap-3 sm:gap-4">
+          {/* Language Switcher */}
+          <div className="flex items-center">
+            {/* simple select for en/ar */}
+            <LanguageSwitcher />
+          </div>
           {/* Notifications */}
           <div className="relative" ref={notificationRef}>
             <button
@@ -181,15 +189,15 @@ const Header = ({ sidebarOpen, setSidebarOpen }: any) => {
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="font-bold text-gray-900 text-lg">
-                        Notifications
+                        {t("notifications.title")}
                       </h3>
                       <p className="text-xs text-gray-600 mt-0.5">
-                        You have {unreadCount} unread messages
+                        {t("notifications.youHave", { count: unreadCount })}
                       </p>
                     </div>
                     {unreadCount > 0 && (
                       <button className="cursor-pointer text-xs text-blue-600 font-semibold hover:text-blue-700 px-3 py-1.5 bg-white rounded-lg shadow-sm">
-                        Mark all read
+                        {t("notifications.markAllRead")}
                       </button>
                     )}
                   </div>
@@ -237,7 +245,7 @@ const Header = ({ sidebarOpen, setSidebarOpen }: any) => {
 
                 <div className="px-5 py-3 bg-gray-50 border-t border-gray-100 text-center">
                   <button className="cursor-pointer text-sm text-blue-600 hover:text-blue-700 font-semibold transition-colors">
-                    View all notifications →
+                    {t("notifications.viewAll")}
                   </button>
                 </div>
               </div>
@@ -296,13 +304,13 @@ const Header = ({ sidebarOpen, setSidebarOpen }: any) => {
                     <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
                       <User className="w-4 h-4" />
                     </div>
-                    <span>My Profile</span>
+                    <span>{t("profile.myProfile")}</span>
                   </button>
                   <button className="cursor-pointer w-full px-4 py-3 text-left text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-3 group">
                     <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
                       <Settings className="w-4 h-4" />
                     </div>
-                    <span>Settings</span>
+                    <span>{t("profile.settings")}</span>
                   </button>
                 </div>
 
@@ -314,7 +322,7 @@ const Header = ({ sidebarOpen, setSidebarOpen }: any) => {
                     <div className="w-8 h-8 rounded-lg bg-red-50 group-hover:bg-red-100 flex items-center justify-center transition-colors">
                       <LogOut className="w-4 h-4" />
                     </div>
-                    <span>Sign out</span>
+                    <span>{t("profile.signOut")}</span>
                   </button>
                 </div>
               </div>

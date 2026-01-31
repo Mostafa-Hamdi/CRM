@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
+import { useTranslations } from "next-intl";
 
 interface Class {
   id: number;
@@ -79,6 +80,8 @@ const Page = () => {
   const [convertClassStatus, { isLoading: isConverting }] =
     useConvertClassStatusMutation();
 
+  const t = useTranslations("classes");
+
   // Fetch classes on mount and when page/size changes
   useEffect(() => {
     const fetchClasses = async () => {
@@ -100,22 +103,22 @@ const Page = () => {
   const statusOptions = [
     {
       value: 0,
-      label: "Planned",
+      label: t("status.0"),
       color: "from-gray-100 to-slate-100 border-gray-200 text-gray-700",
     },
     {
       value: 1,
-      label: "Open",
+      label: t("status.1"),
       color: "from-green-100 to-emerald-100 border-green-200 text-green-700",
     },
     {
       value: 2,
-      label: "Full",
+      label: t("status.2"),
       color: "from-yellow-100 to-orange-100 border-yellow-200 text-yellow-700",
     },
     {
       value: 3,
-      label: "Closed",
+      label: t("status.3"),
       color: "from-red-100 to-rose-100 border-red-200 text-red-700",
     },
   ];
@@ -155,7 +158,7 @@ const Page = () => {
 
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
-      title: "😢 Are you sure you want to delete this class?",
+      title: t("deleteConfirm"),
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Yes",
@@ -171,8 +174,8 @@ const Page = () => {
 
       await Swal.fire({
         icon: "success",
-        title: "Deleted!",
-        text: "Class has been deleted successfully.",
+        title: t("deleteSuccess"),
+        text: "",
         timer: 2000,
       });
 
@@ -185,10 +188,7 @@ const Page = () => {
     } catch (err: any) {
       console.error(err);
 
-      const errorMessage =
-        err?.data?.message ||
-        err?.error ||
-        "Something went wrong while deleting the class.";
+      const errorMessage = err?.data?.message || err?.error || t("deleteFail");
 
       Swal.fire({
         icon: "error",
@@ -375,10 +375,10 @@ const Page = () => {
               </div>
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
-                  Classes
+                  {t("title")}
                 </h1>
                 <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                  Manage and organize all classes
+                  {t("subtitle")}
                 </p>
               </div>
             </div>
@@ -389,7 +389,7 @@ const Page = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
               <Plus className="w-5 h-5 relative z-10" />
-              <span className="relative z-10">Add Class</span>
+              <span className="relative z-10">{t("addButton")}</span>
             </Link>
           </div>
         </div>
@@ -400,7 +400,7 @@ const Page = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">
-                  Total Classes
+                  {t("totalClasses")}
                 </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mt-1">
                   {classesResponse?.totalCount || 0}
@@ -545,8 +545,8 @@ const Page = () => {
                 <span className="font-bold text-blue-600">
                   {classesResponse.totalPages}
                 </span>{" "}
-                ({classesResponse.totalCount} total classes, {pageSize} per
-                page)
+                ({classesResponse.totalCount} {t("totalClasses")}, {pageSize}{" "}
+                per page)
               </p>
             </div>
           )}
@@ -557,7 +557,7 @@ const Page = () => {
           {isLoading ? (
             <div className="p-20 flex flex-col items-center justify-center">
               <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4" />
-              <p className="text-gray-600 font-medium">Loading classes...</p>
+              <p className="text-gray-600 font-medium">{t("loading")}</p>
             </div>
           ) : filteredClasses.length === 0 ? (
             <div className="p-20 text-center">
@@ -565,9 +565,7 @@ const Page = () => {
                 <BookOpen className="w-10 h-10 text-gray-400" />
               </div>
               <p className="text-gray-600 font-medium text-lg">
-                {searchQuery
-                  ? "No classes found matching your search"
-                  : "No classes yet"}
+                {searchQuery ? t("noClassesFound") : t("noClassesYet")}
               </p>
             </div>
           ) : (

@@ -630,6 +630,12 @@ export const api = createApi({
       query: () => "/leads",
       providesTags: ["Leads"],
     }),
+    getLeadDetails: builder.query<{ data: any }, { id: number }>({
+      query: ({ id }) => ({
+        url: `/leads/${id}/details`,
+      }),
+      providesTags: ["Leads"],
+    }),
     getLeadsPipeLine: builder.query<{ leads: any }, void>({
       query: () => ({
         url: "/leads/pipeline",
@@ -778,6 +784,14 @@ export const api = createApi({
       }),
       invalidatesTags: ["Leads"],
     }),
+    convertLeadStatus: builder.mutation<void, { id: number; status: number }>({
+      query: ({ id, status }) => ({
+        url: `/leads/${id}/status`,
+        method: "PUT",
+        body: { status },
+      }),
+      invalidatesTags: ["Leads"],
+    }),
 
     deleteLead: builder.mutation<void, { id: number }>({
       query: ({ id }) => ({
@@ -797,11 +811,14 @@ export const api = createApi({
       }),
     }),
 
-    addLeadNote: builder.mutation<void, { id: number; note: string }>({
-      query: ({ id, note }) => ({
+    addLeadNote: builder.mutation<
+      void,
+      { id: number; note: string; interactionType: number }
+    >({
+      query: ({ id, note, interactionType }) => ({
         url: `/leads/${id}/notes`,
         method: "POST",
-        body: { note },
+        body: { note, interactionType },
       }),
       invalidatesTags: ["Leads"],
     }),
@@ -953,6 +970,7 @@ export const {
   useGetSpecificStudentsMutation,
   // Leads
   useGetLeadsQuery,
+  useGetLeadDetailsQuery,
   useGetLeadsPipeLineQuery,
   useGetLeadQuery,
   useAddLeadMutation,
@@ -960,6 +978,7 @@ export const {
   useGetSpecificLeadsMutation,
   useGetFilteredLeadsMutation,
   useConvertStatusMutation,
+  useConvertLeadStatusMutation,
   useDeleteLeadMutation,
   useUpdateLeadStatusMutation,
   // Lead Notes

@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import Login from "./components/Login";
 import { PropsWithChildren, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { LocaleProvider, useIsRTL } from "./i18n/LocaleProvider";
 
 export default function LayoutClient({ children }: PropsWithChildren) {
   const isLogin = useSelector((state: any) => state.auth.isAuthenticated);
@@ -11,23 +12,28 @@ export default function LayoutClient({ children }: PropsWithChildren) {
   useEffect(() => {
     if (!isLogin) router.push("/");
   }, [isLogin]);
+  // don't call locale hooks before provider mounts
+  const Inner = ({ children }: PropsWithChildren) => {
+    const isRTL = useIsRTL();
+
+    return (
+      <>
+        <Layout />
+        <main
+          className={`
+            transition-all duration-300
+            ${isRTL ? "lg:pr-64" : "lg:pl-64"}
+          `}
+        >
+          {children}
+        </main>
+      </>
+    );
+  };
+
   return (
-    <>
-      {isLogin ? (
-        <>
-          <Layout />
-          <main
-            className={`
-              transition-all duration-300
-              lg:pl-64
-              `}
-          >
-            {children}
-          </main>
-        </>
-      ) : (
-        <Login />
-      )}
-    </>
+    <LocaleProvider>
+      <>{isLogin ? <Inner>{children}</Inner> : <Login />}</>
+    </LocaleProvider>
   );
 }
