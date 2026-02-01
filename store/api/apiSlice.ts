@@ -100,6 +100,7 @@ export const api = createApi({
     "Classes",
     "CourseClasses",
     "RolePermissions",
+    "FollowUps",
   ],
   endpoints: (builder) => ({
     /* =========================
@@ -642,36 +643,16 @@ export const api = createApi({
       }),
       providesTags: ["Leads"],
     }),
-    // getLeadsPipeLine: builder.query({
-    //   query: ({ pipeline }) => `/leads/pipeline/${pipeline}`,
-    //   providesTags: (result, error, { pipeline }) => [
-    //     { type: "Leads", id: pipeline },
-    //   ],
-    // }),
 
-    // NEW MUTATION - Update lead status
     updateLeadStatus: builder.mutation({
       query: ({ leadId, status, reason }) => ({
         url: `/leads/${leadId}/status`,
-        method: "PUT", // or 'PATCH' depending on your API
+        method: "PUT",
         body: {
-          status, // This is now a number (1-7)
-          reason, // Optional reason string
+          status,
+          reason,
         },
       }),
-      // Invalidate all pipeline caches to refetch data after update
-      // invalidatesTags: (result, error, { leadId }) => [
-      //   { type: "Leads", id: "LIST" },
-      //   ...[
-      //     "new",
-      //     "contacted",
-      //     "qualified",
-      //     "proposal",
-      //     "negotiation",
-      //     "won",
-      //     "lost",
-      //   ].map((pipeline) => ({ type: "Leads", id: pipeline })),
-      // ],
     }),
 
     getLead: builder.query<any, { id: number }>({
@@ -849,29 +830,44 @@ export const api = createApi({
        LEAD FOLLOW-UP ENDPOINTS
        ========================= */
 
+    // Get single lead follow-up by lead ID (QUERY)
     getLeadFollowup: builder.query<any, { id: number }>({
       query: ({ id }) => ({
         url: `/leads/${id}/follow-up`,
       }),
+      providesTags: ["FollowUps"],
     }),
 
-    getFollowupToday: builder.query<any, void>({
+    // GET /api/leads/follow-ups - Get all follow-ups (QUERY - auto-fetch)
+    getFollowups: builder.query<any[], void>({
+      query: () => "/leads/follow-ups",
+      providesTags: ["FollowUps"],
+    }),
+
+    // GET /api/leads/follow-ups?today=true (MUTATION - manual trigger)
+    getFollowupsToday: builder.mutation<any[], void>({
       query: () => ({
-        url: "/leads/follow-ups/today",
+        url: "/leads/follow-ups",
+        params: { today: true },
       }),
     }),
 
-    getFollowupOverdue: builder.mutation<any, void>({
+    // GET /api/leads/follow-ups?overdue=true (MUTATION - manual trigger)
+    getFollowupsOverdue: builder.mutation<any[], void>({
       query: () => ({
-        url: "/leads/follow-ups/overdue",
-        method: "GET",
+        url: "/leads/follow-ups",
+        params: { overdue: true },
       }),
     }),
 
-    getFollowupRange: builder.mutation<any, { from: string; to: string }>({
+    // GET /api/leads/follow-ups?from=X&to=Y (MUTATION - manual trigger)
+    getFollowupsByDateRange: builder.mutation<
+      any[],
+      { from: string; to: string }
+    >({
       query: ({ from, to }) => ({
-        url: `/leads/follow-ups/range?from=${from}&to=${to}`,
-        method: "GET",
+        url: "/leads/follow-ups",
+        params: { from, to },
       }),
     }),
 
@@ -1011,9 +1007,10 @@ export const {
 
   // Lead Follow-ups
   useGetLeadFollowupQuery,
-  useGetFollowupTodayQuery,
-  useGetFollowupOverdueMutation,
-  useGetFollowupRangeMutation,
+  useGetFollowupsQuery,
+  useGetFollowupsTodayMutation,
+  useGetFollowupsOverdueMutation,
+  useGetFollowupsByDateRangeMutation,
 
   // Lead Import/Export
   useImportLeadsMutation,

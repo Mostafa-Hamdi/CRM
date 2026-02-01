@@ -1,11 +1,12 @@
 "use client";
 
 import {
-  useGetFollowupOverdueMutation,
-  useGetFollowupRangeMutation,
-  useGetFollowupTodayQuery,
+  useGetFollowupsQuery,
+  useGetFollowupsTodayMutation,
+  useGetFollowupsOverdueMutation,
+  useGetFollowupsByDateRangeMutation,
 } from "@/store/api/apiSlice";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -17,7 +18,6 @@ import {
   Sparkles,
   User,
   Phone,
-  Mail,
   MessageSquare,
   RefreshCw,
   Filter,
@@ -46,21 +46,35 @@ const dateRangeSchema = yup.object().shape({
 
 type DateRangeFormData = yup.InferType<typeof dateRangeSchema>;
 
-type FilterMode = "today" | "overdue" | "range";
+type FilterMode = "all" | "today" | "overdue" | "range";
+
+interface FollowUp {
+  id: number;
+  fullName: string;
+  phone: string;
+  status: number;
+  followUpDate: string;
+  followUpReason: string;
+}
 
 const Page = () => {
-  const [filterMode, setFilterMode] = useState<FilterMode>("today");
-  const [displayedFollowups, setDisplayedFollowups] = useState<any[]>([]);
+  const [filterMode, setFilterMode] = useState<FilterMode>("all");
+  const [displayedFollowups, setDisplayedFollowups] = useState<FollowUp[]>([]);
 
+  // Query for all follow-ups (auto-fetch on mount)
   const {
-    data: todayFollowups,
-    isLoading: todayLoading,
-    refetch: refetchToday,
-  } = useGetFollowupTodayQuery();
-  const [getFollowupOverdue, { isLoading: overdueLoading }] =
-    useGetFollowupOverdueMutation();
-  const [getFollowupRange, { isLoading: rangeLoading }] =
-    useGetFollowupRangeMutation();
+    data: allFollowups,
+    isLoading: allLoading,
+    refetch: refetchAll,
+  } = useGetFollowupsQuery();
+
+  // Mutations for filtered queries (manual trigger)
+  const [triggerToday, { isLoading: todayLoading }] =
+    useGetFollowupsTodayMutation();
+  const [triggerOverdue, { isLoading: overdueLoading }] =
+    useGetFollowupsOverdueMutation();
+  const [triggerDateRange, { isLoading: dateRangeLoading }] =
+    useGetFollowupsByDateRangeMutation();
 
   const {
     register,
@@ -71,24 +85,45 @@ const Page = () => {
     resolver: yupResolver(dateRangeSchema),
   });
 
-  // Update displayed followups when today data changes
-  useState(() => {
-    if (todayFollowups && filterMode === "today") {
-      setDisplayedFollowups(todayFollowups);
+  // Update displayed followups when all followups data changes
+  useEffect(() => {
+    if (filterMode === "all" && allFollowups) {
+      setDisplayedFollowups(allFollowups);
     }
-  });
+  }, [allFollowups, filterMode]);
 
-  const handleShowToday = () => {
-    setFilterMode("today");
-    setDisplayedFollowups(todayFollowups || []);
-    refetchToday();
+  const handleShowAll = () => {
+    setFilterMode("all");
+    setDisplayedFollowups(allFollowups || []);
+    refetchAll();
+  };
+
+  const handleShowToday = async () => {
+    try {
+      const response = await triggerToday();
+
+      if ("data" in response && response.data) {
+        setFilterMode("today");
+        setDisplayedFollowups(response.data);
+      } else {
+        setDisplayedFollowups([]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch today's followups:", error);
+      setDisplayedFollowups([]);
+    }
   };
 
   const handleShowOverdue = async () => {
     try {
-      const result = await getFollowupOverdue().unwrap();
-      setFilterMode("overdue");
-      setDisplayedFollowups(result || []);
+      const response = await triggerOverdue();
+
+      if ("data" in response && response.data) {
+        setFilterMode("overdue");
+        setDisplayedFollowups(response.data);
+      } else {
+        setDisplayedFollowups([]);
+      }
     } catch (error) {
       console.error("Failed to fetch overdue followups:", error);
       setDisplayedFollowups([]);
@@ -97,23 +132,36 @@ const Page = () => {
 
   const onSubmitDateRange = async (data: DateRangeFormData) => {
     try {
-      const result = await getFollowupRange({
+      const response = await triggerDateRange({
         from: data.from,
         to: data.to,
-      }).unwrap();
-      setFilterMode("range");
-      setDisplayedFollowups(result || []);
+      });
+
+      if ("data" in response && response.data) {
+        setFilterMode("range");
+        setDisplayedFollowups(response.data);
+      } else {
+        setDisplayedFollowups([]);
+      }
     } catch (error) {
       console.error("Failed to fetch followups by range:", error);
       setDisplayedFollowups([]);
     }
   };
 
-  const isLoading = todayLoading || overdueLoading || rangeLoading;
+  const isLoading =
+    allLoading || todayLoading || overdueLoading || dateRangeLoading;
   const followups =
-    filterMode === "today" && todayFollowups
-      ? todayFollowups
-      : displayedFollowups;
+    filterMode === "all" && allFollowups ? allFollowups : displayedFollowups;
+  const statusMap: { [key: number]: string } = {
+    1: "New",
+    2: "Contacted",
+    3: "Interested",
+    4: "Followup",
+    5: "Cold",
+    6: "Lost",
+    7: "Converted",
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
@@ -151,14 +199,32 @@ const Page = () => {
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
-                onClick={handleShowToday}
+                onClick={handleShowAll}
                 className={`cursor-pointer flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
+                  filterMode === "all"
+                    ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/40"
+                    : "bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300"
+                }`}
+              >
+                <Calendar className="w-5 h-5" />
+                All Follow-ups
+              </button>
+
+              <button
+                type="button"
+                onClick={handleShowToday}
+                disabled={todayLoading}
+                className={`cursor-pointer flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                   filterMode === "today"
                     ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/40"
                     : "bg-white border-2 border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300"
                 }`}
               >
-                <Calendar className="w-5 h-5" />
+                {todayLoading ? (
+                  <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-700 rounded-full animate-spin" />
+                ) : (
+                  <Clock className="w-5 h-5" />
+                )}
                 Today's Follow-ups
               </button>
 
@@ -233,10 +299,10 @@ const Page = () => {
                   <button
                     type="button"
                     onClick={handleSubmit(onSubmitDateRange)}
-                    disabled={rangeLoading}
+                    disabled={dateRangeLoading}
                     className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    {rangeLoading ? (
+                    {dateRangeLoading ? (
                       <>
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         <span>Searching...</span>
@@ -259,6 +325,7 @@ const Page = () => {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-blue-600" />
+              {filterMode === "all" && "All Follow-ups"}
               {filterMode === "today" && "Today's Follow-ups"}
               {filterMode === "overdue" && "Overdue Follow-ups"}
               {filterMode === "range" && "Follow-ups in Range"}
@@ -267,10 +334,10 @@ const Page = () => {
               </span>
             </h2>
 
-            {filterMode === "today" && (
+            {filterMode === "all" && (
               <button
                 type="button"
-                onClick={() => refetchToday()}
+                onClick={() => refetchAll()}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 title="Refresh"
               >
@@ -297,6 +364,7 @@ const Page = () => {
                 No follow-ups found
               </p>
               <p className="text-gray-500 text-sm">
+                {filterMode === "all" && "No follow-ups available"}
                 {filterMode === "today" &&
                   "There are no follow-ups scheduled for today"}
                 {filterMode === "overdue" &&
@@ -310,59 +378,81 @@ const Page = () => {
           {/* Follow-ups List */}
           {!isLoading && followups && followups.length > 0 && (
             <div className="grid grid-cols-1 gap-4">
-              {followups.map((followup: any, index: number) => (
+              {followups.map((followup: FollowUp, index: number) => (
                 <div
                   key={followup.id || index}
                   className="bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl p-5 hover:border-blue-300 hover:shadow-md transition-all"
                 >
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                     <div className="flex-1 space-y-3">
-                      {/* Lead Name */}
-                      <div className="flex items-center gap-2">
-                        <User className="w-5 h-5 text-blue-600" />
-                        <span className="font-semibold text-gray-900">
-                          {followup.leadName ||
-                            followup.fullName ||
-                            "Unknown Lead"}
-                        </span>
-                      </div>
-
-                      {/* Contact Info */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                        {(followup.phone || followup.phoneNumber) && (
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <Phone className="w-4 h-4" />
-                            <span>
-                              {followup.phone || followup.phoneNumber}
+                      {/* Lead Name & Status */}
+                      <div className="flex items-center justify-between gap-4 flex-wrap">
+                        <div className="flex items-center gap-2">
+                          <User className="w-5 h-5 text-blue-600" />
+                          <span className="font-semibold text-gray-900">
+                            {followup.fullName || "Unknown Lead"}
+                          </span>
+                        </div>
+                        {followup.status && (
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                followup.status === 1
+                                  ? "bg-blue-100 text-blue-700"
+                                  : followup.status === 2
+                                    ? "bg-green-100 text-green-700"
+                                    : followup.status === 3
+                                      ? "bg-yellow-100 text-yellow-700"
+                                      : followup.status === 4
+                                        ? "bg-purple-100 text-purple-700"
+                                        : followup.status === 5
+                                          ? "bg-orange-100 text-orange-700"
+                                          : followup.status === 6
+                                            ? "bg-emerald-100 text-emerald-700"
+                                            : followup.status === 7
+                                              ? "bg-red-100 text-red-700"
+                                              : "bg-gray-100 text-gray-700"
+                              }`}
+                            >
+                              Status: {statusMap[followup.status] || "Unknown"}
                             </span>
                           </div>
                         )}
-                        {followup.email && (
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <Mail className="w-4 h-4" />
-                            <span>{followup.email}</span>
-                          </div>
-                        )}
                       </div>
 
-                      {/* Note */}
-                      {followup.note && (
+                      {/* Contact Info */}
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Phone className="w-4 h-4" />
+                        <span>{followup.phone}</span>
+                      </div>
+
+                      {/* Follow-up Reason */}
+                      {followup.followUpReason && (
                         <div className="flex items-start gap-2 text-sm text-gray-700 bg-white/50 rounded-lg p-3">
-                          <MessageSquare className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                          <span>{followup.note}</span>
+                          <MessageSquare className="w-4 h-4 mt-0.5 flex-shrink-0 text-blue-600" />
+                          <div>
+                            <span className="font-medium text-gray-900">
+                              Reason:{" "}
+                            </span>
+                            <span>{followup.followUpReason}</span>
+                          </div>
                         </div>
                       )}
                     </div>
 
                     {/* Follow-up Date */}
-                    <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-gray-200">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-gray-200 min-w-fit">
                       <Clock className="w-5 h-5 text-blue-600" />
                       <div className="text-sm">
                         <div className="font-semibold text-gray-900">
                           {followup.followUpDate
                             ? new Date(
                                 followup.followUpDate,
-                              ).toLocaleDateString()
+                              ).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              })
                             : "No date set"}
                         </div>
                         {followup.followUpDate && (
