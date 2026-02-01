@@ -21,102 +21,21 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
+import { useTranslations } from "next-intl";
 
-// Validation Schema
-const classSchema = yup.object().shape({
-  courseId: yup
-    .number()
-    .required("Course is required")
-    .min(1, "Please select a course")
-    .typeError("Course must be selected"),
-  name: yup
-    .string()
-    .required("Class name is required")
-    .min(2, "Name must be at least 2 characters")
-    .max(200, "Name must not exceed 200 characters"),
-  code: yup
-    .string()
-    .required("Class code is required")
-    .min(2, "Code must be at least 2 characters")
-    .max(50, "Code must not exceed 50 characters"),
-  price: yup
-    .number()
-    .required("Price is required")
-    .min(0, "Price must be at least 0")
-    .typeError("Price must be a valid number"),
-  instructorName: yup
-    .string()
-    .required("Instructor name is required")
-    .min(2, "Instructor name must be at least 2 characters")
-    .max(100, "Instructor name must not exceed 100 characters"),
-  startDate: yup
-    .string()
-    .required("Start date is required")
-    .test("is-valid-date", "Please enter a valid date", (value) => {
-      if (!value) return false;
-      const date = new Date(value);
-      return date instanceof Date && !isNaN(date.getTime());
-    }),
-  endDate: yup
-    .string()
-    .required("End date is required")
-    .test("is-valid-date", "Please enter a valid date", (value) => {
-      if (!value) return false;
-      const date = new Date(value);
-      return date instanceof Date && !isNaN(date.getTime());
-    })
-    .test(
-      "is-after-start",
-      "End date must be after start date",
-      function (value) {
-        const { startDate } = this.parent;
-        if (!value || !startDate) return true;
-        return new Date(value) > new Date(startDate);
-      },
-    ),
-  daysOfWeek: yup
-    .array()
-    .of(yup.string())
-    .min(1, "Please select at least one day")
-    .required("Days of week is required"),
-  timeFrom: yup
-    .string()
-    .required("Start time is required")
-    .matches(
-      /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
-      "Please enter a valid time (HH:MM)",
-    ),
-  timeTo: yup
-    .string()
-    .required("End time is required")
-    .matches(
-      /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
-      "Please enter a valid time (HH:MM)",
-    )
-    .test(
-      "is-after-start-time",
-      "End time must be after start time",
-      function (value) {
-        const { timeFrom } = this.parent;
-        if (!value || !timeFrom) return true;
-
-        const [startHour, startMin] = timeFrom.split(":").map(Number);
-        const [endHour, endMin] = value.split(":").map(Number);
-
-        const startMinutes = startHour * 60 + startMin;
-        const endMinutes = endHour * 60 + endMin;
-
-        return endMinutes > startMinutes;
-      },
-    ),
-  maxStudents: yup
-    .number()
-    .required("Maximum students is required")
-    .min(1, "Maximum students must be at least 1")
-    .typeError("Maximum students must be a valid number"),
-});
-
-type ClassFormData = yup.InferType<typeof classSchema>;
+type ClassFormData = {
+  courseId: number;
+  name: string;
+  code: string;
+  price: number;
+  instructorName: string;
+  startDate: string;
+  endDate: string;
+  daysOfWeek: (string | undefined)[];
+  timeFrom: string;
+  timeTo: string;
+  maxStudents: number;
+};
 
 interface Course {
   id: number;
@@ -137,6 +56,91 @@ const Page = () => {
   const router = useRouter();
   const { data: courses, isLoading: isLoadingCourses } = useGetCoursesQuery();
   const [addClass, { isLoading }] = useAddClassMutation();
+
+  const t = useTranslations("classes");
+
+  const classSchema = yup.object().shape({
+    courseId: yup
+      .number()
+      .required(t("validation.courseRequired"))
+      .min(1, t("validation.selectCourse"))
+      .typeError(t("validation.courseType")),
+    name: yup
+      .string()
+      .required(t("validation.nameRequired"))
+      .min(2, t("validation.nameMin", { min: 2 }))
+      .max(200, t("validation.nameMax", { max: 200 })),
+    code: yup
+      .string()
+      .required(t("validation.codeRequired"))
+      .min(2, t("validation.codeMin", { min: 2 }))
+      .max(50, t("validation.codeMax", { max: 50 })),
+    price: yup
+      .number()
+      .required(t("validation.priceRequired"))
+      .min(0, t("validation.priceMin", { min: 0 }))
+      .typeError(t("validation.priceType")),
+    instructorName: yup
+      .string()
+      .required(t("validation.instructorRequired"))
+      .min(2, t("validation.instructorMin", { min: 2 }))
+      .max(100, t("validation.instructorMax", { max: 100 })),
+    startDate: yup
+      .string()
+      .required(t("validation.startDateRequired"))
+      .test("is-valid-date", t("validation.validDate"), (value) => {
+        if (!value) return false;
+        const date = new Date(value);
+        return date instanceof Date && !isNaN(date.getTime());
+      }),
+    endDate: yup
+      .string()
+      .required(t("validation.endDateRequired"))
+      .test("is-valid-date", t("validation.validDate"), (value) => {
+        if (!value) return false;
+        const date = new Date(value);
+        return date instanceof Date && !isNaN(date.getTime());
+      })
+      .test("is-after-start", t("validation.endAfterStart"), function (value) {
+        const { startDate } = this.parent;
+        if (!value || !startDate) return true;
+        return new Date(value) > new Date(startDate);
+      }),
+    daysOfWeek: yup
+      .array()
+      .of(yup.string())
+      .min(1, t("validation.minDays"))
+      .required(t("validation.daysRequired")),
+    timeFrom: yup
+      .string()
+      .required(t("validation.timeFromRequired"))
+      .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, t("validation.validTime")),
+    timeTo: yup
+      .string()
+      .required(t("validation.timeToRequired"))
+      .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, t("validation.validTime"))
+      .test(
+        "is-after-start-time",
+        t("validation.timeAfterStart"),
+        function (value) {
+          const { timeFrom } = this.parent;
+          if (!value || !timeFrom) return true;
+
+          const [startHour, startMin] = timeFrom.split(":").map(Number);
+          const [endHour, endMin] = value.split(":").map(Number);
+
+          const startMinutes = startHour * 60 + startMin;
+          const endMinutes = endHour * 60 + endMin;
+
+          return endMinutes > startMinutes;
+        },
+      ),
+    maxStudents: yup
+      .number()
+      .required(t("validation.maxStudentsRequired"))
+      .min(1, t("validation.maxStudentsMin", { min: 1 }))
+      .typeError(t("validation.maxStudentsType")),
+  });
 
   const {
     register,
@@ -187,8 +191,8 @@ const Page = () => {
 
       await Swal.fire({
         icon: "success",
-        title: "Success!",
-        text: "Class has been added successfully.",
+        title: t("addSuccessTitle"),
+        text: t("addSuccessText"),
         timer: 2000,
         showConfirmButton: false,
       });
@@ -196,7 +200,7 @@ const Page = () => {
       reset();
       router.push("/classes");
     } catch (err) {
-      let message = "Failed to add class.";
+      let message = t("addFail");
 
       if (typeof err === "object" && err !== null) {
         const maybeData = (err as any).data;
@@ -207,7 +211,7 @@ const Page = () => {
 
       Swal.fire({
         icon: "error",
-        title: "Oops!",
+        title: t("oops"),
         text: message,
       });
     }
@@ -237,10 +241,10 @@ const Page = () => {
               </div>
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
-                  Add New Class
+                  {t("addTitle")}
                 </h1>
                 <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                  Create a new class for a course
+                  {t("addSubtitle")}
                 </p>
               </div>
             </div>
@@ -250,7 +254,7 @@ const Page = () => {
               className="group relative cursor-pointer flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-2xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300"
             >
               <ArrowLeft className="w-5 h-5" />
-              <span className="hidden sm:inline">Back</span>
+              <span className="hidden sm:inline">{t("goBack")}</span>
             </Link>
           </div>
         </div>
@@ -262,13 +266,13 @@ const Page = () => {
             <div className="pb-6 border-b border-gray-200">
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-blue-600" />
-                Basic Information
+                {t("basicInformation")}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Course Selection */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Course <span className="text-red-500">*</span>
+                    {t("courseLabel")} <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <select
@@ -280,8 +284,8 @@ const Page = () => {
                     >
                       <option value={0}>
                         {isLoadingCourses
-                          ? "Loading courses..."
-                          : "Select a course"}
+                          ? t("loadingCourses")
+                          : t("selectCourse")}
                       </option>
                       {courses?.data?.map((course: Course) => (
                         <option key={course.id} value={course.id}>
@@ -302,7 +306,8 @@ const Page = () => {
                 {/* Class Name */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Class Name <span className="text-red-500">*</span>
+                    {t("classNameLabel")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2">
@@ -311,7 +316,7 @@ const Page = () => {
                     <input
                       type="text"
                       {...register("name")}
-                      placeholder="Enter class name"
+                      placeholder={t("enterClassName")}
                       className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                         errors.name ? "border-red-300" : "border-gray-200"
                       } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all`}
@@ -328,7 +333,8 @@ const Page = () => {
                 {/* Class Code */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Class Code <span className="text-red-500">*</span>
+                    {t("classCodeLabel")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2">
@@ -337,7 +343,7 @@ const Page = () => {
                     <input
                       type="text"
                       {...register("code")}
-                      placeholder="e.g., CS101-A"
+                      placeholder={t("codePlaceholder")}
                       className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                         errors.code ? "border-red-300" : "border-gray-200"
                       } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all`}
@@ -354,7 +360,7 @@ const Page = () => {
                 {/* Price */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Price <span className="text-red-500">*</span>
+                    {t("priceLabel")} <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2">
@@ -365,7 +371,7 @@ const Page = () => {
                       step="0.01"
                       min="0"
                       {...register("price")}
-                      placeholder="0.00"
+                      placeholder={t("pricePlaceholder")}
                       className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                         errors.price ? "border-red-300" : "border-gray-200"
                       } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all`}
@@ -382,7 +388,8 @@ const Page = () => {
                 {/* Instructor Name */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Instructor Name <span className="text-red-500">*</span>
+                    {t("instructorLabel")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2">
@@ -391,7 +398,7 @@ const Page = () => {
                     <input
                       type="text"
                       {...register("instructorName")}
-                      placeholder="Enter instructor name"
+                      placeholder={t("instructorPlaceholder")}
                       className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                         errors.instructorName
                           ? "border-red-300"
@@ -413,13 +420,14 @@ const Page = () => {
             <div className="pb-6 border-b border-gray-200">
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-blue-600" />
-                Schedule
+                {t("schedule")}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Start Date */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Start Date <span className="text-red-500">*</span>
+                    {t("startDateLabel")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2">
@@ -445,7 +453,7 @@ const Page = () => {
                 {/* End Date */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    End Date <span className="text-red-500">*</span>
+                    {t("endDateLabel")} <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2">
@@ -471,7 +479,8 @@ const Page = () => {
                 {/* Days of Week */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Days of Week <span className="text-red-500">*</span>
+                    {t("daysOfWeekLabel")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <Controller
                     name="daysOfWeek"
@@ -523,7 +532,8 @@ const Page = () => {
                 {/* Time From */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Start Time <span className="text-red-500">*</span>
+                    {t("startTimeLabel")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2">
@@ -549,7 +559,7 @@ const Page = () => {
                 {/* Time To */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    End Time <span className="text-red-500">*</span>
+                    {t("endTimeLabel")} <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2">
@@ -578,13 +588,14 @@ const Page = () => {
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <Users className="w-5 h-5 text-blue-600" />
-                Capacity
+                {t("capacityTitle")}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Max Students */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Maximum Students <span className="text-red-500">*</span>
+                    {t("maxStudentsLabel")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2">
@@ -594,7 +605,7 @@ const Page = () => {
                       type="number"
                       min="1"
                       {...register("maxStudents")}
-                      placeholder="e.g., 30"
+                      placeholder={t("maxStudentsPlaceholder")}
                       className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                         errors.maxStudents
                           ? "border-red-300"
@@ -619,7 +630,7 @@ const Page = () => {
                 onClick={() => router.push("/classes")}
                 className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all"
               >
-                Cancel
+                {t("cancel")}
               </button>
               <button
                 type="submit"
@@ -630,12 +641,12 @@ const Page = () => {
                 {isLoading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin relative z-10" />
-                    <span className="relative z-10">Adding Class...</span>
+                    <span className="relative z-10">{t("adding")}</span>
                   </>
                 ) : (
                   <>
                     <CheckCircle className="w-5 h-5 relative z-10" />
-                    <span className="relative z-10">Add Class</span>
+                    <span className="relative z-10">{t("addButton")}</span>
                   </>
                 )}
               </button>
@@ -650,12 +661,13 @@ const Page = () => {
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-blue-900 mb-1">Quick Tips</h3>
+              <h3 className="font-semibold text-blue-900 mb-1">
+                {t("quickTipsTitle")}
+              </h3>
               <ul className="text-sm text-blue-700 space-y-1">
-                <li>• Select the course this class belongs to</li>
-                <li>• Click on the days to select when the class meets</li>
-                <li>• End date and time must be after start date and time</li>
-                <li>• At least one day must be selected</li>
+                {(t.raw("quickTips") as unknown as string[]).map((tip, idx) => (
+                  <li key={idx}>• {tip}</li>
+                ))}
               </ul>
             </div>
           </div>

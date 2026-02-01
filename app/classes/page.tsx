@@ -161,8 +161,8 @@ const Page = () => {
       title: t("deleteConfirm"),
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes",
-      cancelButtonText: "No",
+      confirmButtonText: t("yes"),
+      cancelButtonText: t("no"),
       confirmButtonColor: "#2563eb",
       cancelButtonColor: "#e5e7eb",
     });
@@ -192,7 +192,7 @@ const Page = () => {
 
       Swal.fire({
         icon: "error",
-        title: "Oops!",
+        title: t("oops"),
         text: errorMessage,
       });
     }
@@ -219,8 +219,8 @@ const Page = () => {
     if (selectedStatus === selectedClass.status) {
       Swal.fire({
         icon: "info",
-        title: "No Change",
-        text: "The selected status is the same as the current status.",
+        title: t("noChangeTitle"),
+        text: t("noChangeText"),
       });
       return;
     }
@@ -233,8 +233,10 @@ const Page = () => {
 
       await Swal.fire({
         icon: "success",
-        title: "Status Updated!",
-        text: `Class status has been changed to ${getStatusInfo(selectedStatus).label}.`,
+        title: t("statusUpdatedTitle"),
+        text: t("statusUpdatedText", {
+          status: getStatusInfo(selectedStatus).label,
+        }),
         timer: 2000,
       });
 
@@ -257,7 +259,7 @@ const Page = () => {
 
       Swal.fire({
         icon: "error",
-        title: "Oops!",
+        title: t("oops"),
         text: errorMessage,
       });
     }
@@ -415,7 +417,7 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-green-500/10 hover:shadow-xl hover:shadow-green-500/20 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Open</p>
+                <p className="text-gray-600 text-sm font-medium">{t("open")}</p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mt-1">
                   {classesResponse?.data?.filter(
                     (cls: Class) => cls.status === 1,
@@ -431,7 +433,7 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-yellow-500/10 hover:shadow-xl hover:shadow-yellow-500/20 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Full</p>
+                <p className="text-gray-600 text-sm font-medium">{t("full")}</p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent mt-1">
                   {classesResponse?.data?.filter(
                     (cls: Class) => cls.status === 2,
@@ -447,7 +449,9 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-purple-500/10 hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Found</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  {t("found")}
+                </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mt-1">
                   {filteredClasses.length}
                 </p>
@@ -463,9 +467,9 @@ const Page = () => {
         <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10">
           <div className="flex flex-wrap gap-3">
             {[
-              { id: "all", label: "All Classes", icon: Filter },
-              { id: "active", label: "Active", icon: CheckCircle },
-              { id: "inactive", label: "Inactive", icon: XCircle },
+              { id: "all", label: t("filters.all"), icon: Filter },
+              { id: "active", label: t("filters.active"), icon: CheckCircle },
+              { id: "inactive", label: t("filters.inactive"), icon: XCircle },
             ].map((filter) => {
               const Icon = filter.icon;
               const isActive = activeFilter === filter.id;
@@ -498,7 +502,7 @@ const Page = () => {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
               <input
                 type="text"
-                placeholder="Search by class name, code, instructor, or course..."
+                placeholder={t("searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all"
@@ -509,7 +513,7 @@ const Page = () => {
             <div className="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl">
               <List className="w-5 h-5 text-gray-600" />
               <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                Show:
+                {t("show")}
               </span>
               <div className="flex items-center gap-2">
                 {[5, 10, 20, 50].map((size) => (
@@ -531,7 +535,7 @@ const Page = () => {
             <div className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 border border-blue-400 rounded-xl shadow-lg shadow-blue-500/30">
               <BookOpen className="w-5 h-5 text-white" />
               <span className="text-sm font-bold text-white">
-                {filteredClasses.length} Classes
+                {filteredClasses.length} {t("classes")}
               </span>
             </div>
           </div>
@@ -540,13 +544,12 @@ const Page = () => {
           {classesResponse && classesResponse.totalPages > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-200">
               <p className="text-sm text-gray-600 text-center">
-                Showing page{" "}
-                <span className="font-bold text-blue-600">{pageNumber}</span> of{" "}
-                <span className="font-bold text-blue-600">
-                  {classesResponse.totalPages}
-                </span>{" "}
-                ({classesResponse.totalCount} {t("totalClasses")}, {pageSize}{" "}
-                per page)
+                {t("pagination", {
+                  page: pageNumber,
+                  total: classesResponse.totalPages,
+                  count: classesResponse.totalCount,
+                  per: pageSize,
+                })}
               </p>
             </div>
           )}
@@ -575,52 +578,52 @@ const Page = () => {
                   <tr>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Class Info
+                        {t("table.classInfo")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Course
+                        {t("table.course")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Instructor
+                        {t("table.instructor")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Schedule
+                        {t("table.schedule")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Duration
+                        {t("table.duration")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Price
+                        {t("table.price")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Capacity
+                        {t("table.capacity")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Status
+                        {t("table.status")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-center">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Change Status
+                        {t("table.changeStatus")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-center">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Operations
+                        {t("table.operations")}
                       </span>
                     </th>
                   </tr>
@@ -680,7 +683,7 @@ const Page = () => {
                           </div>
                         ) : (
                           <span className="text-gray-400 text-sm italic">
-                            Not assigned
+                            {t("notAssigned")}
                           </span>
                         )}
                       </td>
@@ -691,7 +694,7 @@ const Page = () => {
                           <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4 text-gray-400" />
                             <span className="text-gray-700 text-sm font-medium">
-                              {classItem.daysOfWeek || "Not scheduled"}
+                              {classItem.daysOfWeek || t("notScheduled")}
                             </span>
                           </div>
                           <div className="flex items-center gap-2">
@@ -707,11 +710,15 @@ const Page = () => {
                       {/* Duration */}
                       <td className="px-6 py-5">
                         <div className="space-y-1">
-                          <div className="text-xs text-gray-500">Start</div>
+                          <div className="text-xs text-gray-500">
+                            {t("start")}
+                          </div>
                           <div className="text-sm font-medium text-gray-700">
                             {formatDate(classItem.startDate)}
                           </div>
-                          <div className="text-xs text-gray-500 mt-1">End</div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {t("end")}
+                          </div>
                           <div className="text-sm font-medium text-gray-700">
                             {formatDate(classItem.endDate)}
                           </div>
@@ -736,7 +743,7 @@ const Page = () => {
                         <div className="flex items-center gap-2">
                           <Users className="w-4 h-4 text-gray-400" />
                           <span className="text-gray-700 text-sm font-medium">
-                            {classItem.maxStudents || 0} students
+                            {classItem.maxStudents || 0} {t("students")}
                           </span>
                         </div>
                       </td>
@@ -758,7 +765,7 @@ const Page = () => {
                           <button
                             onClick={() => handleOpenStatusModal(classItem)}
                             className="cursor-pointer p-2.5 text-blue-600 hover:text-white bg-blue-50 hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 group"
-                            title="Change status"
+                            title={t("changeStatus")}
                           >
                             <RefreshCw className="w-5 h-5" />
                           </button>
@@ -771,14 +778,14 @@ const Page = () => {
                           <Link
                             href={`/classes/${classItem.id}/edit`}
                             className="cursor-pointer p-2.5 text-indigo-600 hover:text-white bg-indigo-50 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/30 group"
-                            title="Edit class"
+                            title={t("editClass")}
                           >
                             <Edit2 className="w-5 h-5" />
                           </Link>
                           <button
                             onClick={() => handleDelete(classItem.id)}
                             className="cursor-pointer p-2.5 text-red-600 hover:text-white bg-red-50 hover:bg-gradient-to-r hover:from-red-600 hover:to-rose-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-red-500/30 group"
-                            title="Delete class"
+                            title={t("deleteClass")}
                           >
                             <Trash2 className="w-5 h-5" />
                           </button>
@@ -802,7 +809,7 @@ const Page = () => {
                   onClick={goToFirstPage}
                   disabled={pageNumber === 1}
                   className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
-                  title="First page"
+                  title={t("firstPage")}
                 >
                   <ChevronsLeft className="w-5 h-5 text-gray-600" />
                 </button>
@@ -810,7 +817,7 @@ const Page = () => {
                   onClick={goToPreviousPage}
                   disabled={pageNumber === 1}
                   className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
-                  title="Previous page"
+                  title={t("previousPage")}
                 >
                   <ChevronLeft className="w-5 h-5 text-gray-600" />
                 </button>
@@ -842,7 +849,7 @@ const Page = () => {
                   onClick={goToNextPage}
                   disabled={pageNumber === classesResponse.totalPages}
                   className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
-                  title="Next page"
+                  title={t("nextPage")}
                 >
                   <ChevronRight className="w-5 h-5 text-gray-600" />
                 </button>
@@ -850,7 +857,7 @@ const Page = () => {
                   onClick={goToLastPage}
                   disabled={pageNumber === classesResponse.totalPages}
                   className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
-                  title="Last page"
+                  title={t("lastPage")}
                 >
                   <ChevronsRight className="w-5 h-5 text-gray-600" />
                 </button>
@@ -873,7 +880,7 @@ const Page = () => {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold text-white">
-                      Change Status
+                      {t("changeStatusTitle")}
                     </h2>
                     <p className="text-cyan-100 text-sm mt-1">
                       {selectedClass.name}
@@ -894,7 +901,7 @@ const Page = () => {
               {/* Current Status */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Current Status
+                  {t("currentStatus")}
                 </label>
                 <div
                   className={`inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r border rounded-lg text-sm font-bold ${
@@ -908,7 +915,7 @@ const Page = () => {
               {/* New Status Selection */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  New Status <span className="text-red-500">*</span>
+                  {t("newStatus")} <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <select
@@ -933,21 +940,14 @@ const Page = () => {
                 <div className="flex gap-3">
                   <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-blue-900">
-                    <p className="font-semibold mb-1">Status Meanings:</p>
+                    <p className="font-semibold mb-1">
+                      {t("statusMeaningsTitle")}
+                    </p>
                     <ul className="space-y-1 text-blue-800 text-xs">
-                      <li>
-                        • <strong>Planned:</strong> Class is scheduled but not
-                        yet open
-                      </li>
-                      <li>
-                        • <strong>Open:</strong> Enrollment is open
-                      </li>
-                      <li>
-                        • <strong>Full:</strong> Maximum capacity reached
-                      </li>
-                      <li>
-                        • <strong>Closed:</strong> Enrollment closed
-                      </li>
+                      <li>• {t("statusMeanings.planned")}</li>
+                      <li>• {t("statusMeanings.open")}</li>
+                      <li>• {t("statusMeanings.full")}</li>
+                      <li>• {t("statusMeanings.closed")}</li>
                     </ul>
                   </div>
                 </div>
@@ -961,7 +961,7 @@ const Page = () => {
                 disabled={isConverting}
                 className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                Cancel
+                {t("cancel")}
               </button>
               <button
                 onClick={handleStatusConversion}
@@ -971,12 +971,12 @@ const Page = () => {
                 {isConverting ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Updating...</span>
+                    <span>{t("updating")}</span>
                   </>
                 ) : (
                   <>
                     <RefreshCw className="w-5 h-5" />
-                    <span>Update Status</span>
+                    <span>{t("updateStatus")}</span>
                   </>
                 )}
               </button>
