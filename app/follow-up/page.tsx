@@ -162,7 +162,9 @@ const Page = () => {
     6: "Lost",
     7: "Converted",
   };
-
+  const handleDatePicker = (e: any) => {
+    e.target.showPicker();
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
       {/* Decorative Elements */}
@@ -262,6 +264,7 @@ const Page = () => {
                     From Date <span className="text-red-500">*</span>
                   </label>
                   <input
+                    onClick={handleDatePicker}
                     type="date"
                     {...register("from")}
                     className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
@@ -281,6 +284,7 @@ const Page = () => {
                     To Date <span className="text-red-500">*</span>
                   </label>
                   <input
+                    onClick={handleDatePicker}
                     type="date"
                     {...register("to")}
                     className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
