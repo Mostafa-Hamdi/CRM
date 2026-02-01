@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
+import { useTranslations } from "next-intl";
 
 interface Class {
   id: number;
@@ -63,26 +64,28 @@ const Page = () => {
     useConvertClassStatusMutation();
   const [deleteClass] = useDeleteClassMutation();
 
-  // Status mapping
+  const t = useTranslations("classes");
+
+  // Status mapping (labels are localized)
   const statusOptions = [
     {
       value: 0,
-      label: "Planned",
+      label: t("status.0"),
       color: "from-gray-100 to-slate-100 border-gray-200 text-gray-700",
     },
     {
       value: 1,
-      label: "Open",
+      label: t("status.1"),
       color: "from-green-100 to-emerald-100 border-green-200 text-green-700",
     },
     {
       value: 2,
-      label: "Full",
+      label: t("status.2"),
       color: "from-yellow-100 to-orange-100 border-yellow-200 text-yellow-700",
     },
     {
       value: 3,
-      label: "Closed",
+      label: t("status.3"),
       color: "from-red-100 to-rose-100 border-red-200 text-red-700",
     },
   ];
@@ -131,8 +134,8 @@ const Page = () => {
     if (selectedStatus === selectedClass.status) {
       Swal.fire({
         icon: "info",
-        title: "No Change",
-        text: "The selected status is the same as the current status.",
+        title: t("noChangeTitle"),
+        text: t("noChangeText"),
       });
       return;
     }
@@ -145,8 +148,10 @@ const Page = () => {
 
       await Swal.fire({
         icon: "success",
-        title: "Status Updated!",
-        text: `Class status has been changed to ${getStatusInfo(selectedStatus).label}.`,
+        title: t("statusUpdatedTitle"),
+        text: t("statusUpdatedText", {
+          status: getStatusInfo(selectedStatus).label,
+        }),
         timer: 2000,
       });
 
@@ -170,11 +175,11 @@ const Page = () => {
 
   const handleDelete = async (classId: number) => {
     const result = await Swal.fire({
-      title: "😢 Are you sure you want to delete this class?",
+      title: t("deleteConfirm"),
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes",
-      cancelButtonText: "No",
+      confirmButtonText: t("confirmYes"),
+      cancelButtonText: t("confirmNo"),
       confirmButtonColor: "#2563eb",
       cancelButtonColor: "#e5e7eb",
     });
@@ -186,8 +191,8 @@ const Page = () => {
 
       await Swal.fire({
         icon: "success",
-        title: "Deleted!",
-        text: "Class has been deleted successfully.",
+        title: t("deleteSuccessTitle"),
+        text: t("deleteSuccessText"),
         timer: 2000,
       });
     } catch (err: any) {
@@ -278,10 +283,10 @@ const Page = () => {
 
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
-                  {courseName} Classes
+                  {courseName} {t("title")}
                 </h1>
                 <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                  View and manage all classes for this course
+                  {t("manageCourseClassesSubtitle")}
                 </p>
               </div>
             </div>
@@ -292,7 +297,7 @@ const Page = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
               <Plus className="w-5 h-5 relative z-10" />
-              <span className="relative z-10">Add Class</span>
+              <span className="relative z-10">{t("addButton")}</span>
             </Link>
           </div>
         </div>
@@ -303,7 +308,7 @@ const Page = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">
-                  Total Classes
+                  {t("totalClasses")}
                 </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mt-1">
                   {classes?.data?.length || 0}
@@ -318,7 +323,7 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-green-500/10 hover:shadow-xl hover:shadow-green-500/20 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Open</p>
+                <p className="text-gray-600 text-sm font-medium">{t("open")}</p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mt-1">
                   {openClasses}
                 </p>
@@ -332,7 +337,7 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-yellow-500/10 hover:shadow-xl hover:shadow-yellow-500/20 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Full</p>
+                <p className="text-gray-600 text-sm font-medium">{t("full")}</p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent mt-1">
                   {fullClasses}
                 </p>
@@ -346,7 +351,9 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-purple-500/10 hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Closed</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  {t("closed")}
+                </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent mt-1">
                   {closedClasses}
                 </p>
@@ -365,7 +372,7 @@ const Page = () => {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
               <input
                 type="text"
-                placeholder="Search by class name, code, or instructor..."
+                placeholder={t("searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all"
@@ -374,7 +381,7 @@ const Page = () => {
             <div className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 border border-blue-400 rounded-xl shadow-lg shadow-blue-500/30">
               <BookOpen className="w-5 h-5 text-white" />
               <span className="text-sm font-bold text-white">
-                {filteredClasses.length} Classes
+                {filteredClasses.length} {t("title")}
               </span>
             </div>
           </div>
@@ -385,7 +392,7 @@ const Page = () => {
           {isLoading ? (
             <div className="p-20 flex flex-col items-center justify-center">
               <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4" />
-              <p className="text-gray-600 font-medium">Loading classes...</p>
+              <p className="text-gray-600 font-medium">{t("loading")}</p>
             </div>
           ) : filteredClasses.length === 0 ? (
             <div className="p-20 text-center">
@@ -393,9 +400,7 @@ const Page = () => {
                 <BookOpen className="w-10 h-10 text-gray-400" />
               </div>
               <p className="text-gray-600 font-medium text-lg mb-2">
-                {searchQuery
-                  ? "No classes found matching your search"
-                  : "No classes for this course yet"}
+                {searchQuery ? t("noClassesFound") : t("noClassesYet")}
               </p>
               {!searchQuery && (
                 <Link
@@ -403,7 +408,7 @@ const Page = () => {
                   className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all cursor-pointer"
                 >
                   <Plus className="w-5 h-5" />
-                  Add First Class
+                  {t("addFirstClass")}
                 </Link>
               )}
             </div>
@@ -414,47 +419,47 @@ const Page = () => {
                   <tr>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Class Info
+                        {t("table.classInfo")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Instructor
+                        {t("table.instructor")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Schedule
+                        {t("table.schedule")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Duration
+                        {t("table.duration")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Price
+                        {t("table.price")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Capacity
+                        {t("table.capacity")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Status
+                        {t("table.status")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-center">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Change Status
+                        {t("table.changeStatus")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-center">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Operations
+                        {t("table.operations")}
                       </span>
                     </th>
                   </tr>
@@ -502,7 +507,7 @@ const Page = () => {
                           </div>
                         ) : (
                           <span className="text-gray-400 text-sm italic">
-                            Not assigned
+                            {t("notAssigned")}
                           </span>
                         )}
                       </td>
@@ -513,7 +518,7 @@ const Page = () => {
                           <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4 text-gray-400" />
                             <span className="text-gray-700 text-sm font-medium">
-                              {classItem.daysOfWeek || "Not scheduled"}
+                              {classItem.daysOfWeek || t("notScheduled")}
                             </span>
                           </div>
                           <div className="flex items-center gap-2">
@@ -529,11 +534,15 @@ const Page = () => {
                       {/* Duration */}
                       <td className="px-6 py-5">
                         <div className="space-y-1">
-                          <div className="text-xs text-gray-500">Start</div>
+                          <div className="text-xs text-gray-500">
+                            {t("start")}
+                          </div>
                           <div className="text-sm font-medium text-gray-700">
                             {formatDate(classItem.startDate)}
                           </div>
-                          <div className="text-xs text-gray-500 mt-1">End</div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {t("end")}
+                          </div>
                           <div className="text-sm font-medium text-gray-700">
                             {formatDate(classItem.endDate)}
                           </div>
@@ -558,7 +567,7 @@ const Page = () => {
                         <div className="flex items-center gap-2">
                           <Users className="w-4 h-4 text-gray-400" />
                           <span className="text-gray-700 text-sm font-medium">
-                            {classItem.maxStudents || 0} students
+                            {classItem.maxStudents || 0} {t("students")}
                           </span>
                         </div>
                       </td>
@@ -580,7 +589,7 @@ const Page = () => {
                           <button
                             onClick={() => handleOpenStatusModal(classItem)}
                             className="cursor-pointer p-2.5 text-blue-600 hover:text-white bg-blue-50 hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 group"
-                            title="Change status"
+                            title={t("changeStatus")}
                           >
                             <RefreshCw className="w-5 h-5" />
                           </button>
@@ -593,14 +602,14 @@ const Page = () => {
                           <Link
                             href={`/classes/${classItem.id}/edit`}
                             className="cursor-pointer p-2.5 text-indigo-600 hover:text-white bg-indigo-50 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/30 group"
-                            title="Edit class"
+                            title={t("editClass")}
                           >
                             <Edit2 className="w-5 h-5" />
                           </Link>
                           <button
                             onClick={() => handleDelete(classItem.id)}
                             className="cursor-pointer p-2.5 text-red-600 hover:text-white bg-red-50 hover:bg-gradient-to-r hover:from-red-600 hover:to-rose-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-red-500/30 group"
-                            title="Delete class"
+                            title={t("deleteClass")}
                           >
                             <Trash2 className="w-5 h-5" />
                           </button>
@@ -628,7 +637,7 @@ const Page = () => {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold text-white">
-                      Change Status
+                      {t("changeStatusTitle")}
                     </h2>
                     <p className="text-cyan-100 text-sm mt-1">
                       {selectedClass.name}
@@ -649,7 +658,7 @@ const Page = () => {
               {/* Current Status */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Current Status
+                  {t("currentStatus")}
                 </label>
                 <div
                   className={`inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r border rounded-lg text-sm font-bold ${
@@ -663,7 +672,7 @@ const Page = () => {
               {/* New Status Selection */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  New Status <span className="text-red-500">*</span>
+                  {t("newStatus")} <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <select
@@ -688,21 +697,14 @@ const Page = () => {
                 <div className="flex gap-3">
                   <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-blue-900">
-                    <p className="font-semibold mb-1">Status Meanings:</p>
+                    <p className="font-semibold mb-1">
+                      {t("statusMeaningsTitle")}
+                    </p>
                     <ul className="space-y-1 text-blue-800 text-xs">
-                      <li>
-                        • <strong>Planned:</strong> Class is scheduled but not
-                        yet open
-                      </li>
-                      <li>
-                        • <strong>Open:</strong> Enrollment is open
-                      </li>
-                      <li>
-                        • <strong>Full:</strong> Maximum capacity reached
-                      </li>
-                      <li>
-                        • <strong>Closed:</strong> Enrollment closed
-                      </li>
+                      <li>• {t("statusMeanings.planned")}</li>
+                      <li>• {t("statusMeanings.open")}</li>
+                      <li>• {t("statusMeanings.full")}</li>
+                      <li>• {t("statusMeanings.closed")}</li>
                     </ul>
                   </div>
                 </div>
@@ -716,7 +718,7 @@ const Page = () => {
                 disabled={isConverting}
                 className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                Cancel
+                {t("cancel")}
               </button>
               <button
                 onClick={handleStatusConversion}
@@ -726,12 +728,12 @@ const Page = () => {
                 {isConverting ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Updating...</span>
+                    <span>{t("updating")}</span>
                   </>
                 ) : (
                   <>
                     <RefreshCw className="w-5 h-5" />
-                    <span>Update Status</span>
+                    <span>{t("updateStatus")}</span>
                   </>
                 )}
               </button>

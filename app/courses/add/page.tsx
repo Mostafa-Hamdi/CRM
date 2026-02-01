@@ -26,94 +26,104 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
+import { useTranslations } from "next-intl";
 
 interface Category {
   id: number;
   name: string;
 }
 
-// Validation schema
-const courseSchema = yup.object({
-  name: yup
-    .string()
-    .required("Course name is required")
-    .min(3, "Course name must be at least 3 characters")
-    .max(200, "Course name must not exceed 200 characters")
-    .trim(),
-  code: yup
-    .string()
-    .required("Course code is required")
-    .min(2, "Course code must be at least 2 characters")
-    .max(50, "Course code must not exceed 50 characters")
-    .matches(
-      /^[A-Z0-9-]+$/,
-      "Course code must be uppercase letters, numbers, and hyphens only",
-    )
-    .trim(),
-  description: yup
-    .string()
-    .required("Description is required")
-    .min(10, "Description must be at least 10 characters")
-    .max(1000, "Description must not exceed 1000 characters")
-    .trim(),
-  estimatedDurationHours: yup
-    .number()
-    .required("Duration is required")
-    .positive("Duration must be greater than 0")
-    .integer("Duration must be a whole number")
-    .max(10000, "Duration is too high")
-    .typeError("Duration must be a valid number"),
-  level: yup
-    .number()
-    .required("Level is required")
-    .oneOf([1, 2, 3], "Please select a valid level")
-    .typeError("Please select a level"),
-  learningOutcomes: yup
-    .string()
-    .required("Learning outcomes are required")
-    .min(10, "Learning outcomes must be at least 10 characters")
-    .max(2000, "Learning outcomes must not exceed 2000 characters")
-    .trim(),
-  prerequisites: yup
-    .string()
-    .nullable()
-    .transform((value) => (value === "" ? null : value))
-    .max(1000, "Prerequisites must not exceed 1000 characters")
-    .default(null),
-  language: yup
-    .string()
-    .nullable()
-    .transform((value) => (value === "" ? null : value))
-    .max(50, "Language must not exceed 50 characters")
-    .default(null),
-  tags: yup
-    .string()
-    .nullable()
-    .transform((value) => (value === "" ? null : value))
-    .max(500, "Tags must not exceed 500 characters")
-    .default(null),
-  thumbnailUrl: yup
-    .string()
-    .nullable()
-    .transform((value) => (value === "" ? null : value))
-    .url("Must be a valid URL")
-    .max(500, "URL must not exceed 500 characters")
-    .default(null),
-  categoryId: yup
-    .number()
-    .required("Category is required")
-    .positive("Please select a category")
-    .typeError("Please select a category"),
-});
-
-// Infer the type from the schema
-type CourseFormData = yup.InferType<typeof courseSchema>;
+type CourseFormData = {
+  name: string;
+  code: string;
+  description: string;
+  estimatedDurationHours: number;
+  level: number;
+  learningOutcomes: string;
+  prerequisites: string | null;
+  language: string | null;
+  tags: string | null;
+  thumbnailUrl: string | null;
+  categoryId: number;
+};
 
 const Page = () => {
   const router = useRouter();
   const { data: categories, isLoading: categoriesLoading } =
     useGetCategoriesQuery();
   const [addCourse, { isLoading }] = useAddCourseMutation();
+
+  const t = useTranslations("courses");
+
+  const courseSchema = yup.object({
+    name: yup
+      .string()
+      .required(t("validation.nameRequired"))
+      .min(3, t("validation.nameMin", { min: 3 }))
+      .max(200, t("validation.nameMax", { max: 200 }))
+      .trim(),
+    code: yup
+      .string()
+      .required(t("validation.codeRequired"))
+      .min(2, t("validation.codeMin", { min: 2 }))
+      .max(50, t("validation.codeMax", { max: 50 }))
+      .matches(/^[A-Z0-9-]+$/, t("validation.codePattern"))
+      .trim(),
+    description: yup
+      .string()
+      .required(t("validation.descriptionRequired"))
+      .min(10, t("validation.descriptionMin", { min: 10 }))
+      .max(1000, t("validation.descriptionMax", { max: 1000 }))
+      .trim(),
+    estimatedDurationHours: yup
+      .number()
+      .required(t("validation.durationRequired"))
+      .positive(t("validation.durationPositive"))
+      .integer(t("validation.durationInteger"))
+      .max(10000, t("validation.durationMax", { max: 10000 }))
+      .typeError(t("validation.durationType")),
+    level: yup
+      .number()
+      .required(t("validation.levelRequired"))
+      .oneOf([1, 2, 3], t("validation.levelOneOf"))
+      .typeError(t("validation.levelType")),
+    learningOutcomes: yup
+      .string()
+      .required(t("validation.learningOutcomesRequired"))
+      .min(10, t("validation.learningOutcomesMin", { min: 10 }))
+      .max(2000, t("validation.learningOutcomesMax", { max: 2000 }))
+      .trim(),
+    prerequisites: yup
+      .string()
+      .nullable()
+      .transform((value) => (value === "" ? null : value))
+      .max(1000, t("validation.prerequisitesMax", { max: 1000 }))
+      .default(null),
+    language: yup
+      .string()
+      .nullable()
+      .transform((value) => (value === "" ? null : value))
+      .max(50, t("validation.languageMax", { max: 50 }))
+      .default(null),
+    tags: yup
+      .string()
+      .nullable()
+      .transform((value) => (value === "" ? null : value))
+      .max(500, t("validation.tagsMax", { max: 500 }))
+      .default(null),
+    thumbnailUrl: yup
+      .string()
+      .nullable()
+      .transform((value) => (value === "" ? null : value))
+      .url(t("validation.thumbnailUrl"))
+      .max(500, t("validation.thumbnailMax", { max: 500 }))
+      .default(null),
+    categoryId: yup
+      .number()
+      .required(t("validation.categoryRequired"))
+      .positive(t("validation.categoryPositive"))
+      .typeError(t("validation.categoryType")),
+  });
 
   const {
     register,
@@ -151,8 +161,8 @@ const Page = () => {
 
       await Swal.fire({
         icon: "success",
-        title: "Success!",
-        text: "Course has been added successfully.",
+        title: t("addSuccessTitle"),
+        text: t("addSuccessText"),
         timer: 2000,
         showConfirmButton: false,
       });
@@ -172,7 +182,7 @@ const Page = () => {
 
       Swal.fire({
         icon: "error",
-        title: "Oops!",
+        title: t("oops"),
         text: errorMessage,
       });
     }
@@ -191,7 +201,7 @@ const Page = () => {
             <Link
               href="/courses"
               className="cursor-pointer p-3 bg-white/50 hover:bg-white border border-gray-200 rounded-xl transition-all duration-300 hover:shadow-md"
-              title="Go back"
+              title={t("goBack")}
             >
               <ArrowLeft className="w-5 h-5 text-gray-700" />
             </Link>
@@ -207,10 +217,10 @@ const Page = () => {
 
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
-                Add Course
+                {t("addTitle")}
               </h1>
               <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                Create a new course for students to enroll
+                {t("addSubtitle")}
               </p>
             </div>
           </div>
@@ -223,7 +233,7 @@ const Page = () => {
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-blue-600" />
-                Basic Information
+                {t("basicInformation")}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Course Name */}
@@ -232,12 +242,13 @@ const Page = () => {
                     htmlFor="name"
                     className="block text-sm font-semibold text-gray-700 mb-2"
                   >
-                    Course Name <span className="text-red-500">*</span>
+                    {t("courseNameLabel")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="name"
                     type="text"
-                    placeholder="e.g., Complete Web Development Bootcamp"
+                    placeholder={t("courseNamePlaceholder")}
                     {...register("name")}
                     className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                       errors.name
@@ -259,14 +270,14 @@ const Page = () => {
                     htmlFor="code"
                     className="block text-sm font-semibold text-gray-700 mb-2"
                   >
-                    Course Code <span className="text-red-500">*</span>
+                    {t("codeLabel")} <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
                       id="code"
                       type="text"
-                      placeholder="e.g., WEB-101"
+                      placeholder={t("codePlaceholder")}
                       {...register("code")}
                       className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                         errors.code
@@ -302,7 +313,7 @@ const Page = () => {
                           : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
                       } rounded-xl px-4 py-3.5 text-gray-900 focus:outline-none focus:ring-4 focus:bg-white transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
-                      <option value={0}>Select a category...</option>
+                      <option value={0}>{t("selectCategory")}</option>
                       {categories?.data?.map((category: Category) => (
                         <option key={category.id} value={category.id}>
                           {category.name}
@@ -330,7 +341,7 @@ const Page = () => {
                   <textarea
                     id="description"
                     rows={4}
-                    placeholder="Provide a detailed description of the course..."
+                    placeholder={t("descriptionPlaceholder")}
                     {...register("description")}
                     className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                       errors.description
@@ -352,7 +363,7 @@ const Page = () => {
             <div className="border-t border-gray-200 pt-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-blue-600" />
-                Course Details
+                {t("courseDetails")}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Duration */}
@@ -361,7 +372,7 @@ const Page = () => {
                     htmlFor="estimatedDurationHours"
                     className="block text-sm font-semibold text-gray-700 mb-2"
                   >
-                    Duration (Hours) <span className="text-red-500">*</span>
+                    {t("durationLabel")} <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -404,9 +415,9 @@ const Page = () => {
                           : "border-gray-200 focus:border-blue-500 focus:ring-blue-500/20"
                       } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 focus:outline-none focus:ring-4 focus:bg-white transition-all appearance-none cursor-pointer`}
                     >
-                      <option value={1}>Beginner</option>
-                      <option value={2}>Intermediate</option>
-                      <option value={3}>Advanced</option>
+                      <option value={1}>{t("level.1")}</option>
+                      <option value={2}>{t("level.2")}</option>
+                      <option value={3}>{t("level.3")}</option>
                     </select>
                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                   </div>
@@ -431,7 +442,7 @@ const Page = () => {
                     <input
                       id="language"
                       type="text"
-                      placeholder="e.g., English"
+                      placeholder={t("languagePlaceholder")}
                       {...register("language")}
                       className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                         errors.language
@@ -461,7 +472,7 @@ const Page = () => {
                     <textarea
                       id="learningOutcomes"
                       rows={4}
-                      placeholder="What will students learn? List the key outcomes..."
+                      placeholder={t("learningOutcomesPlaceholder")}
                       {...register("learningOutcomes")}
                       className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                         errors.learningOutcomes
@@ -489,7 +500,7 @@ const Page = () => {
                   <textarea
                     id="prerequisites"
                     rows={3}
-                    placeholder="What should students know before taking this course? (Optional)"
+                    placeholder={t("prerequisitesPlaceholder")}
                     {...register("prerequisites")}
                     className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                       errors.prerequisites
@@ -518,7 +529,7 @@ const Page = () => {
                     <input
                       id="tags"
                       type="text"
-                      placeholder="e.g., web, javascript, react (comma separated)"
+                      placeholder={t("tagsPlaceholder")}
                       {...register("tags")}
                       className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                         errors.tags
@@ -548,7 +559,7 @@ const Page = () => {
                     <input
                       id="thumbnailUrl"
                       type="url"
-                      placeholder="https://example.com/image.jpg"
+                      placeholder={t("thumbnailPlaceholder")}
                       {...register("thumbnailUrl")}
                       className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                         errors.thumbnailUrl
@@ -574,23 +585,25 @@ const Page = () => {
                 onClick={() => router.push("/courses")}
                 className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all cursor-pointer"
               >
-                Cancel
+                {t("cancel")}
               </button>
               <button
                 type="button"
-                onClick={handleSubmit(onSubmit)}
+                onClick={handleSubmit((data) =>
+                  onSubmit(data as CourseFormData),
+                )}
                 disabled={isLoading || categoriesLoading}
                 className="flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isLoading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Adding Course...</span>
+                    <span>{t("adding")}</span>
                   </>
                 ) : (
                   <>
                     <CheckCircle className="w-5 h-5" />
-                    <span>Add Course</span>
+                    <span>{t("addButton")}</span>
                   </>
                 )}
               </button>
