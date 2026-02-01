@@ -67,6 +67,15 @@ const Page = () => {
     fetchCategories();
   }, [pageNumber, pageSize, getSpecificCategories]);
 
+  // localized text helpers
+  const pageInfo = () =>
+    t("pageInfo", {
+      current: pageNumber,
+      total: categoriesResponse?.totalPages || 1,
+      count: categoriesResponse?.totalCount || 0,
+      pageSize,
+    });
+
   // Filter categories based on search query
   const filteredCategories = useMemo(() => {
     if (!categoriesResponse?.data) return [];
@@ -79,11 +88,11 @@ const Page = () => {
 
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
-      title: "😢 Are you sure you want to delete this category?",
+      title: t("deleteConfirm"),
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes",
-      cancelButtonText: "No",
+      confirmButtonText: t("confirmYes") || "Yes",
+      cancelButtonText: t("confirmNo") || "No",
       confirmButtonColor: "#2563eb",
       cancelButtonColor: "#e5e7eb",
     });
@@ -95,8 +104,8 @@ const Page = () => {
 
       await Swal.fire({
         icon: "success",
-        title: "Deleted!",
-        text: "Category has been deleted successfully.",
+        title: t("addSuccessTitle") || "Deleted!",
+        text: t("deleteSuccess"),
         timer: 2000,
       });
 
@@ -116,7 +125,7 @@ const Page = () => {
 
       Swal.fire({
         icon: "error",
-        title: "Oops!",
+        title: t("oops") || "Oops!",
         text: errorMessage,
       });
     }
@@ -223,7 +232,7 @@ const Page = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">
-                  Total Categories
+                  {t("totalCategories")}
                 </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mt-1">
                   {categoriesResponse?.totalCount || 0}
@@ -239,7 +248,7 @@ const Page = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">
-                  Categories Found
+                  {t("categoriesFound")}
                 </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mt-1">
                   {filteredCategories.length}
@@ -255,7 +264,7 @@ const Page = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">
-                  Current Page
+                  {t("currentPage")}
                 </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mt-1">
                   {filteredCategories.length}
@@ -286,7 +295,7 @@ const Page = () => {
             <div className="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl">
               <List className="w-5 h-5 text-gray-600" />
               <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                Show:
+                {t("show")}
               </span>
               <div className="flex items-center gap-2">
                 {[5, 10, 20, 50].map((size) => (
@@ -309,22 +318,14 @@ const Page = () => {
               <FolderTree className="w-5 h-5 text-white" />
               <span className="text-sm font-bold text-white">
                 {filteredCategories.length} {t("title")}
-              </span>
+              </span>{" "}
             </div>
           </div>
 
           {/* Pagination Info */}
           {categoriesResponse && categoriesResponse.totalPages > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-200">
-              <p className="text-sm text-gray-600 text-center">
-                Showing page{" "}
-                <span className="font-bold text-blue-600">{pageNumber}</span> of{" "}
-                <span className="font-bold text-blue-600">
-                  {categoriesResponse.totalPages}
-                </span>{" "}
-                ({categoriesResponse.totalCount} total categories, {pageSize}{" "}
-                per page)
-              </p>
+              <p className="text-sm text-gray-600 text-center">{pageInfo()}</p>
             </div>
           )}
         </div>
@@ -334,7 +335,7 @@ const Page = () => {
           {isLoading ? (
             <div className="p-20 flex flex-col items-center justify-center">
               <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4" />
-              <p className="text-gray-600 font-medium">Loading categories...</p>
+              <p className="text-gray-600 font-medium">{t("loading")}</p>
             </div>
           ) : filteredCategories.length === 0 ? (
             <div className="p-20 text-center">

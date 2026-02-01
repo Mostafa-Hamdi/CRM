@@ -19,27 +19,30 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
+import { useTranslations } from "next-intl";
 
-// Validation Schema
-const categorySchema = yup.object().shape({
-  name: yup
-    .string()
-    .required("Category name is required")
-    .min(2, "Category name must be at least 2 characters")
-    .max(100, "Category name must not exceed 100 characters")
-    .trim(),
-});
-
-type CategoryFormData = yup.InferType<typeof categorySchema>;
+type CategoryFormData = {
+  name: string;
+};
 
 const Page = () => {
+  const t = useTranslations("categories");
   const params = useParams();
   const router = useRouter();
   const id = Number(params?.id);
-  console.log(id);
   const { data: categoryData, isLoading: loadingCategory } =
     useGetCategoryQuery({ id });
   const [updateCategory, { isLoading: updating }] = useUpdateCategoryMutation();
+
+  // Validation Schema using translations
+  const categorySchema = yup.object().shape({
+    name: yup
+      .string()
+      .required(t("nameRequired"))
+      .min(2, t("nameMin", { min: 2 }))
+      .max(100, t("nameMax", { max: 100 }))
+      .trim(),
+  });
 
   const {
     register,
@@ -68,8 +71,8 @@ const Page = () => {
 
       await Swal.fire({
         icon: "success",
-        title: "Success!",
-        text: "Category has been updated successfully.",
+        title: t("updateSuccessTitle"),
+        text: t("updateSuccessText"),
         timer: 2000,
         showConfirmButton: false,
       });
@@ -115,10 +118,10 @@ const Page = () => {
               </div>
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
-                  Edit Category
+                  {t("editTitle")}
                 </h1>
                 <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                  Update category information
+                  {t("editSubtitle")}
                 </p>
               </div>
             </div>
@@ -126,9 +129,10 @@ const Page = () => {
             <Link
               href="/categories"
               className="group relative cursor-pointer flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-2xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300"
+              title={t("goBack")}
             >
               <ArrowLeft className="w-5 h-5" />
-              <span className="hidden sm:inline">Back</span>
+              <span className="hidden sm:inline">{t("goBack")}</span>
             </Link>
           </div>
         </div>
@@ -138,7 +142,7 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-3xl p-12 shadow-xl shadow-blue-500/10">
             <div className="flex flex-col items-center justify-center">
               <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4" />
-              <p className="text-gray-600 text-lg">Loading category...</p>
+              <p className="text-gray-600 text-lg">{t("loading")}</p>
             </div>
           </div>
         )}
@@ -153,12 +157,12 @@ const Page = () => {
                   htmlFor="name"
                   className="block text-sm font-semibold text-gray-700 mb-2"
                 >
-                  Category Name <span className="text-red-500">*</span>
+                  {t("nameLabel")} <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="name"
                   type="text"
-                  placeholder="Enter category name"
+                  placeholder={t("enterName")}
                   {...register("name")}
                   className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                     errors.name
@@ -181,7 +185,7 @@ const Page = () => {
                   onClick={() => router.push("/categories")}
                   className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
                 <button
                   type="button"
@@ -193,12 +197,12 @@ const Page = () => {
                   {updating ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin relative z-10" />
-                      <span className="relative z-10">Updating...</span>
+                      <span className="relative z-10">{t("updating")}</span>
                     </>
                   ) : (
                     <>
                       <CheckCircle className="w-5 h-5 relative z-10" />
-                      <span className="relative z-10">Update Category</span>
+                      <span className="relative z-10">{t("updateButton")}</span>
                     </>
                   )}
                 </button>
@@ -215,15 +219,13 @@ const Page = () => {
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-blue-900 mb-1">Quick Tips</h3>
+                <h3 className="font-semibold text-blue-900 mb-1">
+                  {t("quickTipsTitle")}
+                </h3>
                 <ul className="text-sm text-blue-700 space-y-1">
-                  <li>
-                    • Choose a clear and descriptive name for the category
-                  </li>
-                  <li>
-                    • Category names should be unique and easy to identify
-                  </li>
-                  <li>• Changes will affect all associated courses</li>
+                  {(t.raw("guidelines") as string[]).map((g, idx) => (
+                    <li key={idx}>• {g}</li>
+                  ))}
                 </ul>
               </div>
             </div>

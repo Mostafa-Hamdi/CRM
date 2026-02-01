@@ -14,24 +14,26 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
-
-// Validation schema
-const categorySchema = yup.object().shape({
-  name: yup
-    .string()
-    .required("Category name is required")
-    .min(2, "Category name must be at least 2 characters")
-    .max(100, "Category name must not exceed 100 characters")
-    .trim(),
-});
+import { useTranslations } from "next-intl";
 
 type CategoryFormData = {
   name: string;
 };
 
 const Page = () => {
+  const t = useTranslations("categories");
   const router = useRouter();
   const [addCategory, { isLoading }] = useAddCategoryMutation();
+
+  // Validation schema using translations
+  const categorySchema = yup.object().shape({
+    name: yup
+      .string()
+      .required(t("nameRequired"))
+      .min(2, t("nameMin", { min: 2 }))
+      .max(100, t("nameMax", { max: 100 }))
+      .trim(),
+  });
 
   const {
     register,
@@ -49,8 +51,8 @@ const Page = () => {
 
       await Swal.fire({
         icon: "success",
-        title: "Success!",
-        text: "Category has been added successfully.",
+        title: t("addSuccessTitle"),
+        text: t("addSuccessText"),
         timer: 2000,
         showConfirmButton: false,
       });
@@ -70,7 +72,7 @@ const Page = () => {
 
       Swal.fire({
         icon: "error",
-        title: "Oops!",
+        title: t("oops") || "Oops!",
         text: errorMessage,
       });
     }
@@ -105,10 +107,10 @@ const Page = () => {
 
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
-                Add Category
+                {t("addTitle")}
               </h1>
               <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                Create a new category for organizing courses
+                {t("addSubtitle")}
               </p>
             </div>
           </div>
@@ -123,13 +125,13 @@ const Page = () => {
                 htmlFor="name"
                 className="block text-sm font-semibold text-gray-700 mb-2"
               >
-                Category Name <span className="text-red-500">*</span>
+                {t("nameLabel")} <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
                   id="name"
                   type="text"
-                  placeholder="Enter category name (e.g., Programming, Design, Marketing)"
+                  placeholder={t("enterName")}
                   {...register("name")}
                   className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                     errors.name
@@ -149,9 +151,6 @@ const Page = () => {
                   {errors.name.message}
                 </p>
               )}
-              <p className="mt-2 text-xs text-gray-500">
-                Choose a clear and descriptive name for the category
-              </p>
             </div>
 
             {/* Action Buttons */}
@@ -161,7 +160,7 @@ const Page = () => {
                 onClick={() => router.push("/categories")}
                 className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all"
               >
-                Cancel
+                {t("cancel")}
               </button>
               <button
                 type="submit"
@@ -171,12 +170,12 @@ const Page = () => {
                 {isLoading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Adding...</span>
+                    <span>{t("adding")}</span>
                   </>
                 ) : (
                   <>
                     <CheckCircle className="w-5 h-5" />
-                    <span>Add Category</span>
+                    <span>{t("addButton")}</span>
                   </>
                 )}
               </button>
@@ -194,13 +193,14 @@ const Page = () => {
             </div>
             <div>
               <h3 className="font-semibold text-blue-900 mb-1">
-                Category Guidelines
+                {t("guidelinesTitle")}
               </h3>
-              <ul className="text-sm text-blue-700 space-y-1">
-                <li>• Use clear and descriptive names</li>
-                <li>• Avoid special characters and numbers</li>
-                <li>• Keep it concise (2-100 characters)</li>
-                <li>• Make it easy to understand for students</li>
+              <ul className="mt-2 text-xs text-gray-500 list-disc pl-5 space-y-1">
+                {(t.raw("guidelines") as string[]).map(
+                  (g: string, idx: number) => (
+                    <li key={idx}>{g}</li>
+                  ),
+                )}
               </ul>
             </div>
           </div>
