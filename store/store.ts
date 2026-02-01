@@ -1,6 +1,7 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { api } from "./api/apiSlice";
 import authReducer from "./slices/auth";
+import followupsReducer from "./slices/followups";
 
 import {
   persistStore,
@@ -16,6 +17,7 @@ import storage from "redux-persist/lib/storage";
 
 const rootReducer = combineReducers({
   auth: authReducer,
+  followups: followupsReducer,
   [api.reducerPath]: api.reducer,
 });
 

@@ -20,13 +20,17 @@ import {
   SchoolIcon,
   KanbanSquare,
 } from "lucide-react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/store/slices/auth";
 import Swal from "sweetalert2";
-import { useLogoutMutation } from "@/store/api/apiSlice";
-import { useState } from "react";
+import {
+  useLogoutMutation,
+  useGetFollowupsTodayMutation,
+} from "@/store/api/apiSlice";
+import { setTodayCount, selectTodayCount } from "@/store/slices/followups";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useIsRTL } from "@/app/i18n/LocaleProvider";
 
@@ -59,6 +63,30 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>(
     {},
   );
+  const todayCount = useSelector(selectTodayCount);
+  const [triggerToday] = useGetFollowupsTodayMutation();
+
+  // Fetch today's follow-up count when sidebar mounts so the badge is available across the app
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      try {
+        const res = await triggerToday();
+        if (!mounted) return;
+        const data = "data" in res ? (res as any).data : res;
+        const count = Array.isArray(data) ? data.length : 0;
+        // Dispatch the update to the followups slice for immediate UI update
+        dispatch(setTodayCount(count));
+      } catch (e) {
+        // ignore errors for the badge
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [triggerToday]);
   const t = useTranslations("sidebar");
 
   const navSections: NavSection[] = [
@@ -282,6 +310,11 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
                           <div className="flex items-center gap-3">
                             <item.icon className="w-5 h-5" />
                             <span className="font-medium">{item.label}</span>
+                            {item.label === t("followUp") && todayCount > 0 && (
+                              <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                                {todayCount}
+                              </span>
+                            )}
                           </div>
                           <ChevronDown
                             className={`w-4 h-4 transition-transform duration-300 ${
@@ -332,7 +365,12 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
                         }`}
                       >
                         <item.icon className="w-5 h-5" />
-                        <span className="font-medium">{item.label}</span>
+                        <span className="font-medium">{item.label}</span>{" "}
+                        {item.label === t("followUp") && todayCount > 0 && (
+                          <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                            {todayCount}
+                          </span>
+                        )}{" "}
                       </Link>
                     )}
                   </div>
