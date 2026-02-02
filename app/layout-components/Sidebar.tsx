@@ -38,25 +38,9 @@ interface SidebarProps {
   sidebarOpen: boolean;
 }
 
-interface SubItem {
-  icon: any;
-  label: string;
-  link: string;
-}
-
-interface NavItem {
-  icon: any;
-  label: string;
-  link?: string;
-  subItems?: SubItem[];
-}
-
-interface NavSection {
-  title: string;
-  items: NavItem[];
-}
-
 const Sidebar = ({ sidebarOpen }: SidebarProps) => {
+  const permissions = useSelector((state: any) => state.auth.user?.permissions);
+  const isLogin = useSelector((state: any) => state.auth.isAuthenticated);
   const path = usePathname();
   const dispatch = useDispatch();
   const [removeRefreshToken] = useLogoutMutation();
@@ -87,147 +71,9 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
       mounted = false;
     };
   }, [triggerToday]);
+
   const t = useTranslations("sidebar");
-
-  const navSections: NavSection[] = [
-    {
-      title: t("sections.main"),
-      items: [
-        { icon: Home, label: t("dashboard"), link: "/" },
-
-        {
-          icon: Boxes,
-          label: t("categories"),
-          subItems: [
-            { icon: List, label: t("allCategories"), link: "/categories" },
-            { icon: Plus, label: t("addCategory"), link: "/categories/add" },
-          ],
-        },
-
-        {
-          icon: GraduationCap,
-          label: t("courses"),
-          subItems: [
-            { icon: List, label: t("allCourses"), link: "/courses" },
-            { icon: Plus, label: t("addCourse"), link: "/courses/add" },
-          ],
-        },
-        {
-          icon: SchoolIcon,
-          label: t("classes"),
-          subItems: [
-            { icon: List, label: t("allClasses"), link: "/classes" },
-            { icon: Plus, label: t("addClass"), link: "/classes/add" },
-          ],
-        },
-
-        {
-          icon: UserCheck,
-          label: t("enrollments"),
-          subItems: [
-            { icon: List, label: t("allEnrollments"), link: "/enrollments" },
-            { icon: Plus, label: t("addEnrollment"), link: "/enrollments/add" },
-          ],
-        },
-
-        {
-          icon: UserPlus,
-          label: t("leads"),
-          subItems: [
-            { icon: KanbanSquare, label: t("board"), link: "/leads/board" },
-            { icon: List, label: t("allLeads"), link: "/leads" },
-            { icon: Plus, label: t("addLead"), link: "/leads/add" },
-          ],
-        },
-
-        {
-          icon: UserSquare,
-          label: t("students"),
-          subItems: [
-            { icon: List, label: t("allStudents"), link: "/students" },
-            { icon: Plus, label: t("addStudent"), link: "/students/add" },
-          ],
-        },
-
-        {
-          icon: Clock,
-          label: t("followUp"),
-          subItems: [
-            { icon: List, label: t("allFollowUps"), link: "/follow-up" },
-            { icon: Plus, label: t("addFollowUp"), link: "/follow-up/add" },
-          ],
-        },
-      ],
-    },
-
-    {
-      title: t("sections.system"),
-      items: [
-        {
-          icon: UserCircle,
-          label: t("users"),
-          subItems: [
-            { icon: List, label: t("allUsers"), link: "/users" },
-            { icon: Plus, label: t("addUser"), link: "/users/add" },
-          ],
-        },
-
-        {
-          icon: Shield,
-          label: t("roles"),
-          subItems: [
-            { icon: List, label: t("allRoles"), link: "/roles" },
-            { icon: Plus, label: t("addRole"), link: "/roles/add" },
-            // {
-            //   icon: EditIcon,
-            //   label: "Edit Role",
-            //   link: "/dashboard/roles/edit/:id",
-            // },
-          ],
-        },
-
-        {
-          icon: Settings,
-          label: t("settings"),
-          subItems: [
-            {
-              icon: Edit,
-              label: t("generalSettings"),
-              link: "/dashboard/settings",
-            },
-            {
-              icon: Edit,
-              label: t("systemConfig"),
-              link: "/dashboard/settings/config",
-            },
-            {
-              icon: EditIcon,
-              label: t("editSettings"),
-              link: "/dashboard/settings/edit",
-            },
-          ],
-        },
-
-        {
-          icon: UserCircle2,
-          label: t("profile"),
-          subItems: [
-            { icon: Edit, label: t("editProfile"), link: "/dashboard/profile" },
-            {
-              icon: Edit,
-              label: t("changePassword"),
-              link: "/dashboard/profile/password",
-            },
-            {
-              icon: EditIcon,
-              label: t("advancedEdit"),
-              link: "/dashboard/profile/edit",
-            },
-          ],
-        },
-      ],
-    },
-  ];
+  const isRTL = useIsRTL();
 
   const toggleDropdown = (label: string) => {
     setOpenDropdowns((prev) => ({
@@ -236,19 +82,14 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
     }));
   };
 
-  const isItemActive = (item: NavItem): boolean => {
-    if (item.link) {
-      return (
-        path === item.link ||
-        (path.startsWith(item.link + "/") && item.link !== "/")
-      );
-    }
-    if (item.subItems) {
-      return item.subItems.some(
-        (sub) => path === sub.link || path.startsWith(sub.link + "/"),
-      );
-    }
-    return false;
+  const isDropdownActive = (links: string[]): boolean => {
+    return links.some(
+      (link) => path === link || (path.startsWith(link + "/") && link !== "/"),
+    );
+  };
+
+  const isLinkActive = (link: string): boolean => {
+    return path === link || (path.startsWith(link + "/") && link !== "/");
   };
 
   const handleLogout = async () => {
@@ -272,7 +113,13 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
       Swal.fire("Logout failed", "", "error");
     }
   };
-  const isRTL = useIsRTL();
+
+  // Helper function to check if user has permission
+  const hasPermission = (permission: string): boolean => {
+    if (!permissions) return false;
+    return isLogin && permissions.includes(permission);
+  };
+
   return (
     <aside
       className={`
@@ -283,103 +130,791 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
       `}
     >
       <nav className="p-4 space-y-6 h-full pb-20 overflow-y-auto">
-        {navSections.map((section, i) => (
-          <div key={i}>
-            <p className="px-4 mb-2 text-xs font-semibold text-gray-400 uppercase">
-              {section.title}
-            </p>
+        {/* MAIN SECTION */}
+        <div>
+          <p className="px-4 mb-2 text-xs font-semibold text-gray-400 uppercase">
+            {t("sections.main")}
+          </p>
 
-            <div className="space-y-2">
-              {section.items.map((item, idx) => {
-                const isActive = isItemActive(item);
-                const hasDropdown = item.subItems && item.subItems.length > 0;
-                const isOpen = openDropdowns[item.label];
+          <div className="space-y-2">
+            {/* Dashboard - Always visible */}
+            <Link
+              href="/"
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                isLinkActive("/")
+                  ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                  : "text-gray-700 hover:bg-blue-50"
+              }`}
+            >
+              <Home className="w-5 h-5" />
+              <span className="font-medium">{t("dashboard")}</span>
+            </Link>
 
-                return (
-                  <div key={idx}>
-                    {hasDropdown ? (
-                      <>
-                        <button
-                          onClick={() => toggleDropdown(item.label)}
-                          className={`cursor-pointer w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${
-                            isActive
-                              ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
-                              : "text-gray-700 hover:bg-blue-50"
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <item.icon className="w-5 h-5" />
-                            <span className="font-medium">{item.label}</span>
-                            {item.label === t("followUp") && todayCount > 0 && (
-                              <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-                                {todayCount}
-                              </span>
-                            )}
-                          </div>
-                          <ChevronDown
-                            className={`w-4 h-4 transition-transform duration-300 ${
-                              isOpen ? "rotate-180" : ""
-                            }`}
-                          />
-                        </button>
+            {/* Categories */}
+            {hasPermission("Categories.View") && (
+              <div>
+                <button
+                  onClick={() => toggleDropdown("categories")}
+                  className={`cursor-pointer w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${
+                    isDropdownActive(["/categories", "/categories/add"])
+                      ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                      : "text-gray-700 hover:bg-blue-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Boxes className="w-5 h-5" />
+                    <span className="font-medium">{t("categories")}</span>
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform duration-300 ${
+                      openDropdowns["categories"] ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
 
-                        {/* Dropdown Menu */}
-                        <div
-                          className={`overflow-hidden transition-all duration-300 ${
-                            isOpen
-                              ? "max-h-96 opacity-100 mt-2"
-                              : "max-h-0 opacity-0"
-                          }`}
-                        >
-                          <div
-                            className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
-                          >
-                            {item.subItems!.map((subItem, subIdx) => {
-                              const isSubActive = path === subItem.link;
-
-                              return (
-                                <Link
-                                  href={subItem.link}
-                                  key={subIdx}
-                                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
-                                    isSubActive
-                                      ? "bg-blue-50 text-blue-600 font-medium"
-                                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                                  }`}
-                                >
-                                  <subItem.icon className="w-4 h-4" />
-                                  <span>{subItem.label}</span>
-                                </Link>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      </>
-                    ) : (
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    openDropdowns["categories"]
+                      ? "max-h-96 opacity-100 mt-2"
+                      : "max-h-0 opacity-0"
+                  }`}
+                >
+                  <div
+                    className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
+                  >
+                    {hasPermission("Categories.View") && (
                       <Link
-                        href={item.link!}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                          isActive
-                            ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
-                            : "text-gray-700 hover:bg-blue-50"
+                        href="/categories"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/categories")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                         }`}
                       >
-                        <item.icon className="w-5 h-5" />
-                        <span className="font-medium">{item.label}</span>{" "}
-                        {item.label === t("followUp") && todayCount > 0 && (
-                          <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-                            {todayCount}
-                          </span>
-                        )}{" "}
+                        <List className="w-4 h-4" />
+                        <span>{t("allCategories")}</span>
+                      </Link>
+                    )}
+
+                    {hasPermission("Categories.Create") && (
+                      <Link
+                        href="/categories/add"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/categories/add")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>{t("addCategory")}</span>
                       </Link>
                     )}
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
+                </div>
+              </div>
+            )}
 
+            {/* Courses */}
+            {hasPermission("COURSES_VIEW") && (
+              <div>
+                <button
+                  onClick={() => toggleDropdown("courses")}
+                  className={`cursor-pointer w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${
+                    isDropdownActive(["/courses", "/courses/add"])
+                      ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                      : "text-gray-700 hover:bg-blue-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <GraduationCap className="w-5 h-5" />
+                    <span className="font-medium">{t("courses")}</span>
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform duration-300 ${
+                      openDropdowns["courses"] ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    openDropdowns["courses"]
+                      ? "max-h-96 opacity-100 mt-2"
+                      : "max-h-0 opacity-0"
+                  }`}
+                >
+                  <div
+                    className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
+                  >
+                    {hasPermission("COURSES_VIEW") && (
+                      <Link
+                        href="/courses"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/courses")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <List className="w-4 h-4" />
+                        <span>{t("allCourses")}</span>
+                      </Link>
+                    )}
+
+                    {hasPermission("COURSES_CREATE") && (
+                      <Link
+                        href="/courses/add"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/courses/add")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>{t("addCourse")}</span>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Classes */}
+            {hasPermission("CLASSES_VIEW") && (
+              <div>
+                <button
+                  onClick={() => toggleDropdown("classes")}
+                  className={`cursor-pointer w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${
+                    isDropdownActive(["/classes", "/classes/add"])
+                      ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                      : "text-gray-700 hover:bg-blue-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <SchoolIcon className="w-5 h-5" />
+                    <span className="font-medium">{t("classes")}</span>
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform duration-300 ${
+                      openDropdowns["classes"] ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    openDropdowns["classes"]
+                      ? "max-h-96 opacity-100 mt-2"
+                      : "max-h-0 opacity-0"
+                  }`}
+                >
+                  <div
+                    className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
+                  >
+                    {hasPermission("CLASSES_VIEW") && (
+                      <Link
+                        href="/classes"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/classes")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <List className="w-4 h-4" />
+                        <span>{t("allClasses")}</span>
+                      </Link>
+                    )}
+
+                    {hasPermission("CLASSES_CREATE") && (
+                      <Link
+                        href="/classes/add"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/classes/add")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>{t("addClass")}</span>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Enrollments */}
+            {hasPermission("enrollments") && (
+              <div>
+                <button
+                  onClick={() => toggleDropdown("enrollments")}
+                  className={`cursor-pointer w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${
+                    isDropdownActive(["/enrollments", "/enrollments/add"])
+                      ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                      : "text-gray-700 hover:bg-blue-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <UserCheck className="w-5 h-5" />
+                    <span className="font-medium">{t("enrollments")}</span>
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform duration-300 ${
+                      openDropdowns["enrollments"] ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    openDropdowns["enrollments"]
+                      ? "max-h-96 opacity-100 mt-2"
+                      : "max-h-0 opacity-0"
+                  }`}
+                >
+                  <div
+                    className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
+                  >
+                    {hasPermission("enrollments.view") && (
+                      <Link
+                        href="/enrollments"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/enrollments")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <List className="w-4 h-4" />
+                        <span>{t("allEnrollments")}</span>
+                      </Link>
+                    )}
+
+                    {hasPermission("enrollments.create") && (
+                      <Link
+                        href="/enrollments/add"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/enrollments/add")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>{t("addEnrollment")}</span>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Leads */}
+            {hasPermission("leads") && (
+              <div>
+                <button
+                  onClick={() => toggleDropdown("leads")}
+                  className={`cursor-pointer w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${
+                    isDropdownActive(["/leads/board", "/leads", "/leads/add"])
+                      ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                      : "text-gray-700 hover:bg-blue-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <UserPlus className="w-5 h-5" />
+                    <span className="font-medium">{t("leads")}</span>
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform duration-300 ${
+                      openDropdowns["leads"] ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    openDropdowns["leads"]
+                      ? "max-h-96 opacity-100 mt-2"
+                      : "max-h-0 opacity-0"
+                  }`}
+                >
+                  <div
+                    className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
+                  >
+                    {hasPermission("leads.board") && (
+                      <Link
+                        href="/leads/board"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/leads/board")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <KanbanSquare className="w-4 h-4" />
+                        <span>{t("board")}</span>
+                      </Link>
+                    )}
+
+                    {hasPermission("leads.view") && (
+                      <Link
+                        href="/leads"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/leads")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <List className="w-4 h-4" />
+                        <span>{t("allLeads")}</span>
+                      </Link>
+                    )}
+
+                    {hasPermission("leads.create") && (
+                      <Link
+                        href="/leads/add"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/leads/add")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>{t("addLead")}</span>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Students */}
+            {hasPermission("students") && (
+              <div>
+                <button
+                  onClick={() => toggleDropdown("students")}
+                  className={`cursor-pointer w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${
+                    isDropdownActive(["/students", "/students/add"])
+                      ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                      : "text-gray-700 hover:bg-blue-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <UserSquare className="w-5 h-5" />
+                    <span className="font-medium">{t("students")}</span>
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform duration-300 ${
+                      openDropdowns["students"] ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    openDropdowns["students"]
+                      ? "max-h-96 opacity-100 mt-2"
+                      : "max-h-0 opacity-0"
+                  }`}
+                >
+                  <div
+                    className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
+                  >
+                    {hasPermission("students.view") && (
+                      <Link
+                        href="/students"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/students")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <List className="w-4 h-4" />
+                        <span>{t("allStudents")}</span>
+                      </Link>
+                    )}
+
+                    {hasPermission("students.create") && (
+                      <Link
+                        href="/students/add"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/students/add")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>{t("addStudent")}</span>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Follow-up */}
+            {hasPermission("followups") && (
+              <div>
+                <button
+                  onClick={() => toggleDropdown("followups")}
+                  className={`cursor-pointer w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${
+                    isDropdownActive(["/follow-up", "/follow-up/add"])
+                      ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                      : "text-gray-700 hover:bg-blue-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Clock className="w-5 h-5" />
+                    <span className="font-medium">{t("followUp")}</span>
+                    {todayCount > 0 && (
+                      <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                        {todayCount}
+                      </span>
+                    )}
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform duration-300 ${
+                      openDropdowns["followups"] ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    openDropdowns["followups"]
+                      ? "max-h-96 opacity-100 mt-2"
+                      : "max-h-0 opacity-0"
+                  }`}
+                >
+                  <div
+                    className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
+                  >
+                    {hasPermission("followups.view") && (
+                      <Link
+                        href="/follow-up"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/follow-up")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <List className="w-4 h-4" />
+                        <span>{t("allFollowUps")}</span>
+                      </Link>
+                    )}
+
+                    {hasPermission("followups.create") && (
+                      <Link
+                        href="/follow-up/add"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/follow-up/add")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>{t("addFollowUp")}</span>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* SYSTEM SECTION */}
+        <div>
+          <p className="px-4 mb-2 text-xs font-semibold text-gray-400 uppercase">
+            {t("sections.system")}
+          </p>
+
+          <div className="space-y-2">
+            {/* Users */}
+            {hasPermission("users") && (
+              <div>
+                <button
+                  onClick={() => toggleDropdown("users")}
+                  className={`cursor-pointer w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${
+                    isDropdownActive(["/users", "/users/add"])
+                      ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                      : "text-gray-700 hover:bg-blue-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <UserCircle className="w-5 h-5" />
+                    <span className="font-medium">{t("users")}</span>
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform duration-300 ${
+                      openDropdowns["users"] ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    openDropdowns["users"]
+                      ? "max-h-96 opacity-100 mt-2"
+                      : "max-h-0 opacity-0"
+                  }`}
+                >
+                  <div
+                    className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
+                  >
+                    {hasPermission("users.view") && (
+                      <Link
+                        href="/users"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/users")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <List className="w-4 h-4" />
+                        <span>{t("allUsers")}</span>
+                      </Link>
+                    )}
+
+                    {hasPermission("users.create") && (
+                      <Link
+                        href="/users/add"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/users/add")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>{t("addUser")}</span>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Roles */}
+            {hasPermission("roles") && (
+              <div>
+                <button
+                  onClick={() => toggleDropdown("roles")}
+                  className={`cursor-pointer w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${
+                    isDropdownActive(["/roles", "/roles/add"])
+                      ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                      : "text-gray-700 hover:bg-blue-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Shield className="w-5 h-5" />
+                    <span className="font-medium">{t("roles")}</span>
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform duration-300 ${
+                      openDropdowns["roles"] ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    openDropdowns["roles"]
+                      ? "max-h-96 opacity-100 mt-2"
+                      : "max-h-0 opacity-0"
+                  }`}
+                >
+                  <div
+                    className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
+                  >
+                    {hasPermission("roles.view") && (
+                      <Link
+                        href="/roles"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/roles")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <List className="w-4 h-4" />
+                        <span>{t("allRoles")}</span>
+                      </Link>
+                    )}
+
+                    {hasPermission("roles.create") && (
+                      <Link
+                        href="/roles/add"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/roles/add")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>{t("addRole")}</span>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Settings */}
+            {hasPermission("settings") && (
+              <div>
+                <button
+                  onClick={() => toggleDropdown("settings")}
+                  className={`cursor-pointer w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${
+                    isDropdownActive([
+                      "/dashboard/settings",
+                      "/dashboard/settings/config",
+                      "/dashboard/settings/edit",
+                    ])
+                      ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                      : "text-gray-700 hover:bg-blue-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Settings className="w-5 h-5" />
+                    <span className="font-medium">{t("settings")}</span>
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform duration-300 ${
+                      openDropdowns["settings"] ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    openDropdowns["settings"]
+                      ? "max-h-96 opacity-100 mt-2"
+                      : "max-h-0 opacity-0"
+                  }`}
+                >
+                  <div
+                    className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
+                  >
+                    {hasPermission("settings.general") && (
+                      <Link
+                        href="/dashboard/settings"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/dashboard/settings")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <Edit className="w-4 h-4" />
+                        <span>{t("generalSettings")}</span>
+                      </Link>
+                    )}
+
+                    {hasPermission("settings.config") && (
+                      <Link
+                        href="/dashboard/settings/config"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/dashboard/settings/config")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <Edit className="w-4 h-4" />
+                        <span>{t("systemConfig")}</span>
+                      </Link>
+                    )}
+
+                    {hasPermission("settings.edit") && (
+                      <Link
+                        href="/dashboard/settings/edit"
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          isLinkActive("/dashboard/settings/edit")
+                            ? "bg-blue-50 text-blue-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
+                      >
+                        <EditIcon className="w-4 h-4" />
+                        <span>{t("editSettings")}</span>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Profile - Always visible for logged-in users */}
+            {isLogin && (
+              <div>
+                <button
+                  onClick={() => toggleDropdown("profile")}
+                  className={`cursor-pointer w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${
+                    isDropdownActive([
+                      "/dashboard/profile",
+                      "/dashboard/profile/password",
+                      "/dashboard/profile/edit",
+                    ])
+                      ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                      : "text-gray-700 hover:bg-blue-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <UserCircle2 className="w-5 h-5" />
+                    <span className="font-medium">{t("profile")}</span>
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform duration-300 ${
+                      openDropdowns["profile"] ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    openDropdowns["profile"]
+                      ? "max-h-96 opacity-100 mt-2"
+                      : "max-h-0 opacity-0"
+                  }`}
+                >
+                  <div
+                    className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
+                  >
+                    <Link
+                      href="/dashboard/profile"
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                        isLinkActive("/dashboard/profile")
+                          ? "bg-blue-50 text-blue-600 font-medium"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      }`}
+                    >
+                      <Edit className="w-4 h-4" />
+                      <span>{t("editProfile")}</span>
+                    </Link>
+
+                    <Link
+                      href="/dashboard/profile/password"
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                        isLinkActive("/dashboard/profile/password")
+                          ? "bg-blue-50 text-blue-600 font-medium"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      }`}
+                    >
+                      <Edit className="w-4 h-4" />
+                      <span>{t("changePassword")}</span>
+                    </Link>
+
+                    <Link
+                      href="/dashboard/profile/edit"
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                        isLinkActive("/dashboard/profile/edit")
+                          ? "bg-blue-50 text-blue-600 font-medium"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      }`}
+                    >
+                      <EditIcon className="w-4 h-4" />
+                      <span>{t("advancedEdit")}</span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Logout Button */}
         <button
           onClick={handleLogout}
           className="cursor-pointer w-full flex items-center gap-3 px-4 py-3 rounded-lg
