@@ -343,7 +343,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
             )}
 
             {/* Enrollments */}
-            {hasPermission("enrollments") && (
+            {hasPermission("ENROLLMENTS_VIEW") && (
               <div>
                 <button
                   onClick={() => toggleDropdown("enrollments")}
@@ -374,7 +374,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
                   <div
                     className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
                   >
-                    {hasPermission("enrollments.view") && (
+                    {hasPermission("ENROLLMENTS_VIEW") && (
                       <Link
                         href="/enrollments"
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
@@ -388,7 +388,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
                       </Link>
                     )}
 
-                    {hasPermission("enrollments.create") && (
+                    {hasPermission("ENROLLMENTS_CREATE") && (
                       <Link
                         href="/enrollments/add"
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
@@ -407,7 +407,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
             )}
 
             {/* Leads */}
-            {hasPermission("leads") && (
+            {hasPermission("LEADS_VIEW") && (
               <div>
                 <button
                   onClick={() => toggleDropdown("leads")}
@@ -438,7 +438,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
                   <div
                     className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
                   >
-                    {hasPermission("leads.board") && (
+                    {hasPermission("LEADS_BOARD") && (
                       <Link
                         href="/leads/board"
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
@@ -452,7 +452,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
                       </Link>
                     )}
 
-                    {hasPermission("leads.view") && (
+                    {hasPermission("LEADS_VIEW") && (
                       <Link
                         href="/leads"
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
@@ -466,7 +466,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
                       </Link>
                     )}
 
-                    {hasPermission("leads.create") && (
+                    {hasPermission("LEADS_CREATE") && (
                       <Link
                         href="/leads/add"
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
@@ -485,7 +485,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
             )}
 
             {/* Students */}
-            {hasPermission("students") && (
+            {hasPermission("STUDENTS_VIEW") && (
               <div>
                 <button
                   onClick={() => toggleDropdown("students")}
@@ -516,7 +516,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
                   <div
                     className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
                   >
-                    {hasPermission("students.view") && (
+                    {hasPermission("STUDENTS_VIEW") && (
                       <Link
                         href="/students"
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
@@ -530,7 +530,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
                       </Link>
                     )}
 
-                    {hasPermission("students.create") && (
+                    {hasPermission("STUDENTS_CREATE") && (
                       <Link
                         href="/students/add"
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
@@ -549,7 +549,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
             )}
 
             {/* Follow-up */}
-            {hasPermission("followups") && (
+            {hasPermission("FOLLOWUPS_VIEW") && (
               <div>
                 <button
                   onClick={() => toggleDropdown("followups")}
@@ -585,7 +585,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
                   <div
                     className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
                   >
-                    {hasPermission("followups.view") && (
+                    {hasPermission("FOLLOWUPS_VIEW") && (
                       <Link
                         href="/follow-up"
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
@@ -599,7 +599,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
                       </Link>
                     )}
 
-                    {hasPermission("followups.create") && (
+                    {hasPermission("FOLLOWUPS_CREATE") && (
                       <Link
                         href="/follow-up/add"
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
@@ -627,7 +627,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
 
           <div className="space-y-2">
             {/* Users */}
-            {hasPermission("users") && (
+            {hasPermission("USERS_VIEW") && (
               <div>
                 <button
                   onClick={() => toggleDropdown("users")}
@@ -658,7 +658,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
                   <div
                     className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
                   >
-                    {hasPermission("users.view") && (
+                    {hasPermission("USERS_VIEW") && (
                       <Link
                         href="/users"
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
@@ -672,7 +672,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
                       </Link>
                     )}
 
-                    {hasPermission("users.create") && (
+                    {hasPermission("USERS_CREATE") && (
                       <Link
                         href="/users/add"
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
@@ -691,7 +691,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
             )}
 
             {/* Roles */}
-            {hasPermission("roles") && (
+            {hasPermission("ROLES_VIEW") && (
               <div>
                 <button
                   onClick={() => toggleDropdown("roles")}
@@ -722,7 +722,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
                   <div
                     className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
                   >
-                    {hasPermission("roles.view") && (
+                    {hasPermission("ROLES_VIEW") && (
                       <Link
                         href="/roles"
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
@@ -736,7 +736,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
                       </Link>
                     )}
 
-                    {hasPermission("roles.create") && (
+                    {hasPermission("ROLES_CREATE") && (
                       <Link
                         href="/roles/add"
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
@@ -755,7 +755,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
             )}
 
             {/* Settings */}
-            {hasPermission("settings") && (
+            {hasPermission("SETTINGS_VIEW") && (
               <div>
                 <button
                   onClick={() => toggleDropdown("settings")}
@@ -790,7 +790,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
                   <div
                     className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
                   >
-                    {hasPermission("settings.general") && (
+                    {hasPermission("SETTINGS_GENERAL") && (
                       <Link
                         href="/dashboard/settings"
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
@@ -804,7 +804,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
                       </Link>
                     )}
 
-                    {hasPermission("settings.config") && (
+                    {hasPermission("SETTINGS_CONFIG") && (
                       <Link
                         href="/dashboard/settings/config"
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
@@ -818,7 +818,7 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
                       </Link>
                     )}
 
-                    {hasPermission("settings.edit") && (
+                    {hasPermission("SETTINGS_EDIT") && (
                       <Link
                         href="/dashboard/settings/edit"
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
