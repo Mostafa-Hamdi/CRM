@@ -438,19 +438,17 @@ const Sidebar = ({ sidebarOpen }: SidebarProps) => {
                   <div
                     className={`${isRTL ? "mr-4 pr-4 border-r-2" : "ml-4 pl-4 border-l-2"} border-blue-200 space-y-1`}
                   >
-                    {hasPermission("LEADS_BOARD") && (
-                      <Link
-                        href="/leads/board"
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
-                          isLinkActive("/leads/board")
-                            ? "bg-blue-50 text-blue-600 font-medium"
-                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                        }`}
-                      >
-                        <KanbanSquare className="w-4 h-4" />
-                        <span>{t("board")}</span>
-                      </Link>
-                    )}
+                    <Link
+                      href="/leads/board"
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                        isLinkActive("/leads/board")
+                          ? "bg-blue-50 text-blue-600 font-medium"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      }`}
+                    >
+                      <KanbanSquare className="w-4 h-4" />
+                      <span>{t("board")}</span>
+                    </Link>
 
                     {hasPermission("LEADS_VIEW") && (
                       <Link
