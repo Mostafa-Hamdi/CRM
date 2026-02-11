@@ -401,10 +401,10 @@ const Page = () => {
               </div>
               <div>
                 <h1 className="text-3xl sm:text-4xl leading-[50px]  font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
-                  Enrollments
+                  Deals
                 </h1>
                 <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                  Manage student course enrollments and track progress
+                  Manage Deals and track progress
                 </p>
               </div>
             </div>
@@ -415,7 +415,7 @@ const Page = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
               <Plus className="w-5 h-5 relative z-10" />
-              <span className="relative z-10">Add Enrollment</span>
+              <span className="relative z-10">Add Deal</span>
             </Link>
           </div>
         </div>
@@ -425,9 +425,7 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10 hover:shadow-xl hover:shadow-blue-500/20 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">
-                  Total Enrollments
-                </p>
+                <p className="text-gray-600 text-sm font-medium">Total Deals</p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mt-1">
                   {enrollmentsResponse?.totalCount || 0}
                 </p>
@@ -565,7 +563,7 @@ const Page = () => {
             <div className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 border border-blue-400 rounded-xl shadow-lg shadow-blue-500/30">
               <UserCheck className="w-5 h-5 text-white" />
               <span className="text-sm font-bold text-white">
-                {filteredEnrollments.length} Enrollments
+                {filteredEnrollments.length} Deals
               </span>
             </div>
           </div>
@@ -591,9 +589,7 @@ const Page = () => {
           {isLoading || isFilterLoading ? (
             <div className="p-20 flex flex-col items-center justify-center">
               <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4" />
-              <p className="text-gray-600 font-medium">
-                Loading enrollments...
-              </p>
+              <p className="text-gray-600 font-medium">Loading Deals...</p>
             </div>
           ) : filteredEnrollments.length === 0 ? (
             <div className="p-20 text-center">
