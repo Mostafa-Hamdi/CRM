@@ -282,7 +282,7 @@ const Page = () => {
               </div>
 
               <div>
-                <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
+                <h1 className="text-3xl sm:text-4xl leading-[50px]  font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
                   {courseName} {t("title")}
                 </h1>
                 <p className="text-gray-600 mt-2 text-sm sm:text-base">

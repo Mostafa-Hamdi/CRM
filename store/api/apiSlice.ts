@@ -29,7 +29,7 @@ interface RefreshResponse {
 ====================== */
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://aura-crm.runasp.net/api",
+  baseUrl: "https://aura-crm.runasp.net/api",
   prepareHeaders: (headers, { getState, endpoint }) => {
     const token = (getState() as RootState).auth.token;
 

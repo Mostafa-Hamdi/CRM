@@ -69,6 +69,177 @@
     ]
   },
   "leads": {
+    "addNote": {
+      "title": "Add Note",
+      "subtitle": "Add a note or interaction to this lead",
+      "goBack": "Go back",
+
+      "interactionTypes": {
+        "generalNote": "General Note",
+        "phoneCall": "Phone Call",
+        "email": "Email",
+        "whatsapp": "WhatsApp",
+        "meeting": "Meeting",
+        "followUp": "Follow Up",
+        "other": "Other"
+      },
+
+      "form": {
+        "interactionDetails": "Interaction Details",
+        "interactionType": "Interaction Type",
+        "note": "Note",
+        "notePlaceholder": "Enter your {type} details here...",
+        "maxCharacters": "Maximum 500 characters",
+        "required": "*",
+        "cancel": "Cancel",
+        "addNote": "Add Note",
+        "addingNote": "Adding Note...",
+        "selected": "Selected: {value} ({label})"
+      },
+
+      "validation": {
+        "noteRequired": "Note is required",
+        "noteMin": "Note must be at least {min} characters",
+        "noteMax": "Note must not exceed {max} characters",
+        "interactionTypeRequired": "Interaction type is required",
+        "interactionTypeValid": "Please select a valid interaction type"
+      },
+
+      "infoBox": {
+        "title": "{type} Information",
+        "message": "This {type} will be added to the lead's timeline and can be viewed by all team members with access."
+      },
+
+      "success": {
+        "title": "Success!",
+        "message": "Note has been added successfully."
+      },
+
+      "error": {
+        "title": "Oops!",
+        "defaultMessage": "Failed to add note."
+      }
+    },
+
+    "edit": {
+      "title": "Edit Lead",
+      "subtitle": "Update lead information",
+      "back": "Back",
+      "backToLeads": "Back to Leads",
+      "loading": "Loading lead data...",
+      "notFound": "Lead not found",
+
+      "form": {
+        "fullName": "Full Name",
+        "fullNamePlaceholder": "Enter full name",
+        "phoneNumber": "Phone Number",
+        "phoneNumberPlaceholder": "Enter phone number",
+        "emailAddress": "Email Address",
+        "emailPlaceholder": "Enter email address",
+        "source": "Source",
+        "sourcePlaceholder": "e.g., Website, Referral, Social Media",
+        "required": "*",
+        "cancel": "Cancel",
+        "updateLead": "Update Lead",
+        "updatingLead": "Updating Lead..."
+      },
+
+      "validation": {
+        "fullNameRequired": "Full name is required",
+        "fullNameMin": "Name must be at least {min} characters",
+        "fullNameMax": "Name must not exceed {max} characters",
+        "phoneRequired": "Phone number is required",
+        "phoneInvalid": "Phone number must contain only numbers and valid characters",
+        "phoneMin": "Phone number must be at least {min} characters",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Please enter a valid email address",
+        "sourceRequired": "Source is required",
+        "sourceMin": "Source must be at least {min} characters",
+        "sourceMax": "Source must not exceed {max} characters"
+      },
+
+      "info": {
+        "title": "Editing Lead #{id}",
+        "tip1": "Make sure all information is up to date",
+        "tip2": "Changes will be saved immediately upon submission",
+        "tip3": "Lead status and other details can be managed separately"
+      },
+
+      "success": {
+        "title": "Success!",
+        "message": "Lead has been updated successfully."
+      },
+
+      "error": {
+        "title": "Oops!",
+        "defaultMessage": "Failed to update lead."
+      }
+    },
+    "addTask": {
+      "title": "Add New Task",
+      "subtitle": "Create a task for lead #{id}",
+      "backToLead": "Back to Lead",
+
+      "form": {
+        "taskTitle": "Task Title",
+        "taskTitlePlaceholder": "e.g., Follow up call, Send proposal, Schedule meeting",
+        "dueDate": "Due Date",
+        "dueDateHelper": "Select a date for when this task should be completed",
+        "required": "*",
+        "cancel": "Cancel",
+        "createTask": "Create Task",
+        "creatingTask": "Creating Task...",
+        "taskCreated": "Task Created!"
+      },
+
+      "validation": {
+        "titleRequired": "Task title is required",
+        "titleMin": "Title must be at least {min} characters",
+        "titleMax": "Title must not exceed {max} characters",
+        "dueDateRequired": "Due date is required",
+        "dueDateFuture": "Due date must be in the future"
+      },
+
+      "success": {
+        "title": "Task Created Successfully!",
+        "message": "Redirecting you back to the lead..."
+      },
+
+      "error": {
+        "title": "Failed to Create Task",
+        "defaultMessage": "An error occurred. Please try again."
+      },
+
+      "tips": {
+        "title": "Tips for Creating Tasks",
+        "tip1": "Be specific with your task title for better tracking",
+        "tip2": "Set realistic due dates to stay on schedule",
+        "tip3": "Tasks will appear in your lead's activity timeline"
+      }
+    },
+
+    "notes": {
+      "title": "Lead Notes",
+      "subtitle": "View all notes and updates for Lead #{id}",
+      "addNote": "Add Note",
+      "goBack": "Go back",
+
+      "stats": {
+        "totalNotes": "Total Notes",
+        "lastUpdated": "Last Updated",
+        "noUpdates": "No updates",
+        "contributors": "Contributors",
+        "author": "Author"
+      },
+
+      "empty": {
+        "title": "No notes yet",
+        "message": "Start documenting your interactions with this lead",
+        "addFirstNote": "Add First Note"
+      },
+
+      "loading": "Loading notes..."
+    },
     "leadDetails": {
       "backToLeads": "Back to Leads",
       "loading": "Loading lead details...",

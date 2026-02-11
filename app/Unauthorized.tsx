@@ -54,7 +54,7 @@ const UnauthorizedPage = ({
 
           {/* Title */}
           <div className="text-center mb-6">
-            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-red-700 via-orange-600 to-red-800 bg-clip-text text-transparent mb-3">
+            <h1 className="text-3xl sm:text-4xl leading-[50px]  font-bold bg-gradient-to-r from-red-700 via-orange-600 to-red-800 bg-clip-text text-transparent mb-3">
               Access Denied
             </h1>
             <p className="text-lg text-gray-700 font-medium">

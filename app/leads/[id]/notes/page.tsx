@@ -2,7 +2,6 @@
 
 import { useGetLeadNotesQuery } from "@/store/api/apiSlice";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
 import {
   FileText,
   Plus,
@@ -14,6 +13,7 @@ import {
   Clock,
 } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 interface Note {
   note: string;
@@ -24,6 +24,7 @@ interface Note {
 const Page = () => {
   const params = useParams();
   const router = useRouter();
+  const t = useTranslations("leads.notes");
   const id = Number(params.id);
   const { data: notes, isLoading } = useGetLeadNotesQuery({ id });
 
@@ -75,7 +76,7 @@ const Page = () => {
               <button
                 onClick={() => router.back()}
                 className="cursor-pointer p-3 bg-white/50 hover:bg-white border border-gray-200 rounded-xl transition-all duration-300 hover:shadow-md"
-                title="Go back"
+                title={t("goBack")}
               >
                 <ArrowLeft className="w-5 h-5 text-gray-700" />
               </button>
@@ -90,11 +91,11 @@ const Page = () => {
               </div>
 
               <div>
-                <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
-                  Lead Notes
+                <h1 className="text-3xl sm:text-4xl leading-[50px] font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
+                  {t("title")}
                 </h1>
                 <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                  View all notes and updates for Lead #{id}
+                  {t("subtitle", { id })}
                 </p>
               </div>
             </div>
@@ -105,7 +106,7 @@ const Page = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
               <Plus className="w-5 h-5 relative z-10" />
-              <span className="relative z-10">Add Note</span>
+              <span className="relative z-10">{t("addNote")}</span>
             </Link>
           </div>
         </div>
@@ -115,7 +116,9 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10 hover:shadow-xl hover:shadow-blue-500/20 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Total Notes</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  {t("stats.totalNotes")}
+                </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mt-1">
                   {notes?.length || 0}
                 </p>
@@ -130,10 +133,12 @@ const Page = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">
-                  Last Updated
+                  {t("stats.lastUpdated")}
                 </p>
                 <p className="text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mt-1">
-                  {notes?.[0] ? formatDate(notes[0].createdAt) : "No updates"}
+                  {notes?.[0]
+                    ? formatDate(notes[0].createdAt)
+                    : t("stats.noUpdates")}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl flex items-center justify-center">
@@ -146,7 +151,7 @@ const Page = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">
-                  Contributors
+                  {t("stats.contributors")}
                 </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mt-1">
                   {notes
@@ -166,7 +171,7 @@ const Page = () => {
           {isLoading ? (
             <div className="p-20 flex flex-col items-center justify-center">
               <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4" />
-              <p className="text-gray-600 font-medium">Loading notes...</p>
+              <p className="text-gray-600 font-medium">{t("loading")}</p>
             </div>
           ) : !notes || notes.length === 0 ? (
             <div className="p-20 text-center">
@@ -174,17 +179,15 @@ const Page = () => {
                 <FileText className="w-10 h-10 text-gray-400" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                No notes yet
+                {t("empty.title")}
               </h3>
-              <p className="text-gray-500 text-sm mb-6">
-                Start documenting your interactions with this lead
-              </p>
+              <p className="text-gray-500 text-sm mb-6">{t("empty.message")}</p>
               <Link
                 href={`/leads/${id}/notes/add`}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
-                <span>Add First Note</span>
+                <span>{t("empty.addFirstNote")}</span>
               </Link>
             </div>
           ) : (
@@ -221,7 +224,9 @@ const Page = () => {
                               <p className="font-bold text-gray-900">
                                 {note.createdBy}
                               </p>
-                              <p className="text-xs text-gray-500">Author</p>
+                              <p className="text-xs text-gray-500">
+                                {t("stats.author")}
+                              </p>
                             </div>
                           </div>
 

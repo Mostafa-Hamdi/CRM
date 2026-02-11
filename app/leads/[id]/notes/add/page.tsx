@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useMemo } from "react";
 import {
   StickyNote,
   Sparkles,
@@ -21,40 +22,49 @@ import {
 import Link from "next/link";
 import Swal from "sweetalert2";
 import { useAddLeadNoteMutation } from "@/store/api/apiSlice";
+import { useTranslations } from "next-intl";
 
-// Interaction types with their integer values
-const INTERACTION_TYPES = [
-  { value: 0, label: "General Note", icon: StickyNote },
-  { value: 1, label: "Phone Call", icon: Phone },
-  { value: 2, label: "Email", icon: Mail },
-  { value: 3, label: "WhatsApp", icon: MessageSquare },
-  { value: 4, label: "Meeting", icon: Calendar },
-  { value: 5, label: "Follow Up", icon: Target },
-  { value: 6, label: "Other", icon: FileText },
-];
-
-// Validation schema
-const noteSchema = yup.object({
-  note: yup
-    .string()
-    .required("Note is required")
-    .min(5, "Note must be at least 5 characters")
-    .max(500, "Note must not exceed 500 characters")
-    .trim(),
-  interactionType: yup
-    .number()
-    .required("Interaction type is required")
-    .min(0, "Please select a valid interaction type"),
-});
-
-// Infer the type from the schema
-type NoteFormData = yup.InferType<typeof noteSchema>;
+type NoteFormData = {
+  note: string;
+  interactionType: number;
+};
 
 const Page = () => {
   const params = useParams();
   const leadId = Number(params.id);
   const router = useRouter();
+  const t = useTranslations("leads.addNote");
   const [addLeadNote, { isLoading }] = useAddLeadNoteMutation();
+
+  // Interaction types with their integer values
+  const INTERACTION_TYPES = useMemo(
+    () => [
+      { value: 0, label: t("interactionTypes.generalNote"), icon: StickyNote },
+      { value: 1, label: t("interactionTypes.phoneCall"), icon: Phone },
+      { value: 2, label: t("interactionTypes.email"), icon: Mail },
+      { value: 3, label: t("interactionTypes.whatsapp"), icon: MessageSquare },
+      { value: 4, label: t("interactionTypes.meeting"), icon: Calendar },
+      { value: 5, label: t("interactionTypes.followUp"), icon: Target },
+      { value: 6, label: t("interactionTypes.other"), icon: FileText },
+    ],
+    [t],
+  );
+
+  // Create validation schema with translations
+  const noteSchema = useMemo(() => {
+    return yup.object({
+      note: yup
+        .string()
+        .required(t("validation.noteRequired"))
+        .min(5, t("validation.noteMin", { min: 5 }))
+        .max(500, t("validation.noteMax", { max: 500 }))
+        .trim(),
+      interactionType: yup
+        .number()
+        .required(t("validation.interactionTypeRequired"))
+        .min(0, t("validation.interactionTypeValid")),
+    });
+  }, [t]);
 
   const {
     register,
@@ -83,8 +93,8 @@ const Page = () => {
 
       await Swal.fire({
         icon: "success",
-        title: "Success!",
-        text: "Note has been added successfully.",
+        title: t("success.title"),
+        text: t("success.message"),
         timer: 2000,
         showConfirmButton: false,
       });
@@ -92,7 +102,7 @@ const Page = () => {
       reset();
       router.push(`/leads/${leadId}`);
     } catch (err: any) {
-      let errorMessage = "Failed to add note.";
+      let errorMessage = t("error.defaultMessage");
 
       if (err?.data) {
         if (typeof err.data === "string") {
@@ -104,7 +114,7 @@ const Page = () => {
 
       Swal.fire({
         icon: "error",
-        title: "Oops!",
+        title: t("error.title"),
         text: errorMessage,
       });
     }
@@ -129,7 +139,7 @@ const Page = () => {
             <Link
               href={`/leads/${leadId}`}
               className="cursor-pointer p-3 bg-white/50 hover:bg-white border border-gray-200 rounded-xl transition-all duration-300 hover:shadow-md"
-              title="Go back"
+              title={t("goBack")}
             >
               <ArrowLeft className="w-5 h-5 text-gray-700" />
             </Link>
@@ -144,11 +154,11 @@ const Page = () => {
             </div>
 
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
-                Add Note
+              <h1 className="text-3xl sm:text-4xl leading-[50px] font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
+                {t("title")}
               </h1>
               <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                Add a note or interaction to this lead
+                {t("subtitle")}
               </p>
             </div>
           </div>
@@ -161,13 +171,14 @@ const Page = () => {
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-blue-600" />
-                Interaction Details
+                {t("form.interactionDetails")}
               </h2>
 
               {/* Interaction Type Cards - Visual Selection */}
               <div className="mb-6">
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Interaction Type <span className="text-red-500">*</span>
+                  {t("form.interactionType")}{" "}
+                  <span className="text-red-500">{t("form.required")}</span>
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {INTERACTION_TYPES.map((type) => {
@@ -178,14 +189,9 @@ const Page = () => {
                         key={type.value}
                         type="button"
                         onClick={() => {
-                          console.log("Clicking type:", type.value);
                           setValue("interactionType", type.value, {
                             shouldValidate: true,
                           });
-                          console.log(
-                            "Selected interaction type:",
-                            selectedInteractionType,
-                          );
                         }}
                         className={`cursor-pointer p-4 rounded-xl border-2 transition-all duration-300 ${
                           isSelected
@@ -215,16 +221,6 @@ const Page = () => {
                     {errors.interactionType.message}
                   </p>
                 )}
-                {/* Debug info */}
-                <p className="mt-2 text-xs text-gray-500">
-                  Selected: {selectedInteractionType} (
-                  {
-                    INTERACTION_TYPES.find(
-                      (t) => t.value === selectedInteractionType,
-                    )?.label
-                  }
-                  )
-                </p>
               </div>
 
               {/* Note Field */}
@@ -233,12 +229,15 @@ const Page = () => {
                   htmlFor="note"
                   className="block text-sm font-semibold text-gray-700 mb-2"
                 >
-                  Note <span className="text-red-500">*</span>
+                  {t("form.note")}{" "}
+                  <span className="text-red-500">{t("form.required")}</span>
                 </label>
                 <textarea
                   id="note"
                   rows={6}
-                  placeholder={`Enter your ${selectedType?.label.toLowerCase() || "note"} details here...`}
+                  placeholder={t("form.notePlaceholder", {
+                    type: selectedType?.label.toLowerCase() || "note",
+                  })}
                   {...register("note")}
                   className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                     errors.note
@@ -253,7 +252,7 @@ const Page = () => {
                   </p>
                 )}
                 <p className="mt-2 text-sm text-gray-500">
-                  Maximum 500 characters
+                  {t("form.maxCharacters")}
                 </p>
               </div>
             </div>
@@ -268,12 +267,14 @@ const Page = () => {
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-blue-900 mb-1">
-                    {selectedType?.label || "Interaction"} Information
+                    {t("infoBox.title", {
+                      type: selectedType?.label || "Interaction",
+                    })}
                   </h3>
                   <p className="text-sm text-blue-700">
-                    This {selectedType?.label.toLowerCase() || "interaction"}{" "}
-                    will be added to the lead's timeline and can be viewed by
-                    all team members with access.
+                    {t("infoBox.message", {
+                      type: selectedType?.label.toLowerCase() || "interaction",
+                    })}
                   </p>
                 </div>
               </div>
@@ -285,24 +286,24 @@ const Page = () => {
                 type="button"
                 onClick={() => router.push(`/leads/${leadId}`)}
                 disabled={isLoading}
-                className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                Cancel
+                {t("form.cancel")}
               </button>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isLoading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Adding Note...</span>
+                    <span>{t("form.addingNote")}</span>
                   </>
                 ) : (
                   <>
                     <CheckCircle className="w-5 h-5" />
-                    <span>Add Note</span>
+                    <span>{t("form.addNote")}</span>
                   </>
                 )}
               </button>

@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useEffect } from "react";
+import { useMemo } from "react";
 import {
   Calendar,
   CheckCircle2,
@@ -15,35 +15,42 @@ import {
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
-// Validation Schema
-const taskSchema = yup.object({
-  title: yup
-    .string()
-    .required("Task title is required")
-    .min(3, "Title must be at least 3 characters")
-    .max(200, "Title must not exceed 200 characters"),
-  dueDate: yup
-    .string()
-    .required("Due date is required")
-    .test("is-future", "Due date must be in the future", (value) => {
-      if (!value) return false;
-      const selectedDate = new Date(value);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      return selectedDate >= today;
-    }),
-});
-
-type TaskFormData = yup.InferType<typeof taskSchema>;
+type TaskFormData = {
+  title: string;
+  dueDate: string;
+};
 
 const Page = () => {
   const params = useParams();
   const router = useRouter();
+  const t = useTranslations("leads.addTask");
   const id = Number(params.id);
 
   const [addLeadTask, { isLoading, isSuccess, isError, error }] =
     useAddLeadTaskMutation();
+
+  // Create validation schema with translations
+  const taskSchema = useMemo(() => {
+    return yup.object({
+      title: yup
+        .string()
+        .required(t("validation.titleRequired"))
+        .min(3, t("validation.titleMin", { min: 3 }))
+        .max(200, t("validation.titleMax", { max: 200 })),
+      dueDate: yup
+        .string()
+        .required(t("validation.dueDateRequired"))
+        .test("is-future", t("validation.dueDateFuture"), (value) => {
+          if (!value) return false;
+          const selectedDate = new Date(value);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          return selectedDate >= today;
+        }),
+    });
+  }, [t]);
 
   const {
     register,
@@ -66,10 +73,8 @@ const Page = () => {
         dueDate: data.dueDate,
       }).unwrap();
 
-      // Reset form after successful submission
       reset();
 
-      // Optional: Redirect after a short delay
       setTimeout(() => {
         router.push(`/leads/${id}`);
       }, 2000);
@@ -95,10 +100,10 @@ const Page = () => {
         <div className="mb-6">
           <Link
             href={`/leads/${id}`}
-            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium mb-4 transition-colors"
+            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium mb-4 transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Lead
+            {t("backToLead")}
           </Link>
 
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 sm:p-8 shadow-xl shadow-blue-500/10">
@@ -109,11 +114,11 @@ const Page = () => {
                 </div>
               </div>
               <div>
-                <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
-                  Add New Task
+                <h1 className="text-3xl sm:text-4xl leading-[50px] font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
+                  {t("title")}
                 </h1>
                 <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                  Create a task for lead #{id}
+                  {t("subtitle", { id })}
                 </p>
               </div>
             </div>
@@ -129,11 +134,9 @@ const Page = () => {
               </div>
               <div>
                 <h3 className="font-semibold text-green-900">
-                  Task Created Successfully!
+                  {t("success.title")}
                 </h3>
-                <p className="text-sm text-green-700">
-                  Redirecting you back to the lead...
-                </p>
+                <p className="text-sm text-green-700">{t("success.message")}</p>
               </div>
             </div>
           </div>
@@ -148,11 +151,10 @@ const Page = () => {
               </div>
               <div>
                 <h3 className="font-semibold text-red-900">
-                  Failed to Create Task
+                  {t("error.title")}
                 </h3>
                 <p className="text-sm text-red-700">
-                  {(error as any)?.data?.message ||
-                    "An error occurred. Please try again."}
+                  {(error as any)?.data?.message || t("error.defaultMessage")}
                 </p>
               </div>
             </div>
@@ -168,14 +170,15 @@ const Page = () => {
                 htmlFor="title"
                 className="block text-sm font-semibold text-gray-700 mb-2"
               >
-                Task Title <span className="text-red-500">*</span>
+                {t("form.taskTitle")}{" "}
+                <span className="text-red-500">{t("form.required")}</span>
               </label>
               <div className="relative">
                 <input
                   id="title"
                   type="text"
                   {...register("title")}
-                  placeholder="e.g., Follow up call, Send proposal, Schedule meeting"
+                  placeholder={t("form.taskTitlePlaceholder")}
                   className={`w-full bg-white border-2 ${
                     errors.title
                       ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
@@ -203,7 +206,8 @@ const Page = () => {
                 htmlFor="dueDate"
                 className="block text-sm font-semibold text-gray-700 mb-2"
               >
-                Due Date <span className="text-red-500">*</span>
+                {t("form.dueDate")}{" "}
+                <span className="text-red-500">{t("form.required")}</span>
               </label>
               <div className="relative">
                 <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
@@ -232,7 +236,7 @@ const Page = () => {
                 </p>
               )}
               <p className="mt-2 text-sm text-gray-500">
-                Select a date for when this task should be completed
+                {t("form.dueDateHelper")}
               </p>
             </div>
 
@@ -242,29 +246,29 @@ const Page = () => {
                 type="button"
                 onClick={() => router.back()}
                 disabled={isLoading || isSuccess}
-                className="flex-1 px-6 py-3.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-6 py-3.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                Cancel
+                {t("form.cancel")}
               </button>
               <button
                 type="submit"
                 disabled={isLoading || isSuccess || !isDirty}
-                className="flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 text-white font-semibold rounded-xl hover:shadow-2xl hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-3.5 bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 text-white font-semibold rounded-xl hover:shadow-2xl hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isLoading ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Creating Task...</span>
+                    <span>{t("form.creatingTask")}</span>
                   </>
                 ) : isSuccess ? (
                   <>
                     <CheckCircle2 className="w-5 h-5" />
-                    <span>Task Created!</span>
+                    <span>{t("form.taskCreated")}</span>
                   </>
                 ) : (
                   <>
                     <ListTodo className="w-5 h-5" />
-                    <span>Create Task</span>
+                    <span>{t("form.createTask")}</span>
                   </>
                 )}
               </button>
@@ -280,12 +284,12 @@ const Page = () => {
             </div>
             <div>
               <h4 className="font-semibold text-blue-900 mb-1">
-                Tips for Creating Tasks
+                {t("tips.title")}
               </h4>
               <ul className="text-sm text-blue-800 space-y-1">
-                <li>• Be specific with your task title for better tracking</li>
-                <li>• Set realistic due dates to stay on schedule</li>
-                <li>• Tasks will appear in your lead's activity timeline</li>
+                <li>• {t("tips.tip1")}</li>
+                <li>• {t("tips.tip2")}</li>
+                <li>• {t("tips.tip3")}</li>
               </ul>
             </div>
           </div>
