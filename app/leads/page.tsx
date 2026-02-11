@@ -4,9 +4,8 @@ import {
   useConvertStatusMutation,
   useDeleteLeadMutation,
   useExportLeadsMutation,
-  useGetClassesQuery,
-  useGetCoursesQuery,
   useGetFilteredLeadsMutation,
+  useGetLeadsQuery,
   useGetSpecificLeadsMutation,
   useImportLeadsMutation,
 } from "@/store/api/apiSlice";
@@ -89,7 +88,7 @@ const Page = () => {
   } | null>(null);
 
   const [getSpecificLeads, { isLoading }] = useGetSpecificLeadsMutation();
-  const { data: classes, isLoading: classesIsLoading } = useGetClassesQuery();
+  const { data: classes, isLoading: classesIsLoading } = useGetLeadsQuery();
   const [deleteLead] = useDeleteLeadMutation();
   const [convertStatus, { isLoading: isConverting }] =
     useConvertStatusMutation();
