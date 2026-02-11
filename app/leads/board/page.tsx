@@ -38,6 +38,7 @@ import {
   useUpdateLeadStatusMutation,
 } from "../../../store/api/apiSlice";
 import Swal from "sweetalert2";
+import { useTranslations } from "next-intl";
 
 interface Lead {
   id: number;
@@ -77,7 +78,6 @@ interface ApiLeadInStage {
   currency: string | null;
   lastActivityAt: string | null;
   lastActivityType: string | null;
-  // Assigned user can come as a simple string or an object from the API
   assignedUser: { id: number; fullName: string } | string | null;
   tags: string | null;
 }
@@ -87,9 +87,8 @@ interface AssignOwnerDialog {
   lead: Lead | null;
 }
 
-// FIXED: Handle stageId 0 and map it to "new"
 const STATUS_TO_STAGE: { [key: number]: string } = {
-  0: "new", // Added mapping for stageId 0
+  0: "new",
   1: "new",
   2: "contacted",
   3: "qualified",
@@ -109,88 +108,8 @@ const STAGE_TO_STATUS: { [key: string]: number } = {
   won: 7,
 };
 
-const STAGES = [
-  {
-    id: "new",
-    name: "New",
-    status: 1,
-    color: "from-gray-600 to-slate-600",
-    wipLimit: 10,
-  },
-  {
-    id: "contacted",
-    name: "Contacted",
-    status: 2,
-    color: "from-blue-600 to-cyan-600",
-    wipLimit: 8,
-  },
-  {
-    id: "qualified",
-    name: "Qualified",
-    status: 3,
-    color: "from-purple-600 to-pink-600",
-    wipLimit: 6,
-  },
-  {
-    id: "proposal",
-    name: "Proposal",
-    status: 4,
-    color: "from-indigo-600 to-blue-600",
-    wipLimit: 5,
-  },
-  {
-    id: "negotiation",
-    name: "Negotiation",
-    status: 5,
-    color: "from-orange-600 to-amber-600",
-    wipLimit: 4,
-  },
-  {
-    id: "won",
-    name: "Won",
-    status: 7,
-    color: "from-green-600 to-emerald-600",
-    wipLimit: null,
-  },
-  {
-    id: "lost",
-    name: "Lost",
-    status: 6,
-    color: "from-red-600 to-rose-600",
-    wipLimit: null,
-  },
-];
-
-const PRIORITY_CONFIG = {
-  urgent: {
-    color: "bg-red-500",
-    label: "Urgent",
-    icon: Flame,
-    textColor: "text-red-700",
-  },
-  high: {
-    color: "bg-orange-500",
-    label: "High",
-    icon: Zap,
-    textColor: "text-orange-700",
-  },
-  medium: {
-    color: "bg-yellow-500",
-    label: "Medium",
-    icon: Circle,
-    textColor: "text-yellow-700",
-  },
-  low: {
-    color: "bg-green-500",
-    label: "Low",
-    icon: Circle,
-    textColor: "text-green-700",
-  },
-};
-
 const transformApiLead = (apiLead: ApiLeadInStage, stageId: number): Lead => {
   const name = apiLead.name || "Unknown";
-  // assignedUser might be an object with { id, fullName } or a string
   const assignedToName =
     typeof apiLead.assignedUser === "string"
       ? apiLead.assignedUser
@@ -257,12 +176,6 @@ const transformApiLead = (apiLead: ApiLeadInStage, stageId: number): Lead => {
   };
 };
 
-const SAVED_FILTERS = [
-  { id: "hot", name: "🔥 My Hot Leads", icon: Flame },
-  { id: "recent", name: "⚡ Recent Activity", icon: Clock },
-  { id: "high-value", name: "💰 High Value", icon: DollarSign },
-];
-
 interface ConfirmationDialog {
   show: boolean;
   type: "backward" | "lost" | null;
@@ -272,15 +185,15 @@ interface ConfirmationDialog {
 }
 
 const Page = () => {
+  const t = useTranslations("leads.board");
+
   const {
     data: leadsData,
     error: leadsError,
     isLoading: leadsLoading,
   } = useGetLeadsPipeLineQuery();
 
-  console.log("Leads Data:", leadsData);
   const { data: users, isLoading: usersLoading } = useGetUsersQuery();
-  console.log("Users Data:", users);
   const [assignLead, { isLoading: isAssigning }] = useAssignLeadMutation();
   const [deleteLead, { isLoading: isDeleting }] = useDeleteLeadMutation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -323,14 +236,105 @@ const Page = () => {
   const [updateLeadStatus, { isLoading: isUpdating }] =
     useUpdateLeadStatusMutation();
 
-  // FIXED: Process leadsData when it changes
+  // Define stages with translations
+  const STAGES = useMemo(
+    () => [
+      {
+        id: "new",
+        name: t("stages.new"),
+        status: 1,
+        color: "from-gray-600 to-slate-600",
+        wipLimit: 10,
+      },
+      {
+        id: "contacted",
+        name: t("stages.contacted"),
+        status: 2,
+        color: "from-blue-600 to-cyan-600",
+        wipLimit: 8,
+      },
+      {
+        id: "qualified",
+        name: t("stages.qualified"),
+        status: 3,
+        color: "from-purple-600 to-pink-600",
+        wipLimit: 6,
+      },
+      {
+        id: "proposal",
+        name: t("stages.proposal"),
+        status: 4,
+        color: "from-indigo-600 to-blue-600",
+        wipLimit: 5,
+      },
+      {
+        id: "negotiation",
+        name: t("stages.negotiation"),
+        status: 5,
+        color: "from-orange-600 to-amber-600",
+        wipLimit: 4,
+      },
+      {
+        id: "won",
+        name: t("stages.won"),
+        status: 7,
+        color: "from-green-600 to-emerald-600",
+        wipLimit: null,
+      },
+      {
+        id: "lost",
+        name: t("stages.lost"),
+        status: 6,
+        color: "from-red-600 to-rose-600",
+        wipLimit: null,
+      },
+    ],
+    [t],
+  );
+
+  const PRIORITY_CONFIG = useMemo(
+    () => ({
+      urgent: {
+        color: "bg-red-500",
+        label: t("priority.urgent"),
+        icon: Flame,
+        textColor: "text-red-700",
+      },
+      high: {
+        color: "bg-orange-500",
+        label: t("priority.high"),
+        icon: Zap,
+        textColor: "text-orange-700",
+      },
+      medium: {
+        color: "bg-yellow-500",
+        label: t("priority.medium"),
+        icon: Circle,
+        textColor: "text-yellow-700",
+      },
+      low: {
+        color: "bg-green-500",
+        label: t("priority.low"),
+        icon: Circle,
+        textColor: "text-green-700",
+      },
+    }),
+    [t],
+  );
+
+  const SAVED_FILTERS = useMemo(
+    () => [
+      { id: "hot", name: t("savedFilters.hotLeads"), icon: Flame },
+      { id: "recent", name: t("savedFilters.recentActivity"), icon: Clock },
+      { id: "high-value", name: t("savedFilters.highValue"), icon: DollarSign },
+    ],
+    [t],
+  );
+
   useEffect(() => {
     if (leadsData) {
       const apiResponse = leadsData as any;
 
-      console.log("Processing API response:", apiResponse);
-
-      // Initialize empty stage leads
       const newStageLeads: { [key: string]: Lead[] } = {
         new: [],
         contacted: [],
@@ -341,29 +345,16 @@ const Page = () => {
         lost: [],
       };
 
-      // Process each stage from the API response
       apiResponse.forEach((stageData: any) => {
         const stageId = stageData.stageId;
         const stageName = STATUS_TO_STAGE[stageId];
-
-        console.log(`Processing stage ${stageId} -> ${stageName}`, {
-          leadsCount: stageData.leads?.length || 0,
-          stageData,
-        });
 
         if (stageName && stageData.leads && stageData.leads.length > 0) {
           const transformedLeads = stageData.leads.map((lead: any) =>
             transformApiLead(lead, stageId),
           );
           newStageLeads[stageName] = transformedLeads;
-          console.log(
-            `✅ ${stageName} stage loaded:`,
-            transformedLeads.length,
-            "leads",
-          );
         } else if (!stageName) {
-          console.warn(`⚠️ Unknown stageId: ${stageId}, mapping to 'new'`);
-          // Fallback: if stageId is not recognized, add to "new"
           if (stageData.leads && stageData.leads.length > 0) {
             const transformedLeads = stageData.leads.map((lead: any) =>
               transformApiLead(lead, stageId),
@@ -373,7 +364,6 @@ const Page = () => {
         }
       });
 
-      console.log("Final stage leads:", newStageLeads);
       setStageLeads(newStageLeads);
     }
   }, [leadsData]);
@@ -515,7 +505,6 @@ const Page = () => {
 
       const oldStage = lead.stage;
 
-      // Prevent duplicate: if lead is already in the target stage, do nothing
       if (oldStage === newStage) {
         console.log(`Lead ${lead.name} is already in ${newStage} stage`);
         setDraggedLead(null);
@@ -530,9 +519,7 @@ const Page = () => {
       };
 
       setStageLeads((prev) => {
-        // Remove from old stage
         const updatedOldStage = prev[oldStage].filter((l) => l.id !== lead.id);
-        // Add to new stage only if it doesn't already exist there
         const updatedNewStage = prev[newStage].some((l) => l.id === lead.id)
           ? prev[newStage]
           : [...prev[newStage], updatedLead];
@@ -549,14 +536,6 @@ const Page = () => {
         status: newStatus,
         reason: reason || undefined,
       }).unwrap();
-
-      console.log(
-        `Activity logged: ${lead.name} moved to ${newStage} (status: ${newStatus})`,
-        {
-          reason,
-          timestamp: new Date().toISOString(),
-        },
-      );
 
       setDraggedLead(null);
       setConfirmation({ show: false, type: null, lead: null, targetStage: "" });
@@ -587,18 +566,16 @@ const Page = () => {
 
   const confirmAssignOwner = async () => {
     if (!assignOwnerDialog.lead || !selectedUserId) {
-      alert("Please select a user");
+      alert(t("confirmations.assignOwner.selectUserError"));
       return;
     }
 
     try {
-      // Send the lead id (from dialog) along with the selected userId
       await assignLead({
         id: assignOwnerDialog.lead.id,
         userId: selectedUserId,
       }).unwrap();
 
-      // Update local state
       const selectedUser = users?.find((u: any) => u.id === selectedUserId);
       if (selectedUser) {
         setStageLeads((prev) => {
@@ -630,11 +607,11 @@ const Page = () => {
 
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
-      title: "😢 Are you sure you want to delete this lead?",
+      title: t("deleteConfirm"),
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes",
-      cancelButtonText: "No",
+      confirmButtonText: t("confirmYes"),
+      cancelButtonText: t("confirmNo"),
       confirmButtonColor: "#2563eb",
       cancelButtonColor: "#e5e7eb",
     });
@@ -644,15 +621,15 @@ const Page = () => {
       await deleteLead({ id }).unwrap();
       await Swal.fire({
         icon: "success",
-        title: "Deleted!",
-        text: "Lead has been deleted successfully.",
+        title: t("deleted"),
+        text: t("deleteSuccess"),
         timer: 2000,
       });
     } catch (err) {
       Swal.fire({
         icon: "error",
-        title: "Oops!",
-        text: "Failed to delete lead.",
+        title: t("oops"),
+        text: t("deleteFail"),
       });
     }
   };
@@ -716,10 +693,10 @@ const Page = () => {
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    return `${diffDays}d ago`;
+    if (diffMins < 1) return t("leadCard.justNow");
+    if (diffMins < 60) return t("leadCard.minutesAgo", { minutes: diffMins });
+    if (diffHours < 24) return t("leadCard.hoursAgo", { hours: diffHours });
+    return t("leadCard.daysAgo", { days: diffDays });
   };
 
   const uniqueOwners = Array.from(new Set(allLeads.map((l) => l.assignedTo)));
@@ -745,31 +722,31 @@ const Page = () => {
               </div>
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
-                  Sales Pipeline
+                  {t("title")}
                 </h1>
                 <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                  Manage your leads through the sales funnel
+                  {t("subtitle")}
                 </p>
                 <div className="mt-2">
                   {leadsLoading ? (
                     <span className="inline-flex items-center gap-2 text-sm text-blue-600 font-medium">
                       <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                      Loading leads...
+                      {t("loadingLeads")}
                     </span>
                   ) : leadsError ? (
                     <span className="inline-flex items-center gap-2 text-sm text-red-600 font-medium">
                       <AlertTriangle className="w-4 h-4" />
-                      Error loading leads
+                      {t("errorLoadingLeads")}
                     </span>
                   ) : allLeads.length > 0 ? (
                     <span className="inline-flex items-center gap-2 text-sm text-green-600 font-medium">
                       <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                      Live - {allLeads.length} leads loaded
+                      {t("liveLeadsLoaded", { count: allLeads.length })}
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-2 text-sm text-gray-600 font-medium">
                       <span className="w-2 h-2 bg-gray-500 rounded-full" />
-                      No leads found
+                      {t("noLeadsFound")}
                     </span>
                   )}
                 </div>
@@ -782,7 +759,7 @@ const Page = () => {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
               <Plus className="w-5 h-5 relative z-10" />
-              <span className="relative z-10">Add Lead</span>
+              <span className="relative z-10">{t("addLead")}</span>
             </Link>
           </div>
         </div>
@@ -792,7 +769,9 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-blue-500/10">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Total Leads</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  {t("stats.totalLeads")}
+                </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mt-1">
                   {stats.totalLeads}
                 </p>
@@ -806,7 +785,9 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-green-500/10">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Won Deals</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  {t("stats.wonDeals")}
+                </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mt-1">
                   {stats.wonDeals}
                 </p>
@@ -821,7 +802,7 @@ const Page = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">
-                  Pipeline Value
+                  {t("stats.pipelineValue")}
                 </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mt-1">
                   {formatCurrency(stats.totalValue)}
@@ -836,7 +817,9 @@ const Page = () => {
           <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-6 shadow-lg shadow-orange-500/10">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Won Value</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  {t("stats.wonValue")}
+                </p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent mt-1">
                   {formatCurrency(stats.wonValue)}
                 </p>
@@ -856,7 +839,7 @@ const Page = () => {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
                 <input
                   type="text"
-                  placeholder="Search by name, company, email, or salesperson..."
+                  placeholder={t("search.placeholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all"
@@ -868,7 +851,7 @@ const Page = () => {
                 className={`px-6 py-3.5 ${showFilters ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-700 border-gray-200"} border-2 font-semibold rounded-xl hover:border-gray-300 transition-all cursor-pointer flex items-center gap-2`}
               >
                 <Filter className="w-5 h-5" />
-                <span>Filters</span>
+                <span>{t("search.filters")}</span>
               </button>
             </div>
 
@@ -896,7 +879,7 @@ const Page = () => {
                   className="px-4 py-2 bg-red-50 border border-red-200 text-red-700 rounded-lg hover:bg-red-100 transition-all cursor-pointer flex items-center gap-2 text-sm font-medium"
                 >
                   <X className="w-4 h-4" />
-                  <span>Clear All</span>
+                  <span>{t("search.clearAll")}</span>
                 </button>
               )}
             </div>
@@ -905,7 +888,7 @@ const Page = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 pt-4 border-t border-gray-200">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Owner
+                    {t("filterLabels.owner")}
                   </label>
                   <select
                     value={filters.owner}
@@ -914,7 +897,7 @@ const Page = () => {
                     }
                     className="w-full bg-white border-2 border-gray-200 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all"
                   >
-                    <option value="">All Owners</option>
+                    <option value="">{t("filterLabels.allOwners")}</option>
                     {uniqueOwners.map((owner) => (
                       <option key={owner} value={owner}>
                         {owner}
@@ -925,7 +908,7 @@ const Page = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Source
+                    {t("filterLabels.source")}
                   </label>
                   <select
                     value={filters.source}
@@ -934,7 +917,7 @@ const Page = () => {
                     }
                     className="w-full bg-white border-2 border-gray-200 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all"
                   >
-                    <option value="">All Sources</option>
+                    <option value="">{t("filterLabels.allSources")}</option>
                     {uniqueSources.map((source) => (
                       <option key={source} value={source}>
                         {source}
@@ -945,7 +928,7 @@ const Page = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Priority
+                    {t("filterLabels.priority")}
                   </label>
                   <select
                     value={filters.priority}
@@ -954,17 +937,17 @@ const Page = () => {
                     }
                     className="w-full bg-white border-2 border-gray-200 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all"
                   >
-                    <option value="">All Priorities</option>
-                    <option value="urgent">Urgent</option>
-                    <option value="high">High</option>
-                    <option value="medium">Medium</option>
-                    <option value="low">Low</option>
+                    <option value="">{t("filterLabels.allPriorities")}</option>
+                    <option value="urgent">{t("priority.urgent")}</option>
+                    <option value="high">{t("priority.high")}</option>
+                    <option value="medium">{t("priority.medium")}</option>
+                    <option value="low">{t("priority.low")}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Min Budget
+                    {t("filterLabels.minBudget")}
                   </label>
                   <input
                     type="number"
@@ -972,14 +955,14 @@ const Page = () => {
                     onChange={(e) =>
                       setFilters({ ...filters, minBudget: e.target.value })
                     }
-                    placeholder="e.g., 50000"
+                    placeholder={t("filterLabels.budgetPlaceholder")}
                     className="w-full bg-white border-2 border-gray-200 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Last Activity
+                    {t("filterLabels.lastActivity")}
                   </label>
                   <select
                     value={filters.lastActivityDays}
@@ -991,11 +974,11 @@ const Page = () => {
                     }
                     className="w-full bg-white border-2 border-gray-200 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all"
                   >
-                    <option value="">All Time</option>
-                    <option value="1">Last 24 hours</option>
-                    <option value="7">Last 7 days</option>
-                    <option value="30">Last 30 days</option>
-                    <option value="90">Last 90 days</option>
+                    <option value="">{t("filterLabels.allTime")}</option>
+                    <option value="1">{t("filterLabels.last24Hours")}</option>
+                    <option value="7">{t("filterLabels.last7Days")}</option>
+                    <option value="30">{t("filterLabels.last30Days")}</option>
+                    <option value="90">{t("filterLabels.last90Days")}</option>
                   </select>
                 </div>
               </div>
@@ -1003,7 +986,7 @@ const Page = () => {
           </div>
         </div>
 
-        {/* Kanban Board - Continued in next message due to length */}
+        {/* Kanban Board */}
         <div className="overflow-x-auto pb-4">
           <div className="inline-flex gap-4 min-w-full">
             {STAGES.map((stage) => {
@@ -1054,7 +1037,7 @@ const Page = () => {
                     {isOverLimit && (
                       <p className="text-xs text-red-600 mt-2 flex items-center gap-1">
                         <AlertTriangle className="w-3 h-3" />
-                        Stage over capacity - focus needed
+                        {t("stageWarnings.overCapacity")}
                       </p>
                     )}
                   </div>
@@ -1064,7 +1047,9 @@ const Page = () => {
                     {leadsLoading ? (
                       <div className="bg-white/50 backdrop-blur-xl border border-gray-200 rounded-2xl p-8 text-center">
                         <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-2" />
-                        <p className="text-gray-500 text-sm">Loading...</p>
+                        <p className="text-gray-500 text-sm">
+                          {t("stageWarnings.loading")}
+                        </p>
                       </div>
                     ) : currentStageLeads.length > 0 ? (
                       currentStageLeads.map((lead) => {
@@ -1126,21 +1111,21 @@ const Page = () => {
                                       className="flex items-center gap-2 px-4 py-2 hover:bg-blue-50 text-gray-700 text-sm cursor-pointer"
                                     >
                                       <Eye className="w-4 h-4" />
-                                      <span>View</span>
+                                      <span>{t("leadCard.view")}</span>
                                     </Link>
                                     <Link
                                       href={`/leads/${lead.id}/edit`}
                                       className="flex items-center gap-2 px-4 py-2 hover:bg-blue-50 text-gray-700 text-sm cursor-pointer"
                                     >
                                       <Edit2 className="w-4 h-4" />
-                                      <span>Edit</span>
+                                      <span>{t("leadCard.edit")}</span>
                                     </Link>
                                     <button
                                       onClick={() => handleDelete(lead.id)}
                                       className="flex items-center gap-2 px-4 py-2 hover:bg-red-50 text-red-600 text-sm w-full cursor-pointer"
                                     >
                                       <Trash2 className="w-4 h-4" />
-                                      <span>Delete</span>
+                                      <span>{t("leadCard.delete")}</span>
                                     </button>
                                   </div>
                                 )}
@@ -1234,21 +1219,21 @@ const Page = () => {
                                     className="flex items-center gap-3 px-4 py-2 hover:bg-green-50 text-gray-700 text-sm w-full cursor-pointer"
                                   >
                                     <MessageCircle className="w-4 h-4 text-green-600" />
-                                    <span>WhatsApp</span>
+                                    <span>{t("leadCard.whatsapp")}</span>
                                   </Link>
                                   <Link
                                     href={`/leads/${lead.id}/notes/add`}
                                     className="flex items-center gap-3 px-4 py-2 hover:bg-orange-50 text-gray-700 text-sm w-full cursor-pointer"
                                   >
                                     <StickyNote className="w-4 h-4 text-orange-600" />
-                                    <span>Add Note</span>
+                                    <span>{t("leadCard.addNote")}</span>
                                   </Link>
                                   <button
                                     onClick={() => handleAssignOwner(lead)}
                                     className="flex items-center gap-3 px-4 py-2 hover:bg-purple-50 text-gray-700 text-sm w-full cursor-pointer"
                                   >
                                     <UserPlus className="w-4 h-4 text-purple-600" />
-                                    <span>Assign Owner</span>
+                                    <span>{t("leadCard.assignOwner")}</span>
                                   </button>
                                 </div>
                               )}
@@ -1258,7 +1243,9 @@ const Page = () => {
                       })
                     ) : (
                       <div className="bg-white/50 backdrop-blur-xl border border-dashed border-gray-300 rounded-2xl p-8 text-center">
-                        <p className="text-gray-400 text-sm">Drop leads here</p>
+                        <p className="text-gray-400 text-sm">
+                          {t("stageWarnings.dropLeadsHere")}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -1280,24 +1267,25 @@ const Page = () => {
               <div>
                 <h3 className="text-xl font-bold text-gray-900">
                   {confirmation.type === "lost"
-                    ? "Mark as Lost?"
-                    : "Move Backward?"}
+                    ? t("confirmations.markAsLost.title")
+                    : t("confirmations.moveBackward.title")}
                 </h3>
                 <p className="text-sm text-gray-600">
                   {confirmation.type === "lost"
-                    ? "This lead will be marked as lost"
-                    : "You're moving this lead to an earlier stage"}
+                    ? t("confirmations.markAsLost.subtitle")
+                    : t("confirmations.moveBackward.subtitle")}
                 </p>
               </div>
             </div>
 
             <div className="bg-gray-50 rounded-xl p-4 mb-4">
               <p className="text-sm text-gray-700 mb-2">
-                <strong>{confirmation.lead.name}</strong> from{" "}
+                <strong>{confirmation.lead.name}</strong>{" "}
+                {t("confirmations.moveBackward.from")}{" "}
                 {confirmation.lead.company}
               </p>
               <p className="text-sm text-gray-600">
-                Moving to:{" "}
+                {t("confirmations.markAsLost.movingTo")}{" "}
                 <strong>
                   {STAGES.find((s) => s.id === confirmation.targetStage)?.name}
                 </strong>
@@ -1307,7 +1295,7 @@ const Page = () => {
             {confirmation.type === "lost" && (
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Reason for loss (optional)
+                  {t("confirmations.markAsLost.reasonLabel")}
                 </label>
                 <textarea
                   value={confirmation.reason || ""}
@@ -1317,7 +1305,7 @@ const Page = () => {
                       reason: e.target.value,
                     })
                   }
-                  placeholder="e.g., Budget constraints, went with competitor..."
+                  placeholder={t("confirmations.markAsLost.reasonPlaceholder")}
                   className="w-full bg-white border-2 border-gray-200 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all resize-none"
                   rows={3}
                 />
@@ -1336,7 +1324,7 @@ const Page = () => {
                 }
                 className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all cursor-pointer"
               >
-                Cancel
+                {t("confirmations.markAsLost.cancel")}
               </button>
               <button
                 onClick={() =>
@@ -1352,12 +1340,12 @@ const Page = () => {
                 {isUpdating ? (
                   <>
                     <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
-                    <span>Updating...</span>
+                    <span>{t("confirmations.markAsLost.updating")}</span>
                   </>
                 ) : (
                   <>
                     <CheckCircle2 className="w-5 h-5" />
-                    <span>Confirm</span>
+                    <span>{t("confirmations.markAsLost.confirm")}</span>
                   </>
                 )}
               </button>
@@ -1376,33 +1364,41 @@ const Page = () => {
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-900">
-                  Assign Owner
+                  {t("confirmations.assignOwner.title")}
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Assign this lead to a team member
+                  {t("confirmations.assignOwner.subtitle")}
                 </p>
               </div>
             </div>
 
             <div className="bg-gray-50 rounded-xl p-4 mb-4">
               <p className="text-sm text-gray-700">
-                <strong>{assignOwnerDialog.lead.name}</strong> from{" "}
+                <strong>{assignOwnerDialog.lead.name}</strong>{" "}
+                {t("confirmations.assignOwner.from")}{" "}
                 {assignOwnerDialog.lead.company}
               </p>
             </div>
 
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select User <span className="text-red-500">*</span>
+                {t("confirmations.assignOwner.selectUser")}{" "}
+                <span className="text-red-500">
+                  {t("confirmations.assignOwner.required")}
+                </span>
               </label>
               <select
                 value={selectedUserId || ""}
                 onChange={(e) => setSelectedUserId(Number(e.target.value))}
                 className="w-full bg-white border-2 border-gray-200 rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all"
               >
-                <option value="">Select a user...</option>
+                <option value="">
+                  {t("confirmations.assignOwner.selectUserPlaceholder")}
+                </option>
                 {usersLoading ? (
-                  <option disabled>Loading users...</option>
+                  <option disabled>
+                    {t("confirmations.assignOwner.loadingUsers")}
+                  </option>
                 ) : users && Array.isArray(users) ? (
                   users.map((user: any) => (
                     <option key={user.id} value={user.id}>
@@ -1410,7 +1406,9 @@ const Page = () => {
                     </option>
                   ))
                 ) : (
-                  <option disabled>No users available</option>
+                  <option disabled>
+                    {t("confirmations.assignOwner.noUsersAvailable")}
+                  </option>
                 )}
               </select>
             </div>
@@ -1423,7 +1421,7 @@ const Page = () => {
                 }}
                 className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all cursor-pointer"
               >
-                Cancel
+                {t("confirmations.assignOwner.cancel")}
               </button>
               <button
                 onClick={() => confirmAssignOwner()}
@@ -1433,12 +1431,12 @@ const Page = () => {
                 {isAssigning ? (
                   <>
                     <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" />
-                    <span>Assigning...</span>
+                    <span>{t("confirmations.assignOwner.assigning")}</span>
                   </>
                 ) : (
                   <>
                     <CheckCircle2 className="w-5 h-5" />
-                    <span>Assign</span>
+                    <span>{t("confirmations.assignOwner.assign")}</span>
                   </>
                 )}
               </button>

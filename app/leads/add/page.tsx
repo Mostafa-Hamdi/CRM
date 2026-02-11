@@ -17,38 +17,45 @@ import {
 import Link from "next/link";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useMemo } from "react";
 
-// Validation Schema
-const leadSchema = yup.object().shape({
-  fullName: yup
-    .string()
-    .required("Full name is required")
-    .min(2, "Name must be at least 2 characters")
-    .max(100, "Name must not exceed 100 characters"),
-  phone: yup
-    .string()
-    .required("Phone number is required")
-    .matches(
-      /^[\d\s\-\+\(\)]+$/,
-      "Phone number must contain only numbers and valid characters",
-    )
-    .min(10, "Phone number must be at least 10 characters"),
-  email: yup
-    .string()
-    .required("Email is required")
-    .email("Please enter a valid email address"),
-  source: yup
-    .string()
-    .required("Source is required")
-    .min(2, "Source must be at least 2 characters")
-    .max(100, "Source must not exceed 100 characters"),
-});
-
-type LeadFormData = yup.InferType<typeof leadSchema>;
+type LeadFormData = {
+  fullName: string;
+  phone: string;
+  email: string;
+  source: string;
+};
 
 const Page = () => {
   const router = useRouter();
+  const t = useTranslations("leads.add");
   const [addLead, { isLoading }] = useAddLeadMutation();
+
+  // Create validation schema with translations
+  const leadSchema = useMemo(() => {
+    return yup.object().shape({
+      fullName: yup
+        .string()
+        .required(t("validation.fullNameRequired"))
+        .min(2, t("validation.fullNameMin", { min: 2 }))
+        .max(100, t("validation.fullNameMax", { max: 100 })),
+      phone: yup
+        .string()
+        .required(t("validation.phoneRequired"))
+        .matches(/^[\d\s\-\+\(\)]+$/, t("validation.phoneInvalid"))
+        .min(10, t("validation.phoneMin", { min: 10 })),
+      email: yup
+        .string()
+        .required(t("validation.emailRequired"))
+        .email(t("validation.emailInvalid")),
+      source: yup
+        .string()
+        .required(t("validation.sourceRequired"))
+        .min(2, t("validation.sourceMin", { min: 2 }))
+        .max(100, t("validation.sourceMax", { max: 100 })),
+    });
+  }, [t]);
 
   const {
     register,
@@ -70,8 +77,8 @@ const Page = () => {
 
       await Swal.fire({
         icon: "success",
-        title: "Success!",
-        text: "Lead has been added successfully.",
+        title: t("success.title"),
+        text: t("success.message"),
         timer: 2000,
         showConfirmButton: false,
       });
@@ -79,7 +86,7 @@ const Page = () => {
       reset();
       router.push("/leads");
     } catch (err) {
-      let message = "Failed to add lead.";
+      let message = t("error.message");
 
       if (typeof err === "object" && err !== null) {
         const maybeData = (err as any).data;
@@ -90,7 +97,7 @@ const Page = () => {
 
       Swal.fire({
         icon: "error",
-        title: "Oops!",
+        title: t("error.title"),
         text: message,
       });
     }
@@ -117,10 +124,10 @@ const Page = () => {
               </div>
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-700 via-cyan-600 to-blue-800 bg-clip-text text-transparent">
-                  Add New Lead
+                  {t("title")}
                 </h1>
                 <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                  Create a new lead in your pipeline
+                  {t("subtitle")}
                 </p>
               </div>
             </div>
@@ -130,7 +137,7 @@ const Page = () => {
               className="group relative cursor-pointer flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-2xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300"
             >
               <ArrowLeft className="w-5 h-5" />
-              <span className="hidden sm:inline">Back</span>
+              <span className="hidden sm:inline">{t("back")}</span>
             </Link>
           </div>
         </div>
@@ -141,7 +148,8 @@ const Page = () => {
             {/* Full Name */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Full Name <span className="text-red-500">*</span>
+                {t("form.fullName")}{" "}
+                <span className="text-red-500">{t("form.required")}</span>
               </label>
               <div className="relative">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2">
@@ -150,7 +158,7 @@ const Page = () => {
                 <input
                   type="text"
                   {...register("fullName")}
-                  placeholder="Enter full name"
+                  placeholder={t("form.fullNamePlaceholder")}
                   className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                     errors.fullName ? "border-red-300" : "border-gray-200"
                   } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all`}
@@ -167,7 +175,8 @@ const Page = () => {
             {/* Phone */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Phone Number <span className="text-red-500">*</span>
+                {t("form.phoneNumber")}{" "}
+                <span className="text-red-500">{t("form.required")}</span>
               </label>
               <div className="relative">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2">
@@ -176,7 +185,7 @@ const Page = () => {
                 <input
                   type="tel"
                   {...register("phone")}
-                  placeholder="Enter phone number"
+                  placeholder={t("form.phoneNumberPlaceholder")}
                   className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                     errors.phone ? "border-red-300" : "border-gray-200"
                   } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all`}
@@ -193,7 +202,8 @@ const Page = () => {
             {/* Email */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Email Address <span className="text-red-500">*</span>
+                {t("form.emailAddress")}{" "}
+                <span className="text-red-500">{t("form.required")}</span>
               </label>
               <div className="relative">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2">
@@ -202,7 +212,7 @@ const Page = () => {
                 <input
                   type="email"
                   {...register("email")}
-                  placeholder="Enter email address"
+                  placeholder={t("form.emailPlaceholder")}
                   className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                     errors.email ? "border-red-300" : "border-gray-200"
                   } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all`}
@@ -219,7 +229,8 @@ const Page = () => {
             {/* Source */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Source <span className="text-red-500">*</span>
+                {t("form.source")}{" "}
+                <span className="text-red-500">{t("form.required")}</span>
               </label>
               <div className="relative">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2">
@@ -228,7 +239,7 @@ const Page = () => {
                 <input
                   type="text"
                   {...register("source")}
-                  placeholder="e.g., Website, Referral, Social Media"
+                  placeholder={t("form.sourcePlaceholder")}
                   className={`w-full bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 ${
                     errors.source ? "border-red-300" : "border-gray-200"
                   } rounded-xl pl-12 pr-4 py-3.5 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all`}
@@ -247,9 +258,9 @@ const Page = () => {
               <button
                 type="button"
                 onClick={() => router.push("/leads")}
-                className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all"
+                className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all cursor-pointer"
               >
-                Cancel
+                {t("form.cancel")}
               </button>
               <button
                 type="submit"
@@ -260,12 +271,14 @@ const Page = () => {
                 {isLoading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin relative z-10" />
-                    <span className="relative z-10">Adding Lead...</span>
+                    <span className="relative z-10">
+                      {t("form.addingLead")}
+                    </span>
                   </>
                 ) : (
                   <>
                     <CheckCircle className="w-5 h-5 relative z-10" />
-                    <span className="relative z-10">Add Lead</span>
+                    <span className="relative z-10">{t("form.addLead")}</span>
                   </>
                 )}
               </button>
@@ -280,11 +293,13 @@ const Page = () => {
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-blue-900 mb-1">Quick Tips</h3>
+              <h3 className="font-semibold text-blue-900 mb-1">
+                {t("quickTips.title")}
+              </h3>
               <ul className="text-sm text-blue-700 space-y-1">
-                <li>• Ensure all contact information is accurate</li>
-                <li>• Source helps track where your leads come from</li>
-                <li>• You can add more details after creating the lead</li>
+                <li>• {t("quickTips.tip1")}</li>
+                <li>• {t("quickTips.tip2")}</li>
+                <li>• {t("quickTips.tip3")}</li>
               </ul>
             </div>
           </div>

@@ -101,15 +101,18 @@ const Page = () => {
 
   const leads = leadsResponse?.data;
 
-  // Status mapping
-  const statusMap: { [key: number]: string } = {
-    1: "New",
-    2: "Contacted",
-    3: "Interested",
-    4: "Followup",
-    5: "Cold",
-    6: "Lost",
-    7: "Converted",
+  // Status mapping - now using translations
+  const getStatusLabel = (status: number): string => {
+    const statusKeys: { [key: number]: string } = {
+      1: "status.new",
+      2: "status.contacted",
+      3: "status.interested",
+      4: "status.followup",
+      5: "status.cold",
+      6: "status.lost",
+      7: "status.converted",
+    };
+    return t(statusKeys[status] || "status.new");
   };
 
   // Fetch leads on mount and when page/size changes
@@ -152,8 +155,8 @@ const Page = () => {
         console.error("Failed to filter leads:", err);
         Swal.fire({
           icon: "error",
-          title: "Oops!",
-          text: "Failed to filter leads.",
+          title: t("oops"),
+          text: t("filterFail"),
         });
       }
     }
@@ -170,17 +173,17 @@ const Page = () => {
         lead.phone.toLowerCase().includes(query) ||
         lead.email.toLowerCase().includes(query) ||
         lead.source.toLowerCase().includes(query) ||
-        statusMap[lead.status]?.toLowerCase().includes(query),
+        getStatusLabel(lead.status).toLowerCase().includes(query),
     );
   }, [displayedLeads, searchQuery]);
 
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
-      title: "😢 Are you sure you want to delete this lead?",
+      title: t("deleteConfirm"),
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes",
-      cancelButtonText: "No",
+      confirmButtonText: t("confirmYes"),
+      cancelButtonText: t("confirmNo"),
       confirmButtonColor: "#2563eb",
       cancelButtonColor: "#e5e7eb",
     });
@@ -190,8 +193,8 @@ const Page = () => {
       await deleteLead({ id }).unwrap();
       await Swal.fire({
         icon: "success",
-        title: "Deleted!",
-        text: "Lead has been deleted successfully.",
+        title: t("deleteSuccessTitle"),
+        text: t("deleteSuccess"),
         timer: 2000,
       });
 
@@ -201,8 +204,8 @@ const Page = () => {
     } catch (err) {
       Swal.fire({
         icon: "error",
-        title: "Oops!",
-        text: "Failed to delete lead.",
+        title: t("oops"),
+        text: t("deleteFail"),
       });
     }
   };
@@ -227,8 +230,8 @@ const Page = () => {
     if (selectedCourseId === 0) {
       Swal.fire({
         icon: "warning",
-        title: "Missing Course",
-        text: "Please select a course.",
+        title: t("convertModal.missingCourse"),
+        text: t("convertModal.selectClassRequired"),
       });
       return;
     }
@@ -236,8 +239,8 @@ const Page = () => {
     if (!paidAmount || parseFloat(paidAmount) <= 0) {
       Swal.fire({
         icon: "warning",
-        title: "Invalid Amount",
-        text: "Please enter a valid paid amount.",
+        title: t("convertModal.invalidAmount"),
+        text: t("convertModal.paidAmountRequired"),
       });
       return;
     }
@@ -251,8 +254,8 @@ const Page = () => {
 
       await Swal.fire({
         icon: "success",
-        title: "Converted!",
-        text: "Lead has been converted successfully.",
+        title: t("convertModal.success"),
+        text: t("convertModal.successText"),
         timer: 2000,
       });
 
@@ -262,7 +265,7 @@ const Page = () => {
       setLeadsResponse(result);
       setDisplayedLeads(result.data);
     } catch (err) {
-      let message = "Failed to convert lead.";
+      let message = t("convertModal.fail");
 
       if (typeof err === "object" && err !== null) {
         const maybeData = (err as any).data;
@@ -272,7 +275,7 @@ const Page = () => {
       }
       Swal.fire({
         icon: "error",
-        title: "Oops!",
+        title: t("oops"),
         text: message,
       });
     }
@@ -378,14 +381,14 @@ const Page = () => {
     const allowedExtensions = [".csv", ".xlsx", ".xls"];
 
     if (file.size > maxSize) {
-      return "File size must be less than 10MB";
+      return t("importModal.fileSizeError");
     }
 
     const fileExtension = file.name
       .toLowerCase()
       .substring(file.name.lastIndexOf("."));
     if (!allowedExtensions.includes(fileExtension)) {
-      return "Only CSV, XLS, and XLSX files are allowed";
+      return t("importModal.fileTypeError");
     }
 
     return null;
@@ -405,7 +408,7 @@ const Page = () => {
     if (error) {
       Swal.fire({
         icon: "error",
-        title: "Invalid File",
+        title: t("importModal.invalidFile"),
         text: error,
       });
       if (fileInputRef.current) {
@@ -435,8 +438,8 @@ const Page = () => {
     if (!selectedFile) {
       Swal.fire({
         icon: "warning",
-        title: "No File Selected",
-        text: "Please select a file to import.",
+        title: t("importModal.noFileSelected"),
+        text: t("importModal.selectFileText"),
       });
       return;
     }
@@ -470,14 +473,14 @@ const Page = () => {
                 .map((err) => `<li class="text-sm">• ${err}</li>`)
                 .join("")}</ul>${
                 errorMessages.length > 10
-                  ? `<p class="text-sm mt-2">...and ${errorMessages.length - 10} more errors</p>`
+                  ? `<p class="text-sm mt-2">${t("importModal.andMoreErrors", { count: errorMessages.length - 10 })}</p>`
                   : ""
               }`
             : "";
 
         await Swal.fire({
           icon: "warning",
-          title: "Import Partially Completed",
+          title: t("importModal.partialSuccess"),
           html: `
             <div class="text-center">
               <p class="mb-2">${t("importSuccess", { successCount })}</p>
@@ -490,7 +493,7 @@ const Page = () => {
       } else {
         await Swal.fire({
           icon: "success",
-          title: "Import Successful!",
+          title: t("importModal.success"),
           html: `<p>${t("importSuccess", { successCount })}</p>`,
           timer: 2500,
           confirmButtonColor: "#2563eb",
@@ -506,8 +509,7 @@ const Page = () => {
     } catch (err: any) {
       handleCloseImportModal();
 
-      let errorMessage =
-        "Failed to import leads. Please check your file format and try again.";
+      let errorMessage = t("importModal.checkFormat");
       if (err?.data?.message) {
         errorMessage = err.data.message;
       } else if (err?.message) {
@@ -516,7 +518,7 @@ const Page = () => {
 
       Swal.fire({
         icon: "error",
-        title: "Import Failed",
+        title: t("importModal.failed"),
         text: errorMessage,
         confirmButtonColor: "#2563eb",
       });
@@ -527,7 +529,7 @@ const Page = () => {
     if (!leads || leads.length === 0) {
       Swal.fire({
         icon: "info",
-        title: "No Data to Export",
+        title: t("exportModal.noData"),
         text: t("noLeadsToExport"),
         confirmButtonColor: "#2563eb",
       });
@@ -554,13 +556,13 @@ const Page = () => {
 
       await Swal.fire({
         icon: "success",
-        title: "Export Successful!",
+        title: t("exportModal.success"),
         html: `<p>${t("exportedToFile", { count: leadsResponse?.totalCount || leads.length, filename })}</p>`,
         timer: 2500,
         confirmButtonColor: "#2563eb",
       });
     } catch (err: any) {
-      let errorMessage = "Failed to export leads. Please try again.";
+      let errorMessage = t("exportModal.failed");
       if (err?.data?.message) {
         errorMessage = err.data.message;
       } else if (err?.message) {
@@ -569,7 +571,7 @@ const Page = () => {
 
       Swal.fire({
         icon: "error",
-        title: "Export Failed",
+        title: t("exportModal.failedTitle"),
         text: errorMessage,
         confirmButtonColor: "#2563eb",
       });
@@ -717,19 +719,19 @@ const Page = () => {
               },
               {
                 id: 5,
-                label: "Cold",
+                label: t("filters.cold"),
                 icon: Pause,
                 color: "from-gray-600 to-slate-600",
               },
               {
                 id: 6,
-                label: "Lost",
+                label: t("filters.lost"),
                 icon: XCircle,
                 color: "from-red-600 to-rose-600",
               },
               {
                 id: 7,
-                label: "Converted",
+                label: t("filters.converted"),
                 icon: CheckCircle,
                 color: "from-emerald-600 to-teal-600",
               },
@@ -787,7 +789,7 @@ const Page = () => {
             <div className="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-gray-50 to-blue-50/50 border-2 border-gray-200 rounded-xl">
               <List className="w-5 h-5 text-gray-600" />
               <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                Show:
+                {t("show")}
               </span>
               <div className="flex items-center gap-2">
                 {[5, 10, 20, 50].map((size) => (
@@ -818,7 +820,7 @@ const Page = () => {
                 ) : (
                   <Upload className="w-5 h-5" />
                 )}
-                <span>Import</span>
+                <span>{t("import")}</span>
               </button>
 
               {/* Export Button */}
@@ -832,13 +834,13 @@ const Page = () => {
                 ) : (
                   <Download className="w-5 h-5" />
                 )}
-                <span>Export</span>
+                <span>{t("export")}</span>
               </button>
             </div>
             <div className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-600 border border-blue-400 rounded-xl shadow-lg shadow-blue-500/30">
               <TrendingUp className="w-5 h-5 text-white" />
               <span className="text-sm font-bold text-white">
-                {filteredLeads.length} Leads
+                {filteredLeads.length} {t("leadsCount")}
               </span>
             </div>
           </div>
@@ -847,12 +849,12 @@ const Page = () => {
           {leadsResponse && leadsResponse.totalPages > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-200">
               <p className="text-sm text-gray-600 text-center">
-                Showing page{" "}
-                <span className="font-bold text-blue-600">{pageNumber}</span> of{" "}
-                <span className="font-bold text-blue-600">
-                  {leadsResponse.totalPages}
-                </span>{" "}
-                ({leadsResponse.totalCount} total leads, {pageSize} per page)
+                {t("pageInfo", {
+                  page: pageNumber,
+                  total: leadsResponse.totalPages,
+                  count: leadsResponse.totalCount,
+                  per: pageSize,
+                })}
               </p>
             </div>
           )}
@@ -863,7 +865,7 @@ const Page = () => {
           {isLoading || isFilterLoading ? (
             <div className="p-20 flex flex-col items-center justify-center">
               <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4" />
-              <p className="text-gray-600 font-medium">Loading leads...</p>
+              <p className="text-gray-600 font-medium">{t("loading")}</p>
             </div>
           ) : filteredLeads.length === 0 ? (
             <div className="p-20 text-center">
@@ -871,9 +873,7 @@ const Page = () => {
                 <Users className="w-10 h-10 text-gray-400" />
               </div>
               <p className="text-gray-600 font-medium text-lg">
-                {searchQuery
-                  ? "No leads found matching your search"
-                  : "No leads yet"}
+                {searchQuery ? t("noLeadsFound") : t("noLeadsYet")}
               </p>
             </div>
           ) : (
@@ -883,47 +883,47 @@ const Page = () => {
                   <tr>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Lead Info
+                        {t("table.leadInfo")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Contact
+                        {t("table.contact")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Source
+                        {t("table.source")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Status
+                        {t("table.status")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Assigned To
+                        {t("table.assignedTo")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-left">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Created Date
+                        {t("table.createdDate")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-center">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Notes
+                        {t("table.notes")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-center">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Convert
+                        {t("table.convert")}
                       </span>
                     </th>
                     <th className="px-6 py-5 text-center">
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        Operations
+                        {t("table.operations")}
                       </span>
                     </th>
                   </tr>
@@ -985,7 +985,7 @@ const Page = () => {
                             lead.status,
                           )}`}
                         >
-                          {statusMap[lead.status]}
+                          {getStatusLabel(lead.status)}
                         </span>
                       </td>
 
@@ -1002,7 +1002,7 @@ const Page = () => {
                           </div>
                         ) : (
                           <span className="text-gray-400 text-sm italic">
-                            Unassigned
+                            {t("unassigned")}
                           </span>
                         )}
                       </td>
@@ -1023,7 +1023,7 @@ const Page = () => {
                           <Link
                             href={`/leads/${lead.id}/notes`}
                             className="p-2.5 text-amber-600 hover:text-white bg-amber-50 hover:bg-gradient-to-r hover:from-amber-600 hover:to-orange-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/30 group cursor-pointer"
-                            title="View notes"
+                            title={t("viewNotes")}
                           >
                             <FileText className="w-5 h-5" />
                           </Link>
@@ -1043,8 +1043,8 @@ const Page = () => {
                             }`}
                             title={
                               lead.status === 7
-                                ? "Already converted"
-                                : "Convert lead"
+                                ? t("alreadyConverted")
+                                : t("convertLead")
                             }
                           >
                             <ArrowRight className="w-5 h-5" />
@@ -1058,14 +1058,14 @@ const Page = () => {
                           <Link
                             href={`/leads/${lead.id}/edit`}
                             className="p-2.5 text-blue-600 hover:text-white bg-blue-50 hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 group cursor-pointer"
-                            title="Edit lead"
+                            title={t("editLead")}
                           >
                             <Edit2 className="w-5 h-5" />
                           </Link>
                           <button
                             onClick={() => handleDelete(lead.id)}
                             className="p-2.5 text-red-600 hover:text-white bg-red-50 hover:bg-gradient-to-r hover:from-red-600 hover:to-rose-600 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-red-500/30 group cursor-pointer"
-                            title="Delete lead"
+                            title={t("deleteLead")}
                           >
                             <Trash2 className="w-5 h-5" />
                           </button>
@@ -1089,7 +1089,7 @@ const Page = () => {
                   onClick={goToFirstPage}
                   disabled={pageNumber === 1}
                   className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
-                  title="First page"
+                  title={t("firstPage")}
                 >
                   <ChevronsLeft className="w-5 h-5 text-gray-600" />
                 </button>
@@ -1097,7 +1097,7 @@ const Page = () => {
                   onClick={goToPreviousPage}
                   disabled={pageNumber === 1}
                   className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
-                  title="Previous page"
+                  title={t("previousPage")}
                 >
                   <ChevronLeft className="w-5 h-5 text-gray-600" />
                 </button>
@@ -1129,7 +1129,7 @@ const Page = () => {
                   onClick={goToNextPage}
                   disabled={pageNumber === leadsResponse.totalPages}
                   className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
-                  title="Next page"
+                  title={t("nextPage")}
                 >
                   <ChevronRight className="w-5 h-5 text-gray-600" />
                 </button>
@@ -1137,7 +1137,7 @@ const Page = () => {
                   onClick={goToLastPage}
                   disabled={pageNumber === leadsResponse.totalPages}
                   className="p-2 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:bg-transparent transition-all cursor-pointer"
-                  title="Last page"
+                  title={t("lastPage")}
                 >
                   <ChevronsRight className="w-5 h-5 text-gray-600" />
                 </button>
@@ -1159,10 +1159,10 @@ const Page = () => {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold text-white">
-                      Import Leads
+                      {t("importModal.title")}
                     </h2>
                     <p className="text-cyan-100 text-sm mt-1">
-                      Upload CSV or Excel file
+                      {t("importModal.subtitle")}
                     </p>
                   </div>
                 </div>
@@ -1178,7 +1178,10 @@ const Page = () => {
             <div className="p-6 space-y-5">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Select File <span className="text-red-500">*</span>
+                  {t("importModal.selectFile")}{" "}
+                  <span className="text-red-500">
+                    {t("importModal.required")}
+                  </span>
                 </label>
 
                 <div
@@ -1206,16 +1209,16 @@ const Page = () => {
                           {(filePreview.size / 1024).toFixed(2)} KB
                         </p>
                         <p className="text-blue-600 text-sm mt-3 font-medium">
-                          Click to change file
+                          {t("importModal.changeFile")}
                         </p>
                       </>
                     ) : (
                       <>
                         <p className="text-gray-900 font-semibold mb-1">
-                          Click to upload or drag and drop
+                          {t("importModal.clickToUpload")}
                         </p>
                         <p className="text-gray-500 text-sm">
-                          CSV, XLS, or XLSX (Max 10MB)
+                          {t("importModal.fileTypes")}
                         </p>
                       </>
                     )}
@@ -1227,12 +1230,14 @@ const Page = () => {
                 <div className="flex gap-3">
                   <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-blue-900">
-                    <p className="font-semibold mb-2">File Requirements:</p>
+                    <p className="font-semibold mb-2">
+                      {t("importModal.requirements.title")}
+                    </p>
                     <ul className="space-y-1 text-blue-800">
-                      <li>• Maximum file size: 10MB</li>
-                      <li>• Supported formats: CSV, XLS, XLSX</li>
-                      <li>• Required columns: Full Name, Phone, Email</li>
-                      <li>• Optional: Source, Status, Assigned To</li>
+                      <li>• {t("importModal.requirements.maxSize")}</li>
+                      <li>• {t("importModal.requirements.formats")}</li>
+                      <li>• {t("importModal.requirements.requiredColumns")}</li>
+                      <li>• {t("importModal.requirements.optionalColumns")}</li>
                     </ul>
                   </div>
                 </div>
@@ -1245,7 +1250,7 @@ const Page = () => {
                 disabled={importLoading}
                 className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                Cancel
+                {t("importModal.cancel")}
               </button>
               <button
                 onClick={handleImportSubmit}
@@ -1255,12 +1260,12 @@ const Page = () => {
                 {importLoading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Importing...</span>
+                    <span>{t("importModal.importing")}</span>
                   </>
                 ) : (
                   <>
                     <Upload className="w-5 h-5" />
-                    <span>Import Leads</span>
+                    <span>{t("importModal.import")}</span>
                   </>
                 )}
               </button>
@@ -1281,7 +1286,7 @@ const Page = () => {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold text-white">
-                      Convert Lead
+                      {t("convertModal.title")}
                     </h2>
                     <p className="text-cyan-100 text-sm mt-1">
                       {selectedLead.fullName}
@@ -1300,7 +1305,8 @@ const Page = () => {
             <div className="p-6 space-y-5">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Select Class <span className="text-red-500">*</span>
+                  {t("convertModal.selectClass")}{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <select
@@ -1323,7 +1329,8 @@ const Page = () => {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Paid Amount <span className="text-red-500">*</span>
+                  {t("convertModal.paidAmount")}{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">
@@ -1347,7 +1354,7 @@ const Page = () => {
                 onClick={handleCloseModal}
                 className="flex-1 px-6 py-3.5 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all cursor-pointer"
               >
-                Cancel
+                {t("convertModal.cancel")}
               </button>
               <button
                 onClick={handleConvertSubmit}
@@ -1357,12 +1364,12 @@ const Page = () => {
                 {isConverting ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Converting...</span>
+                    <span>{t("convertModal.converting")}</span>
                   </>
                 ) : (
                   <>
                     <CheckCircle className="w-5 h-5" />
-                    <span>Convert Lead</span>
+                    <span>{t("convertModal.convert")}</span>
                   </>
                 )}
               </button>

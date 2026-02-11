@@ -29,7 +29,7 @@ interface RefreshResponse {
 ====================== */
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "https://jacelyn-undelineable-maynard.ngrok-free.dev/api",
+  baseUrl: "http://aura-crm.runasp.net/api",
   prepareHeaders: (headers, { getState, endpoint }) => {
     const token = (getState() as RootState).auth.token;
 

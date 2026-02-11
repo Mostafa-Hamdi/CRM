@@ -69,27 +69,414 @@
     ]
   },
   "leads": {
-    "title": "Leads",
-    "subtitle": "Manage and track your sales leads pipeline",
+    "leadDetails": {
+      "backToLeads": "Back to Leads",
+      "loading": "Loading lead details...",
+      "error": {
+        "title": "Error loading lead",
+        "message": "Unable to fetch lead details"
+      },
+
+      "header": {
+        "score": "Score",
+        "lastActivity": "Last activity",
+        "journey": {
+          "title": "Lead Journey - Click any stage to change",
+          "complete": "Complete"
+        }
+      },
+
+      "quickActions": {
+        "whatsApp": "Whats App",
+        "addNote": "Add Note",
+        "addTask": "Add Task",
+        "archive": "Archive"
+      },
+
+      "stages": {
+        "title": "Lead Journey - Click to Change Stage",
+        "clickToMove": "Click to move",
+        "current": "Current"
+      },
+
+      "stageHistory": {
+        "title": "Stage History",
+        "changedBy": "Changed by",
+        "unknownStage": "Unknown Stage"
+      },
+
+      "activityTimeline": {
+        "title": "Activity Timeline",
+        "noActivities": "No activities yet",
+        "duration": "Duration",
+        "result": "Result",
+        "by": "by",
+        "min": "min",
+        "sec": "sec"
+      },
+
+      "leadDetailsSection": {
+        "title": "Lead Details",
+        "source": "Source",
+        "budget": "Budget",
+        "interestedIn": "Interested In",
+        "location": "Location",
+        "assignedTo": "Assigned To",
+        "unknown": "Unknown",
+        "unassigned": "Unassigned"
+      },
+
+      "smartInsights": {
+        "title": "Smart Insights",
+        "leadScore": "Lead Score",
+        "lastActivity": "Last Activity",
+        "daysInPipeline": "Days in Pipeline",
+        "days": "days"
+      },
+
+      "timeAgo": {
+        "justNow": "Just now",
+        "minutesAgo": "{minutes} mins ago",
+        "hoursAgo": "{hours} hours ago",
+        "daysAgo": "{days} days ago"
+      },
+
+      "stageChangeConfirm": {
+        "title": "Change Lead Stage?",
+        "message": "Are you sure you want to move this lead to",
+        "confirm": "Confirm",
+        "cancel": "Cancel"
+      },
+
+      "deleteConfirm": {
+        "title": "😢 Are you sure you want to delete this lead?",
+        "confirmYes": "Yes",
+        "confirmNo": "No",
+        "successTitle": "Deleted!",
+        "successMessage": "Lead has been deleted successfully.",
+        "errorTitle": "Oops!",
+        "errorMessage": "Failed to delete lead."
+      },
+
+      "weekDays": {
+        "short": {
+          "sun": "Sun",
+          "mon": "Mon",
+          "tue": "Tue",
+          "wed": "Wed",
+          "thu": "Thu",
+          "fri": "Fri",
+          "sat": "Sat"
+        },
+        "long": {
+          "sunday": "Sunday",
+          "monday": "Monday",
+          "tuesday": "Tuesday",
+          "wednesday": "Wednesday",
+          "thursday": "Thursday",
+          "friday": "Friday",
+          "saturday": "Saturday"
+        }
+      }
+    }
+  },
+  "add": {
+    "title": "Add New Lead",
+    "subtitle": "Create a new lead in your pipeline",
+    "back": "Back",
+
+    "form": {
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Enter full name",
+      "phoneNumber": "Phone Number",
+      "phoneNumberPlaceholder": "Enter phone number",
+      "emailAddress": "Email Address",
+      "emailPlaceholder": "Enter email address",
+      "source": "Source",
+      "sourcePlaceholder": "e.g., Website, Referral, Social Media",
+      "required": "*",
+      "cancel": "Cancel",
+      "addLead": "Add Lead",
+      "addingLead": "Adding Lead..."
+    },
+
+    "validation": {
+      "fullNameRequired": "Full name is required",
+      "fullNameMin": "Name must be at least {min} characters",
+      "fullNameMax": "Name must not exceed {max} characters",
+      "phoneRequired": "Phone number is required",
+      "phoneInvalid": "Phone number must contain only numbers and valid characters",
+      "phoneMin": "Phone number must be at least {min} characters",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email address",
+      "sourceRequired": "Source is required",
+      "sourceMin": "Source must be at least {min} characters",
+      "sourceMax": "Source must not exceed {max} characters"
+    },
+
+    "quickTips": {
+      "title": "Quick Tips",
+      "tip1": "Ensure all contact information is accurate",
+      "tip2": "Source helps track where your leads come from",
+      "tip3": "You can add more details after creating the lead"
+    },
+
+    "success": {
+      "title": "Success!",
+      "message": "Lead has been added successfully."
+    },
+
+    "error": {
+      "title": "Oops!",
+      "message": "Failed to add lead."
+    }
+  },
+  "board": {
+    "title": "Sales Pipeline",
+    "subtitle": "Manage your leads through the sales funnel",
     "addLead": "Add Lead",
-    "totalLeads": "Total Leads",
-    "new": "New",
-    "converted": "Converted",
-    "found": "Found",
-    "searchPlaceholder": "Search by name, phone, email or source...",
-    "chooseClass": "Choose a class...",
-    "noLeadsToExport": "There are no leads to export.",
-    "filters": {
-      "all": "All",
+    "loadingLeads": "Loading leads...",
+    "errorLoadingLeads": "Error loading leads",
+    "liveLeadsLoaded": "Live - {count} leads loaded",
+    "noLeadsFound": "No leads found",
+
+    "stats": {
+      "totalLeads": "Total Leads",
+      "wonDeals": "Won Deals",
+      "pipelineValue": "Pipeline Value",
+      "wonValue": "Won Value"
+    },
+
+    "search": {
+      "placeholder": "Search by name, company, email, or salesperson...",
+      "filters": "Filters",
+      "clearAll": "Clear All"
+    },
+
+    "savedFilters": {
+      "hotLeads": "🔥 My Hot Leads",
+      "recentActivity": "⚡ Recent Activity",
+      "highValue": "💰 High Value"
+    },
+
+    "filterLabels": {
+      "owner": "Owner",
+      "allOwners": "All Owners",
+      "source": "Source",
+      "allSources": "All Sources",
+      "priority": "Priority",
+      "allPriorities": "All Priorities",
+      "minBudget": "Min Budget",
+      "budgetPlaceholder": "e.g., 50000",
+      "lastActivity": "Last Activity",
+      "allTime": "All Time",
+      "last24Hours": "Last 24 hours",
+      "last7Days": "Last 7 days",
+      "last30Days": "Last 30 days",
+      "last90Days": "Last 90 days"
+    },
+
+    "priority": {
+      "urgent": "Urgent",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+
+    "stages": {
       "new": "New",
       "contacted": "Contacted",
-      "interested": "Interested",
-      "followup": "Followup"
+      "qualified": "Qualified",
+      "proposal": "Proposal",
+      "negotiation": "Negotiation",
+      "won": "Won",
+      "lost": "Lost"
     },
-    "importSuccess": "{successCount} leads imported successfully",
-    "importFail": "{failCount} leads failed to import",
-    "exportedToFile": "{count} leads exported to {filename}"
+
+    "stageWarnings": {
+      "overCapacity": "Stage over capacity - focus needed",
+      "loading": "Loading...",
+      "dropLeadsHere": "Drop leads here"
+    },
+
+    "leadCard": {
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete",
+      "whatsapp": "WhatsApp",
+      "addNote": "Add Note",
+      "assignOwner": "Assign Owner",
+      "justNow": "Just now",
+      "minutesAgo": "{minutes}m ago",
+      "hoursAgo": "{hours}h ago",
+      "daysAgo": "{days}d ago"
+    },
+
+    "confirmations": {
+      "markAsLost": {
+        "title": "Mark as Lost?",
+        "subtitle": "This lead will be marked as lost",
+        "movingTo": "Moving to:",
+        "reasonLabel": "Reason for loss (optional)",
+        "reasonPlaceholder": "e.g., Budget constraints, went with competitor...",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "updating": "Updating..."
+      },
+      "moveBackward": {
+        "title": "Move Backward?",
+        "subtitle": "You're moving this lead to an earlier stage",
+        "from": "from"
+      },
+      "assignOwner": {
+        "title": "Assign Owner",
+        "subtitle": "Assign this lead to a team member",
+        "selectUser": "Select User",
+        "selectUserPlaceholder": "Select a user...",
+        "loadingUsers": "Loading users...",
+        "noUsersAvailable": "No users available",
+        "cancel": "Cancel",
+        "assign": "Assign",
+        "assigning": "Assigning...",
+        "required": "*",
+        "selectUserError": "Please select a user",
+        "from": "from"
+      }
+    },
+
+    "deleteConfirm": "😢 Are you sure you want to delete this lead?",
+    "deleteSuccess": "Lead has been deleted successfully.",
+    "deleteFail": "Failed to delete lead.",
+    "deleted": "Deleted!",
+    "confirmYes": "Yes",
+    "confirmNo": "No",
+    "oops": "Oops!"
   },
+  "leadsCount": "Leads",
+  "show": "Show:",
+  "filterFail": "Failed to filter leads.",
+  "deleteSuccessTitle": "Deleted!",
+
+  "exportModal": {
+    "noData": "No Data to Export",
+    "success": "Export Successful!",
+    "failed": "Failed to export leads. Please try again.",
+    "failedTitle": "Export Failed"
+  },
+
+  "filters": {
+    "all": "All",
+    "new": "New",
+    "contacted": "Contacted",
+    "interested": "Interested",
+    "followup": "Followup",
+    "cold": "Cold",
+    "lost": "Lost",
+    "converted": "Converted"
+  },
+  "table": {
+    "leadInfo": "Lead Info",
+    "contact": "Contact",
+    "source": "Source",
+    "status": "Status",
+    "assignedTo": "Assigned To",
+    "createdDate": "Created Date",
+    "notes": "Notes",
+    "convert": "Convert",
+    "operations": "Operations"
+  },
+  "status": {
+    "new": "New",
+    "contacted": "Contacted",
+    "interested": "Interested",
+    "followup": "Followup",
+    "cold": "Cold",
+    "lost": "Lost",
+    "converted": "Converted"
+  },
+  "unassigned": "Unassigned",
+  "viewNotes": "View notes",
+  "alreadyConverted": "Already converted",
+  "convertLead": "Convert lead",
+  "editLead": "Edit lead",
+  "deleteLead": "Delete lead",
+  "deleteConfirm": "😢 Are you sure you want to delete this lead?",
+  "confirmYes": "Yes",
+  "confirmNo": "No",
+  "deleteSuccess": "Lead has been deleted successfully.",
+  "deleteFail": "Failed to delete lead.",
+  "oops": "Oops!",
+  "loading": "Loading leads...",
+  "noLeadsFound": "No leads found matching your search",
+  "noLeadsYet": "No leads yet",
+  "pageInfo": "Showing page {page} of {total} ({count} total leads, {per} per page)",
+  "firstPage": "First page",
+  "previousPage": "Previous page",
+  "nextPage": "Next page",
+  "lastPage": "Last page",
+
+  "convertModal": {
+    "title": "Convert Lead",
+    "selectClass": "Select Class",
+    "selectClassRequired": "Please select a class.",
+    "paidAmount": "Paid Amount",
+    "paidAmountRequired": "Please enter a valid paid amount.",
+    "invalidAmount": "Invalid Amount",
+    "missingCourse": "Missing Course",
+    "cancel": "Cancel",
+    "convert": "Convert Lead",
+    "converting": "Converting...",
+    "success": "Converted!",
+    "successText": "Lead has been converted successfully.",
+    "fail": "Failed to convert lead."
+  },
+
+  "importModal": {
+    "title": "Import Leads",
+    "subtitle": "Upload CSV or Excel file",
+    "selectFile": "Select File",
+    "required": "*",
+    "clickToUpload": "Click to upload or drag and drop",
+    "fileTypes": "CSV, XLS, or XLSX (Max 10MB)",
+    "fileName": "File name",
+    "fileSize": "File size",
+    "changeFile": "Click to change file",
+    "cancel": "Cancel",
+    "import": "Import Leads",
+    "importing": "Importing...",
+    "noFileSelected": "No File Selected",
+    "selectFileText": "Please select a file to import.",
+    "requirements": {
+      "title": "File Requirements:",
+      "maxSize": "Maximum file size: 10MB",
+      "formats": "Supported formats: CSV, XLS, XLSX",
+      "requiredColumns": "Required columns: Full Name, Phone, Email",
+      "optionalColumns": "Optional: Source, Status, Assigned To"
+    },
+    "partialSuccess": "Import Partially Completed",
+    "success": "Import Successful!",
+    "failed": "Import Failed",
+    "checkFormat": "Please check your file format and try again.",
+    "andMoreErrors": "...and {count} more errors"
+  },
+
+  "export": "Export",
+  "exporting": "Exporting...",
+  "import": "Import",
+  "title": "Leads",
+  "subtitle": "Manage and track your sales leads pipeline",
+  "addLead": "Add Lead",
+  "totalLeads": "Total Leads",
+  "new": "New",
+  "converted": "Converted",
+  "found": "Found",
+  "searchPlaceholder": "Search by name, phone, email or source...",
+  "chooseClass": "Choose a class...",
+  "noLeadsToExport": "There are no leads to export.",
+
+  "importSuccess": "{successCount} leads imported successfully",
+  "importFail": "{failCount} leads failed to import",
+  "exportedToFile": "{count} leads exported to {filename}",
   "sidebar": {
     "sections": {
       "main": "Main",

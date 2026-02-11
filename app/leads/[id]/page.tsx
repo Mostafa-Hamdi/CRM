@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import whats from "@/public/whats.png";
 import {
   ArrowLeft,
@@ -38,6 +39,7 @@ import Image from "next/image";
 import Swal from "sweetalert2";
 
 const Page = () => {
+  const t = useTranslations();
   const params = useParams();
   const router = useRouter();
   const id = Number(params.id);
@@ -58,7 +60,9 @@ const Page = () => {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 font-semibold">Loading lead details...</p>
+          <p className="text-gray-600 font-semibold">
+            {t("leads.details.loading")}
+          </p>
         </div>
       </div>
     );
@@ -71,15 +75,17 @@ const Page = () => {
         <div className="text-center">
           <AlertCircle className="w-16 h-16 text-red-600 mx-auto mb-4" />
           <p className="text-gray-900 font-bold text-xl mb-2">
-            Error loading lead
+            {t("leads.details.error.title")}
           </p>
-          <p className="text-gray-600 mb-4">Unable to fetch lead details</p>
+          <p className="text-gray-600 mb-4">
+            {t("leads.details.error.message")}
+          </p>
           <Link
             href="/leads"
             className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Leads
+            {t("leads.details.backToLeads")}
           </Link>
         </div>
       </div>
@@ -101,7 +107,8 @@ const Page = () => {
   const assignedName =
     typeof leadInfo.assignedUser === "string"
       ? leadInfo.assignedUser
-      : (leadInfo.assignedUser?.fullName ?? "Unassigned");
+      : (leadInfo.assignedUser?.fullName ??
+        t("leads.details.leadDetailsSection.unassigned"));
 
   // Map stage colors
   const stageColorMap: { [key: string]: string } = {
@@ -178,18 +185,21 @@ const Page = () => {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins} mins ago`;
-    if (diffHours < 24) return `${diffHours} hours ago`;
-    return `${diffDays} days ago`;
+    if (diffMins < 1) return t("leads.details.timeAgo.justNow");
+    if (diffMins < 60)
+      return t("leads.details.timeAgo.minutesAgo", { minutes: diffMins });
+    if (diffHours < 24)
+      return t("leads.details.timeAgo.hoursAgo", { hours: diffHours });
+    return t("leads.details.timeAgo.daysAgo", { days: diffDays });
   };
+
   const handleDelete = async (id: number) => {
     const result = await Swal.fire({
-      title: "😢 Are you sure you want to delete this lead?",
+      title: t("leads.details.deleteConfirm.title"),
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes",
-      cancelButtonText: "No",
+      confirmButtonText: t("leads.details.deleteConfirm.confirmYes"),
+      cancelButtonText: t("leads.details.deleteConfirm.confirmNo"),
       confirmButtonColor: "#2563eb",
       cancelButtonColor: "#e5e7eb",
     });
@@ -199,19 +209,20 @@ const Page = () => {
       await deleteLead({ id }).unwrap();
       await Swal.fire({
         icon: "success",
-        title: "Deleted!",
-        text: "Lead has been deleted successfully.",
+        title: t("leads.details.deleteConfirm.successTitle"),
+        text: t("leads.details.deleteConfirm.successMessage"),
         timer: 2000,
       });
       router.push("/leads");
     } catch (err) {
       Swal.fire({
         icon: "error",
-        title: "Oops!",
-        text: "Failed to delete lead.",
+        title: t("leads.details.deleteConfirm.errorTitle"),
+        text: t("leads.details.deleteConfirm.errorMessage"),
       });
     }
   };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
       {/* Decorative Elements */}
@@ -225,7 +236,7 @@ const Page = () => {
           className="inline-flex items-center gap-2 px-4 py-2 bg-white/70 backdrop-blur-xl border border-white/60 rounded-xl text-gray-700 font-semibold hover:bg-white transition-all shadow-lg"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Leads
+          {t("leads.details.backToLeads")}
         </Link>
 
         {/* HEADER - First Impression */}
@@ -246,7 +257,7 @@ const Page = () => {
                     {metrics.leadScore && (
                       <span className="px-3 py-1 bg-gradient-to-r from-yellow-100 to-amber-100 border border-yellow-300 rounded-lg text-yellow-700 text-sm font-bold flex items-center gap-1">
                         <Target className="w-4 h-4" />
-                        Score: {metrics.leadScore}
+                        {t("leads.details.header.score")}: {metrics.leadScore}
                       </span>
                     )}
                     {currentStage.name !== "0" && (
@@ -280,7 +291,8 @@ const Page = () => {
                   {metrics.lastActivityAt && (
                     <p className="text-sm text-gray-500 mt-2 flex items-center gap-2">
                       <Clock className="w-4 h-4" />
-                      Last activity: {formatTimeAgo(metrics.lastActivityAt)}
+                      {t("leads.details.header.lastActivity")}:{" "}
+                      {formatTimeAgo(metrics.lastActivityAt)}
                     </p>
                   )}
                 </div>
@@ -290,10 +302,11 @@ const Page = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-semibold text-gray-700">
-                    Lead Journey - Click any stage to change
+                    {t("leads.details.header.journey.title")}
                   </span>
                   <span className="text-gray-500">
-                    {Math.round(progressPercentage)}% Complete
+                    {Math.round(progressPercentage)}%{" "}
+                    {t("leads.details.header.journey.complete")}
                   </span>
                 </div>
 
@@ -424,28 +437,28 @@ const Page = () => {
                 className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-green-500/40 transition-all"
               >
                 <Image src={whats} alt="WhatsApp" className="w-5 h-5" />
-                Whats App
+                {t("leads.details.quickActions.whatsApp")}
               </Link>
               <Link
                 href={`/leads/${leadInfo.id}/notes`}
                 className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-amber-500/40 transition-all"
               >
                 <Edit className="w-5 h-5" />
-                Add Note
+                {t("leads.details.quickActions.addNote")}
               </Link>
               <Link
                 href={`/leads/${leadInfo.id}/task`}
                 className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-purple-500/40 transition-all"
               >
                 <Bell className="w-5 h-5" />
-                Add Task
+                {t("leads.details.quickActions.addTask")}
               </Link>
               <button
                 onClick={() => handleDelete(leadInfo.id)}
                 className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-red-500/40 transition-all"
               >
                 <Trash2 className="w-5 h-5" />
-                Archive
+                {t("leads.details.quickActions.archive")}
               </button>
             </div>
           </div>
@@ -458,7 +471,7 @@ const Page = () => {
             <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 shadow-xl shadow-blue-500/10">
               <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-blue-600" />
-                Lead Journey - Click to Change Stage
+                {t("leads.details.stages.title")}
               </h2>
 
               {/* Interactive Stage Pills */}
@@ -561,7 +574,7 @@ const Page = () => {
 
                         {isCurrent && (
                           <span className="px-2 py-1 bg-white/30 backdrop-blur-sm text-white text-xs font-bold rounded-full animate-pulse">
-                            Current
+                            {t("leads.details.stages.current")}
                           </span>
                         )}
                       </div>
@@ -587,7 +600,7 @@ const Page = () => {
                             isCompleted ? "text-white/80" : colors.text
                           }`}
                         >
-                          Click to move
+                          {t("leads.details.stages.clickToMove")}
                         </p>
                       )}
                     </button>
@@ -599,7 +612,7 @@ const Page = () => {
               {stageHistory.length > 0 && (
                 <div className="space-y-4">
                   <h3 className="font-bold text-gray-900 mb-4">
-                    Stage History
+                    {t("leads.details.stageHistory.title")}
                   </h3>
                   {stageHistory.map((history: any, index: number) => {
                     const stageInfo = stages.find(
@@ -636,7 +649,8 @@ const Page = () => {
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex-1">
                               <h4 className="font-bold text-gray-900">
-                                {stageInfo?.name || "Unknown Stage"}
+                                {stageInfo?.name ||
+                                  t("leads.details.stageHistory.unknownStage")}
                               </h4>
                               <p className="text-sm text-gray-600 mt-1">
                                 {new Date(history.changedAt).toLocaleDateString(
@@ -656,7 +670,8 @@ const Page = () => {
                               </p>
                               <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
                                 <User className="w-3 h-3" />
-                                Changed by {history.changedByName}
+                                {t("leads.details.stageHistory.changedBy")}{" "}
+                                {history.changedByName}
                               </p>
                             </div>
                           </div>
@@ -672,12 +687,12 @@ const Page = () => {
             <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 shadow-xl shadow-blue-500/10">
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <Activity className="w-5 h-5 text-blue-600" />
-                Activity Timeline
+                {t("leads.details.activityTimeline.title")}
               </h2>
               <div className="space-y-4">
                 {activityTimeline.length === 0 ? (
                   <p className="text-gray-500 text-center py-8">
-                    No activities yet
+                    {t("leads.details.activityTimeline.noActivities")}
                   </p>
                 ) : (
                   activityTimeline.map((activity: any, index: number) => {
@@ -712,14 +727,20 @@ const Page = () => {
                                 )}
                                 {activity.durationSeconds && (
                                   <p className="text-sm text-gray-600 mt-1">
-                                    Duration:{" "}
+                                    {t(
+                                      "leads.details.activityTimeline.duration",
+                                    )}
+                                    :{" "}
                                     {Math.floor(activity.durationSeconds / 60)}{" "}
-                                    min {activity.durationSeconds % 60} sec
+                                    {t("leads.details.activityTimeline.min")}{" "}
+                                    {activity.durationSeconds % 60}{" "}
+                                    {t("leads.details.activityTimeline.sec")}
                                   </p>
                                 )}
                                 {activity.result && (
                                   <p className="text-sm text-gray-600 mt-1">
-                                    Result: {activity.result}
+                                    {t("leads.details.activityTimeline.result")}
+                                    : {activity.result}
                                   </p>
                                 )}
                               </div>
@@ -731,7 +752,8 @@ const Page = () => {
                                 {new Date(
                                   activity.createdAt,
                                 ).toLocaleTimeString()}{" "}
-                                • by {activity.createdByName}
+                                • {t("leads.details.activityTimeline.by")}{" "}
+                                {activity.createdByName}
                               </p>
                             </div>
                           </div>
@@ -750,15 +772,18 @@ const Page = () => {
             <div className="bg-white/70 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 shadow-xl shadow-blue-500/10">
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <User className="w-5 h-5 text-blue-600" />
-                Lead Details
+                {t("leads.details.leadDetailsSection.title")}
               </h2>
               <div className="space-y-3">
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                   <Tag className="w-5 h-5 text-gray-600" />
                   <div>
-                    <p className="text-xs text-gray-500">Source</p>
+                    <p className="text-xs text-gray-500">
+                      {t("leads.details.leadDetailsSection.source")}
+                    </p>
                     <p className="font-semibold text-gray-900">
-                      {leadInfo.source || "Unknown"}
+                      {leadInfo.source ||
+                        t("leads.details.leadDetailsSection.unknown")}
                     </p>
                   </div>
                 </div>
@@ -766,7 +791,9 @@ const Page = () => {
                   <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                     <DollarSign className="w-5 h-5 text-gray-600" />
                     <div>
-                      <p className="text-xs text-gray-500">Budget</p>
+                      <p className="text-xs text-gray-500">
+                        {t("leads.details.leadDetailsSection.budget")}
+                      </p>
                       <p className="font-semibold text-gray-900">
                         ${leadInfo.budget.toLocaleString()}
                       </p>
@@ -777,7 +804,9 @@ const Page = () => {
                   <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                     <Sparkles className="w-5 h-5 text-gray-600" />
                     <div>
-                      <p className="text-xs text-gray-500">Interested In</p>
+                      <p className="text-xs text-gray-500">
+                        {t("leads.details.leadDetailsSection.interestedIn")}
+                      </p>
                       <p className="font-semibold text-gray-900">
                         {leadInfo.interestedIn}
                       </p>
@@ -788,7 +817,9 @@ const Page = () => {
                   <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                     <MapPin className="w-5 h-5 text-gray-600" />
                     <div>
-                      <p className="text-xs text-gray-500">Location</p>
+                      <p className="text-xs text-gray-500">
+                        {t("leads.details.leadDetailsSection.location")}
+                      </p>
                       <p className="font-semibold text-gray-900">
                         {leadInfo.location}
                       </p>
@@ -799,7 +830,9 @@ const Page = () => {
                   <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                     <User className="w-5 h-5 text-gray-600" />
                     <div>
-                      <p className="text-xs text-gray-500">Assigned To</p>
+                      <p className="text-xs text-gray-500">
+                        {t("leads.details.leadDetailsSection.assignedTo")}
+                      </p>
                       <p className="font-semibold text-gray-900">
                         {assignedName}
                       </p>
@@ -813,13 +846,13 @@ const Page = () => {
             <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-3xl p-6 shadow-xl">
               <h2 className="text-xl font-bold text-purple-900 mb-4 flex items-center gap-2">
                 <Sparkles className="w-5 h-5" />
-                Smart Insights
+                {t("leads.details.smartInsights.title")}
               </h2>
               <div className="space-y-4">
                 {metrics.leadScore && (
                   <div className="flex items-center justify-between p-3 bg-white rounded-xl">
                     <span className="text-gray-700 font-medium">
-                      Lead Score
+                      {t("leads.details.smartInsights.leadScore")}
                     </span>
                     <span className="text-2xl font-black text-purple-600">
                       {metrics.leadScore}/100
@@ -829,7 +862,7 @@ const Page = () => {
                 {metrics.lastActivityAt && (
                   <div className="flex items-center justify-between p-3 bg-white rounded-xl">
                     <span className="text-gray-700 font-medium">
-                      Last Activity
+                      {t("leads.details.smartInsights.lastActivity")}
                     </span>
                     <span className="font-bold text-gray-900">
                       {formatTimeAgo(metrics.lastActivityAt)}
@@ -838,10 +871,11 @@ const Page = () => {
                 )}
                 <div className="flex items-center justify-between p-3 bg-white rounded-xl">
                   <span className="text-gray-700 font-medium">
-                    Days in Pipeline
+                    {t("leads.details.smartInsights.daysInPipeline")}
                   </span>
                   <span className="font-bold text-gray-900">
-                    {Math.ceil(metrics.daysInPipeline)} days
+                    {Math.ceil(metrics.daysInPipeline)}{" "}
+                    {t("leads.details.smartInsights.days")}
                   </span>
                 </div>
               </div>
@@ -855,10 +889,10 @@ const Page = () => {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
             <h3 className="text-xl font-bold text-gray-900 mb-4">
-              Change Lead Stage?
+              {t("leads.details.stageChangeConfirm.title")}
             </h3>
             <p className="text-gray-600 mb-6">
-              Are you sure you want to move this lead to{" "}
+              {t("leads.details.stageChangeConfirm.message")}{" "}
               <span className="font-bold">{targetStage.name}</span>?
             </p>
             <div className="flex gap-3">
@@ -866,13 +900,13 @@ const Page = () => {
                 onClick={confirmStageChange}
                 className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
               >
-                Confirm
+                {t("leads.details.stageChangeConfirm.confirm")}
               </button>
               <button
                 onClick={cancelStageChange}
                 className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-300 transition-all"
               >
-                Cancel
+                {t("leads.details.stageChangeConfirm.cancel")}
               </button>
             </div>
           </div>
